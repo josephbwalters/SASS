@@ -1,1 +1,3 @@
 .DS_Store
+SASS/Debug/*
+SASS/src/*

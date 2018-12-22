@@ -56,7 +56,7 @@
 #include <ref_a.h>
 #include <interrupt.h>
 
-#include <Headers/MSP_EXP432P401R.h>
+#include <Sources/Headers/MSP_EXP432P401R.h>
 
 /*
  *  =============================== ADC ===============================

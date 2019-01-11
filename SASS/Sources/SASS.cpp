@@ -1,7 +1,4 @@
 /* XDCtools Header files */
-#include <Sources/Headers/Board.h>
-
-#include <Sources/Headers/SASS.h>
 #include <xdc/std.h>
 #include <xdc/runtime/System.h>
 
@@ -19,10 +16,9 @@
 // #include <ti/drivers/WiFi.h>
 
 /* Board Header file */
-#include "Headers/Board.h"
+#include "Board.h"
 
 /* Custom Header file */
-#include "Headers/SASS.h"
 
 
 #define TASKSTACKSIZE   512

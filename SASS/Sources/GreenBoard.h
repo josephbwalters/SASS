@@ -6,15 +6,15 @@
 #include "Board.h"
 
 
-#define RADAR_N_PORT
-#define RADAR_E_PORT
-#define RADAR_S_PORT
-#define RADAR_W_PORT
+#define RADAR_N_SLAVE_SELECT_PORT
+#define RADAR_E_SLAVE_SELECT_PORT
+#define RADAR_S_SLAVE_SELECT_PORT
+#define RADAR_W_SLAVE_SELECT_PORT
 
-#define RADAR_N_PIN
-#define RADAR_E_PIN
-#define RADAR_S_PIN
-#define RADAR_W_PIN
+#define RADAR_N_SLAVE_SELECT_PIN
+#define RADAR_E_SLAVE_SELECT_PIN
+#define RADAR_S_SLAVE_SELECT_PIN
+#define RADAR_W_SLAVE_SELECT_PIN
 
 
 #define LIDAR_N_PORT

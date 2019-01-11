@@ -1,5 +1,5 @@
 #ifndef DIRECTIONS_H
-#define DIRECTION_H
+#define DIRECTIONS_H
 
 namespace sources
 {

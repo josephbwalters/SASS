@@ -1,37 +1,35 @@
-// TODO: Check Imports!
-// #include <Sources/Lights/Lights.cpp>
-// #include <Sources/Objects/Vehicle.cpp>
+#include "Scheduler.h"
+#include "../Lights/Lights.h"
 #include "../Commands.h"
 #include "../Directions.h"
 
-class Scheduler
+using namespace sources;
+
+using namespace sources::scheduler;
+using namespace sources::lights;
+
+void Scheduler::scheduler_thread()
 {
-    std::deque<int> traffic_queue;
-
-    void scheduler_thread()
+    while(true)
     {
-        while(true)
+        // TODO: Implement Panic feature
+        // TODO: Implement with directions input into the queue, not numbers!
+        if (!m_traffic_queue.empty())
         {
-            // TODO: Implement Panic feature
-
-            // TODO: Implement with directions input into the queue, not numbers!
-            if (!traffic_queue.empty())
+            if (m_traffic_queue.front() == 1)
             {
-                if (traffic_queue.front() == 1)
-                {
-                    Lights.control(Commands::PROCEED, Directions::NORTH);
-                    // Timed delay
-                }
-                else if (traffic_queue.front() == 2)
-                {
-                    Lights.control(Commands::PROCEED, Directions::EAST);
-                    // Timed delay
-                }
+                m_lights.control(Commands::PROCEED, Directions::NORTH);
+                // Timed delay
             }
-            else
+            else if (m_traffic_queue.front() == 2)
             {
-                Lights.wait();
+                m_lights.control(Commands::PROCEED, Directions::EAST);
+                // Timed delay
             }
         }
+        else
+        {
+            m_lights.wait();
+        }
     }
-};
+}

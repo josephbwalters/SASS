@@ -51,24 +51,24 @@
 #define RADAR_W_SLAVE_SELECT_PIN
 
 // SDA Lines
-#define LIDAR_N_PORT
-#define LIDAR_E_PORT
-#define LIDAR_S_PORT
-#define LIDAR_W_PORT
+#define LIDAR_N_SDA_PORT GPIO_PORT_P1
+#define LIDAR_E_SDA_PORT GPIO_PORT_P6
+#define LIDAR_S_SDA_PORT
+#define LIDAR_W_SDA_PORT
 
-#define LIDAR_N_PIN
-#define LIDAR_E_PIN
-#define LIDAR_S_PIN
-#define LIDAR_W_PIN
+#define LIDAR_N_SDA_PIN GPIO_PIN6
+#define LIDAR_E_SDA_PIN GPIO_PIN5
+#define LIDAR_S_SDA_PIN
+#define LIDAR_W_SDA_PIN
 
 // SCL Lines
-#define LIDAR_N_PORT
-#define LIDAR_E_PORT
+#define LIDAR_N_PORT GPIO_PORT_P1
+#define LIDAR_E_PORT GPIO_PORT_P6
 #define LIDAR_S_PORT
 #define LIDAR_W_PORT
 
-#define LIDAR_N_PIN
-#define LIDAR_E_PIN
+#define LIDAR_N_PIN GPIO_PIN7
+#define LIDAR_E_PIN GPIO_PIN4
 #define LIDAR_S_PIN
 #define LIDAR_W_PIN
 

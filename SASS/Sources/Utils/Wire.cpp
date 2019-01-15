@@ -11,13 +11,13 @@ void Wire::beginTransmission(int lidarliteAddress)
     ;
 }
 
-void Wire::endTransmission()
+int Wire::endTransmission()
 {
     ;
 }
 
 // false means perform repeated start
-void Wire::endTransmission(bool true_or_false)
+int Wire::endTransmission(bool true_or_false)
 {
     ;
 }

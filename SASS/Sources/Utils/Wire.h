@@ -17,8 +17,8 @@ protected:
 
 public:
     static void beginTransmission(int lidarliteAddress);
-    static void endTransmission();
-    static void endTransmission(bool true_or_false); // false means perform repeated start
+    static int endTransmission();
+    static int endTransmission(bool true_or_false); // false means perform repeated start
 
     static void write(uint8_t value);         // - a value to send as a single byte
     static void write(char *str);        // - a string to send as a series of bytes

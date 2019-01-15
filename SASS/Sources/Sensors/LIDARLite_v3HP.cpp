@@ -37,6 +37,7 @@
 #include "LIDARLite_v3HP.h"
 
 using namespace sources::sensors;
+using namespace sources::utils;
 
 /*------------------------------------------------------------------------------
   Configure
@@ -214,7 +215,7 @@ void LIDARLite_v3HP::waitForBusy(uint8_t lidarliteAddress)
     // bailout reports error over serial
     if (busyCounter > 9999)
     {
-        sources::utils::Serial.println("> bailing out of waitForBusy()");
+        Serial::println("> bailing out of waitForBusy()");
     }
 } /* LIDARLite_v3HP::waitForBusy */
 
@@ -293,7 +294,7 @@ void LIDARLite_v3HP::write(uint8_t regAddr, uint8_t * dataBytes,
 {
     int nackCatcher;
 
-    sources::utils::Wire.beginTransmission((int) lidarliteAddress);
+    Wire::beginTransmission((int) lidarliteAddress);
 
     // Wire.write Syntax
     // -----------------------------------------------------------------
@@ -302,19 +303,21 @@ void LIDARLite_v3HP::write(uint8_t regAddr, uint8_t * dataBytes,
     // Wire.write(data, length)  - an array of data to send as bytes
 
     // First byte of every write sets the LidarLite's internal register address pointer
-    sources::utils::Wire.write((int) regAddr);
+    Wire::write((int) regAddr);
 
     // Subsequent bytes are data writes
-    sources::utils::Wire.write(dataBytes, (int) numBytes);
+    Wire::write(dataBytes, (int) numBytes);
 
     // A nack means the device is not responding. Report the error over serial.
-    nackCatcher = Wire.endTransmission();
+    nackCatcher = Wire::endTransmission();
     if (nackCatcher != 0)
     {
-        sources::utils::Serial.println("> nack");
+        Serial::println("> nack");
     }
 
-    delayMicroseconds(100); // 100 us delay for robustness with successive reads and writes
+    // NEED TO REWRITE DELAY IN MSP432 TERMS
+    // delayMicroseconds(100); // 100 us delay for robustness with successive reads and writes
+
 } /* LIDARLite_v3HP::write */
 
 /*------------------------------------------------------------------------------
@@ -343,23 +346,23 @@ void LIDARLite_v3HP::read(uint8_t regAddr, uint8_t * dataBytes,
     int nackCatcher = 0;
 
     // Set the internal register address pointer in the Lidar Lite
-    sources::utils::Wire.beginTransmission((int) lidarliteAddress);
-    sources::utils::Wire.write((int) regAddr); // Set the register to be read
+    Wire::beginTransmission((int) lidarliteAddress);
+    Wire::write((int) regAddr); // Set the register to be read
 
     // A nack means the device is not responding, report the error over serial
-    nackCatcher = Wire.endTransmission(false); // false means perform repeated start
+    nackCatcher = Wire::endTransmission(false); // false means perform repeated start
     if (nackCatcher != 0)
     {
-        sources::utils::Serial.println("> nack");
+        Serial::println("> nack");
     }
 
     // Perform read, save in dataBytes array
-    Wire.requestFrom((int)lidarliteAddress, (int) numBytes);
-    if ((int) numBytes <= Wire.available())
+    Wire::requestFrom((int)lidarliteAddress, (int) numBytes);
+    if ((int) numBytes <= Wire::available())
     {
         while (i < numBytes)
         {
-            dataBytes[i] = (uint8_t) Wire.read();
+            dataBytes[i] = (uint8_t) Wire::read();
             i++;
         }
     }
@@ -415,7 +418,7 @@ void LIDARLite_v3HP::correlationRecordToSerial(
         {
             correlationValue |= 0xff00;
         }
-        Serial.println(correlationValue);
+        Serial::println(correlationValue);
     }
 
     // test mode disable

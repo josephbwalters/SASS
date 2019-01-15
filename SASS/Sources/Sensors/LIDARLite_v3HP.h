@@ -35,6 +35,12 @@
 // #include <Arduino.h>
 #include <stdint.h>
 
+namespace sources
+{
+namespace sensors
+{
+
+
 class LIDARLite_v3HP
 {
   public:
@@ -51,5 +57,7 @@ class LIDARLite_v3HP
 
       void      correlationRecordToSerial (uint16_t numberOfReadings = 1024, uint8_t lidarliteAddress = LIDARLITE_ADDR_DEFAULT);
 };
+
+}} //sources::sensors
 
 #endif

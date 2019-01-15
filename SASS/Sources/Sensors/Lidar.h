@@ -1,8 +1,0 @@
-#ifndef SOURCES_HEADERS_LIDAR_H_
-#define SOURCES_HEADERS_LIDAR_H_
-
-
-
-
-
-#endif /* SOURCES_HEADERS_LIDAR_H_ */

@@ -28,8 +28,8 @@
 
 ------------------------------------------------------------------------------*/
 
-#include <Arduino.h>
-#include <Wire.h>
+// #include <Arduino.h>
+// #include <Wire.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include "LIDARLite_v3HP.h"

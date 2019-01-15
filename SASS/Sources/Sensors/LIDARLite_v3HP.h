@@ -32,7 +32,7 @@
 
 #define LIDARLITE_ADDR_DEFAULT 0x62
 
-#include <Arduino.h>
+// #include <Arduino.h>
 #include <stdint.h>
 
 class LIDARLite_v3HP

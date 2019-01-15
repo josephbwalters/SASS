@@ -168,11 +168,7 @@ void TwoWire::beginTransmission(int address)
     beginTransmission((uint8_t)address);
 }
 
-<<<<<<< HEAD
-int Wire::endTransmission()
-=======
 uint8_t TwoWire::endTransmission(uint8_t sendStop)
->>>>>>> 3a99ac1b592c0944b209ddeb26b17dbc0f5a52de
 {
     bool ret;
     WireContext *wc = getWireContext();
@@ -203,15 +199,10 @@ uint8_t TwoWire::endTransmission(uint8_t sendStop)
     return (ret ? 0 : 4);
 }
 
-<<<<<<< HEAD
-// false means perform repeated start
-int Wire::endTransmission(bool true_or_false)
-=======
 //  This provides backwards compatibility with the original
 //  definition, and expected behaviour, of endTransmission
 //
 uint8_t TwoWire::endTransmission(void)
->>>>>>> 3a99ac1b592c0944b209ddeb26b17dbc0f5a52de
 {
     return (endTransmission(true));
 }

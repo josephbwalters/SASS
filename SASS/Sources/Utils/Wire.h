@@ -46,14 +46,7 @@
 #define MASTER_RX 2
 #define SLAVE_RX 3
 
-<<<<<<< HEAD
-public:
-    static void beginTransmission(int lidarliteAddress);
-    static int endTransmission();
-    static int endTransmission(bool true_or_false); // false means perform repeated start
-=======
 #define BOOST_PACK_WIRE 0
->>>>>>> 3a99ac1b592c0944b209ddeb26b17dbc0f5a52de
 
 typedef struct WireContext {
     I2C_Transaction i2cTransaction;

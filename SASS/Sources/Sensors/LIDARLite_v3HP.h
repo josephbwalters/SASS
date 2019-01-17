@@ -1,8 +1,3 @@
-/*
- * Modified LIDARLite_v3HP library.
- * Arduino library adapted to TI MSP432.
- */
-
 /*------------------------------------------------------------------------------
 
   LIDARLite_v3HP Arduino Library
@@ -27,12 +22,20 @@
   limitations under the License.
 
 ------------------------------------------------------------------------------*/
+
+/*
+ * Modified by: Trent Sellers
+ * Date: January 17, 2019
+ * Description: Arduino library adapted to TI MSP432.
+ */
+
 #ifndef LIDARLite_v3HP_h
 #define LIDARLite_v3HP_h
 
 #define LIDARLITE_ADDR_DEFAULT 0x62
 
-// #include <Arduino.h>
+#include <Sources/Utils/Energia.h>
+
 #include <stdint.h>
 
 namespace sources

@@ -1,8 +1,3 @@
-/*
- * Modified LIDARLite_v3HP library.
- * Arduino library adapted to TI MSP432.
- */
-
 /*------------------------------------------------------------------------------
 
   LIDARLite_v3HP Arduino Library
@@ -28,16 +23,20 @@
 
 ------------------------------------------------------------------------------*/
 
-// #include <Arduino.h>
-#include "../Utils/old/Serial.h"
-#include "../Utils/Wire.h"
+/*
+ * Modified by: Trent Sellers
+ * Date: January 17, 2019
+ * Description: Arduino library adapted to TI MSP432.
+ */
+
+#include <Sources/Utils/Energia.h>
+#include <Sources/Utils/Wire.h>
+#include "LIDARLite_v3HP.h"
 
 #include <stdarg.h>
 #include <stdint.h>
-#include "LIDARLite_v3HP.h"
 
 using namespace sources::sensors;
-using namespace sources::utils;
 
 /*------------------------------------------------------------------------------
   Configure
@@ -215,7 +214,7 @@ void LIDARLite_v3HP::waitForBusy(uint8_t lidarliteAddress)
     // bailout reports error over serial
     if (busyCounter > 9999)
     {
-        Serial::println("> bailing out of waitForBusy()");
+        Serial.println("> bailing out of waitForBusy()");
     }
 } /* LIDARLite_v3HP::waitForBusy */
 
@@ -312,7 +311,7 @@ void LIDARLite_v3HP::write(uint8_t regAddr, uint8_t * dataBytes,
     nackCatcher = Wire.endTransmission();
     if (nackCatcher != 0)
     {
-        Serial::println("> nack");
+        Serial.println("> nack");
     }
 
     // NEED TO REWRITE DELAY IN MSP432 TERMS
@@ -353,7 +352,7 @@ void LIDARLite_v3HP::read(uint8_t regAddr, uint8_t * dataBytes,
     nackCatcher = Wire.endTransmission(false); // false means perform repeated start
     if (nackCatcher != 0)
     {
-        Serial::println("> nack");
+        Serial.println("> nack");
     }
 
     // Perform read, save in dataBytes array
@@ -418,7 +417,7 @@ void LIDARLite_v3HP::correlationRecordToSerial(
         {
             correlationValue |= 0xff00;
         }
-        Serial::println(correlationValue);
+        Serial.println(correlationValue);
     }
 
     // test mode disable

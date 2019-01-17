@@ -16,10 +16,9 @@
 // #include <ti/drivers/WiFi.h>
 
 /* Board Header file */
-#include "Board.h"
+#include <Sources/Board.h>
 
-/* Custom Header file */
-
+#include <Sources/Sensors/LIDARLiteTest.h>
 
 #define TASKSTACKSIZE   512
 
@@ -46,7 +45,7 @@ int main(void)
     /* Call board init functions */
     Board_initGeneral();
     Board_initGPIO();
-    // Board_initI2C();
+    Board_initI2C();
     // Board_initSDSPI();
     // Board_initSPI();
     // Board_initUART();
@@ -59,6 +58,8 @@ int main(void)
     taskParams.stackSize = TASKSTACKSIZE;
     taskParams.stack = &task0Stack;
     Task_construct(&task0Struct, (Task_FuncPtr)heartBeatFxn, &taskParams, NULL);
+
+    Task_construct(&task0Struct, (Task_FuncPtr)run_test, &taskParams, NULL);
 
     /* Construct RADAR Monitoring Thread */
     // NOTE: This thread should be capable of either spawning another thread

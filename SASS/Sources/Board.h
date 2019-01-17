@@ -37,7 +37,7 @@
 extern "C" {
 #endif
 
-#include "../../Sources/Headers/MSP_EXP432P401R.h"
+#include "MSP_EXP432P401R.h"
 
 #define Board_initADC               MSP_EXP432P401R_initADC
 #define Board_initGeneral           MSP_EXP432P401R_initGeneral

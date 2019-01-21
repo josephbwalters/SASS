@@ -28,6 +28,7 @@ int cal_cnt = 0;
 
 void setup();
 void loop();
+void simple_test_extern();
 
 void run_test()
 {

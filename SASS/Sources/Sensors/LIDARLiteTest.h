@@ -1,10 +1,3 @@
-/*
- * LIDARLiteTest.h
- *
- *  Created on: Jan 17, 2019
- *      Author: trent
- */
-
 #ifndef LIDAR_LITE_TEST_H_
 #define LIDAR_LITE_TEST_H_
 

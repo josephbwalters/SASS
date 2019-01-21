@@ -25,6 +25,9 @@
 Task_Struct task0Struct;
 Char task0Stack[TASKSTACKSIZE];
 
+Task_Struct task1Struct;
+Char task1Stack[TASKSTACKSIZE];
+
 /*
  *  ======== heartBeatFxn ========
  *  Toggle the Board_LED0. The Task_sleep is determined by arg0 which
@@ -40,7 +43,9 @@ Void heartBeatFxn(UArg arg0, UArg arg1)
 
 int main(void)
 {
-    Task_Params taskParams;
+    Task_Params taskParams0;
+    Task_Params taskParams1;
+
 
     /* Call board init functions */
     Board_initGeneral();
@@ -53,13 +58,17 @@ int main(void)
     // Board_initWiFi();
 
     /* Construct heartBeat Task  thread */
-    Task_Params_init(&taskParams);
-    taskParams.arg0 = 1000;
-    taskParams.stackSize = TASKSTACKSIZE;
-    taskParams.stack = &task0Stack;
-    Task_construct(&task0Struct, (Task_FuncPtr)heartBeatFxn, &taskParams, NULL);
+    Task_Params_init(&taskParams0);
+    taskParams0.arg0 = 1000;
+    taskParams0.stackSize = TASKSTACKSIZE;
+    taskParams0.stack = &task0Stack;
+    Task_construct(&task0Struct, (Task_FuncPtr)heartBeatFxn, &taskParams0, NULL);
 
-    Task_construct(&task0Struct, (Task_FuncPtr)run_test, &taskParams, NULL);
+    Task_Params_init(&taskParams1);
+    taskParams1.arg0 = 1000;
+    taskParams1.stackSize = TASKSTACKSIZE;
+    taskParams1.stack = &task0Stack;
+    Task_construct(&task1Struct, (Task_FuncPtr)run_test, &taskParams1, NULL);
 
     /* Construct RADAR Monitoring Thread */
     // NOTE: This thread should be capable of either spawning another thread

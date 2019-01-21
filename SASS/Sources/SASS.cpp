@@ -18,8 +18,6 @@
 /* Board Header file */
 #include <Sources/Board.h>
 
-#include <Sources/Sensors/LIDARLiteTest.h>
-
 #define TASKSTACKSIZE   512
 
 Task_Struct task0Struct;
@@ -44,8 +42,6 @@ Void heartBeatFxn(UArg arg0, UArg arg1)
 int main(void)
 {
     Task_Params taskParams0;
-    Task_Params taskParams1;
-
 
     /* Call board init functions */
     Board_initGeneral();
@@ -63,12 +59,6 @@ int main(void)
     taskParams0.stackSize = TASKSTACKSIZE;
     taskParams0.stack = &task0Stack;
     Task_construct(&task0Struct, (Task_FuncPtr)heartBeatFxn, &taskParams0, NULL);
-
-    Task_Params_init(&taskParams1);
-    taskParams1.arg0 = 1000;
-    taskParams1.stackSize = TASKSTACKSIZE;
-    taskParams1.stack = &task0Stack;
-    Task_construct(&task1Struct, (Task_FuncPtr)run_test, &taskParams1, NULL);
 
     /* Construct RADAR Monitoring Thread */
     // NOTE: This thread should be capable of either spawning another thread

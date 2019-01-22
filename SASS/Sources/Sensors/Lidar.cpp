@@ -75,8 +75,8 @@ double Lidar::get_velocity()
 
 void Lidar::init()
 {
-    uint8_t TEMP = 0xFF
-    set_i2c_addr(TEMP, TEMP, TEMP);
+    uint8_t TEMP = 0xFF;
+    set_i2c_addr(TEMP, TEMP);
     configure(TEMP, TEMP);
 }
 
@@ -106,7 +106,7 @@ void Lidar::set_i2c_addr(uint8_t new_addr, uint8_t addr)
 }
 
 // Currently using template code from Garmin libraries
-void Lidar::configure(uint8_t config, uint8_t addr)
+void Lidar::configure(uint8_t config, uint8_t lidar_lite_addr)
 {
     uint8_t sigCountMax;
     uint8_t acqConfigReg;
@@ -150,12 +150,12 @@ void Lidar::configure(uint8_t config, uint8_t addr)
     write(0x1c, &thresholdBypass, 1, addr);
 }
 
-void Lidar::write(uint8_t regAddr, uint8_t * dataBytes, uint16_t numBytes, uint8_t addr)
+void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes, uint8_t addr)
 {
 
 }
 
-void Lidar::read(uint8_t regAddr, uint8_t * dataBytes, uint16_t numBytes, uint8_t addr)
+void Lidar::read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes, uint8_t addr)
 {
 
 }

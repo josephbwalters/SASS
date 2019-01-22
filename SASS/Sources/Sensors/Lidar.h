@@ -26,9 +26,9 @@ public:
     double get_velocity();
     void init();
     void set_i2c_addr(uint8_t new_addr, uint8_t addr);
-    void configure(uint8_t configuration, uint8_t lidarliteAddress);
-    void write(uint8_t regAddr, uint8_t * dataBytes, uint16_t numBytes, uint8_t addr);
-    void read(uint8_t regAddr, uint8_t * dataBytes, uint16_t numBytes, uint8_t addr);
+    void configure(uint8_t config, uint8_t lidar_lite_addr);
+    void write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes, uint8_t addr);
+    void read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes, uint8_t addr);
 
 private:
     Lidar();

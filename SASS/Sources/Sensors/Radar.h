@@ -22,6 +22,7 @@ public:
 
     double get_distance();
     double get_velocity();
+    void init();
 
 private:
     Radar();

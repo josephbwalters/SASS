@@ -4,7 +4,7 @@ using namespace sources::sensors;
 
 Radar::Radar()
 {
-    // Constructor
+    init();
 }
 
 Radar::~Radar()
@@ -71,4 +71,9 @@ double Radar::get_velocity()
 {
     // TEMPORARY RETURN
     return 0.00;
+}
+
+void Radar::init()
+{
+
 }

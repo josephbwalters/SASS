@@ -4,7 +4,7 @@ using namespace sources::sensors;
 
 Lidar::Lidar()
 {
-    // Constructor
+    init();
 }
 
 Lidar::~Lidar()
@@ -71,4 +71,9 @@ double Lidar::get_velocity()
 {
     // TEMPORARY RETURN
     return 0.00;
+}
+
+void Lidar::init()
+{
+
 }

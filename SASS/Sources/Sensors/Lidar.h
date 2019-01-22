@@ -1,6 +1,8 @@
 #ifndef LIDAR_H_
 #define LIDAR_H_
 
+#include <stdint.h>
+
 enum LidarInstanceType
 {
     LIDAR_NORTH,
@@ -22,10 +24,13 @@ public:
 
     double get_distance();
     double get_velocity();
+    void init();
 
 private:
     Lidar();
     virtual ~Lidar();
+
+    uint8_t addr;
 
     static Lidar* lidar_north;
     static Lidar* lidar_east;

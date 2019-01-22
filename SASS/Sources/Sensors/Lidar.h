@@ -25,16 +25,19 @@ public:
     double get_distance();
     double get_velocity();
     void init();
-    void set_i2c_addr(uint8_t new_addr, uint8_t addr);
-    void configure(uint8_t config, uint8_t addr);
-    void write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes, uint8_t addr);
-    void read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes, uint8_t addr);
+    void set_i2c_addr(uint8_t new_addr);
+    void configure(uint8_t config);
+    void write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes);
+    void read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes);
 
 private:
-    Lidar();
+    Lidar(LidarInstanceType lidar_type);
     virtual ~Lidar();
 
-    uint8_t addr;
+    static uint8_t default_addr;
+    uint8_t m_current_addr;
+
+    LidarInstanceType m_lidar_type;
 
     static Lidar* lidar_north;
     static Lidar* lidar_east;

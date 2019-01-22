@@ -106,7 +106,7 @@ void Lidar::set_i2c_addr(uint8_t new_addr, uint8_t addr)
 }
 
 // Currently using template code from Garmin libraries
-void Lidar::configure(uint8_t config, uint8_t lidar_lite_addr)
+void Lidar::configure(uint8_t config, uint8_t addr)
 {
     uint8_t sigCountMax;
     uint8_t acqConfigReg;

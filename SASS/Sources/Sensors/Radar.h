@@ -18,7 +18,7 @@ namespace sensors
 class Radar
 {
 public:
-    Radar* get_instance(RadarInstanceType radar_type);
+    static Radar* get_instance(RadarInstanceType radar_type);
 
     double get_distance();
     double get_velocity();
@@ -27,10 +27,10 @@ private:
     Radar();
     virtual ~Radar();
 
-    Radar* radar_north;
-    Radar* radar_east;
-    Radar* radar_south;
-    Radar* radar_west;
+    static Radar* radar_north;
+    static Radar* radar_east;
+    static Radar* radar_south;
+    static Radar* radar_west;
 };
 
 

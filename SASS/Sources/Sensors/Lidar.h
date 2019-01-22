@@ -18,7 +18,7 @@ namespace sensors
 class Lidar
 {
 public:
-    Lidar* get_instance(LidarInstanceType lidar_type);
+    static Lidar* get_instance(LidarInstanceType lidar_type);
 
     double get_distance();
     double get_velocity();
@@ -27,10 +27,10 @@ private:
     Lidar();
     virtual ~Lidar();
 
-    Lidar* lidar_north;
-    Lidar* lidar_east;
-    Lidar* lidar_south;
-    Lidar* lidar_west;
+    static Lidar* lidar_north;
+    static Lidar* lidar_east;
+    static Lidar* lidar_south;
+    static Lidar* lidar_west;
 };
 
 

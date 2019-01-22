@@ -1,3 +1,6 @@
+#include <xdc/runtime/System.h>
+#include <ti/drivers/I2C.h>
+
 #include <Sources/Sensors/Lidar.h>
 
 using namespace sources::sensors;
@@ -154,12 +157,74 @@ void Lidar::configure(uint8_t config)
 
 void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
 {
+    I2C_Handle handle;
+    I2C_Params params;
+    I2C_Transaction i2cTransaction;
 
+    I2C_Params_init(&params);
+    params.transferMode = I2C_MODE_CALLBACK;
+    params.transferCallbackFxn = NULL; // Originally, NULL was "someI2CCallbackFunction" - actually is default
+    handle = I2C_open(0, &params); // Originally, 0 was "someI2C_configIndexValue"
+    if (!handle)
+    {
+        System_printf("I2C did not open");
+    }
+
+    i2cTransaction.slaveAddress = m_current_addr; // Originally, "some7BitI2CSlaveAddress"
+
+    i2cTransaction.writeBuf = &reg_addr; // Originally, "someWriteBuffer"
+    i2cTransaction.writeCount = 1; // Originally, "numOfBytesToWrite"
+
+    bool ret = I2C_transfer(handle, &i2cTransaction);
+    if (!ret)
+    {
+        System_printf("Unsuccessful I2C transfer");
+    }
+
+    i2cTransaction.writeBuf = data_bytes; // Originally, "someWriteBuffer"
+    i2cTransaction.writeCount = num_bytes; // Originally, "numOfBytesToWrite"
+
+    ret = I2C_transfer(handle, &i2cTransaction);
+    if (!ret)
+    {
+        System_printf("Unsuccessful I2C transfer");
+    }
 }
 
 void Lidar::read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
 {
+    I2C_Handle handle;
+    I2C_Params params;
+    I2C_Transaction i2cTransaction;
 
+    I2C_Params_init(&params);
+    params.transferMode = I2C_MODE_CALLBACK;
+    params.transferCallbackFxn = NULL; // Originally, NULL was "someI2CCallbackFunction" - actually is default
+    handle = I2C_open(0, &params); // Originally, 0 was "someI2C_configIndexValue"
+    if (!handle)
+    {
+        System_printf("I2C did not open");
+    }
+
+    i2cTransaction.slaveAddress = m_current_addr; // Originally, "some7BitI2CSlaveAddress"
+
+    i2cTransaction.writeBuf = &reg_addr; // Originally, "someWriteBuffer"
+    i2cTransaction.writeCount = 1; // Originally, "numOfBytesToWrite"
+
+    bool ret = I2C_transfer(handle, &i2cTransaction);
+    if (!ret)
+    {
+        System_printf("Unsuccessful I2C transfer");
+    }
+
+    i2cTransaction.readBuf = data_bytes;
+    i2cTransaction.readCount = num_bytes;
+
+    ret = I2C_transfer(handle, &i2cTransaction);
+    if (!ret)
+    {
+        System_printf("Unsuccessful I2C transfer");
+    }
 }
 
 

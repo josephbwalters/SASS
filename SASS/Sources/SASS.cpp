@@ -65,7 +65,7 @@ int main(void)
     //       or there should be another thread that leaves LiDAR in sleep mode
     //       until it is activated by this thread.
 
-    /* Constuct Scheduler Thread */
+    /* Construct Scheduler Thread */
 
     /* Construct Light Control Thread */
 

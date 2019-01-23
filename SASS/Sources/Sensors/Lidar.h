@@ -22,8 +22,8 @@ class Lidar
 public:
     static Lidar* get_instance(LidarInstanceType lidar_type);
 
-    double get_distance();
-    double get_velocity();
+    uint16_t get_distance();
+    uint16_t get_velocity();
     void init();
     void set_i2c_addr(uint8_t new_addr);
     void configure(uint8_t config);

@@ -64,16 +64,32 @@ Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
     };
 }
 
-double Lidar::get_distance()
+uint16_t Lidar::get_distance()
 {
-    // TEMPORARY RETURN
-    return 0.00;
+    uint16_t distance;
+    uint8_t data_bytes[2];
+
+    // Read two bytes from register 0x0f and 0x10 (autoincrement)
+    read(0x0f, data_bytes, 2);
+
+    // Shift high byte and add to low byte
+    distance = (data_bytes[0] << 8) | data_bytes[1];
+
+    return (distance);
 }
 
-double Lidar::get_velocity()
+uint16_t Lidar::get_velocity()
 {
-    // TEMPORARY RETURN
-    return 0.00;
+    uint16_t velocity;
+    uint8_t data_bytes[2];
+
+    // Read two bytes from register 0x0f and 0x10 (autoincrement)
+    read(0x0f, data_bytes, 2);
+
+    // Shift high byte and add to low byte
+    velocity = (data_bytes[0] << 8) | data_bytes[1];
+
+    return (velocity);
 }
 
 void Lidar::init()

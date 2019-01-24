@@ -21,7 +21,7 @@ void Logger::print_buffer(String statement, uint8_t * buffer)
     int buffer_length = sizeof(buffer)/sizeof(buffer[0]);
     for(int buffer_index = buffer_length-1; buffer_index >= 0; buffer_index--)
     {
-        System_printf("%x ", buffer[buffer_index]);
+        System_printf("%02x ", buffer[buffer_index]);
     }
     System_printf("\n");
     System_flush();

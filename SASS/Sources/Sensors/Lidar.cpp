@@ -1,20 +1,26 @@
 #include <xdc/runtime/System.h>
+#include <xdc/std.h>
+
 #include <ti/drivers/I2C.h>
 
+#include <Sources/Board.h>
 #include <Sources/Sensors/Lidar.h>
+#include <Sources/Logger/Logger.h>
+
+
 
 using namespace sources::sensors;
+using namespace sources::logger;
 
 sources::sensors::Lidar* sources::sensors::Lidar::lidar_north = nullptr;
 sources::sensors::Lidar* sources::sensors::Lidar::lidar_east = nullptr;
 sources::sensors::Lidar* sources::sensors::Lidar::lidar_south = nullptr;
 sources::sensors::Lidar* sources::sensors::Lidar::lidar_west = nullptr;
-uint8_t sources::sensors::Lidar::default_addr = 0;
+uint8_t sources::sensors::Lidar::default_addr = 0x62;
 
 Lidar::Lidar(LidarInstanceType lidar_type) : m_current_addr(default_addr), m_lidar_type(lidar_type)
 {
-    System_printf("Constructor\n");
-    System_flush();
+    Logger::print((String)"Creating instance...");
     init();
 }
 
@@ -25,8 +31,7 @@ Lidar::~Lidar()
 
 Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
 {
-    System_printf("Get Instance\n");
-    System_flush();
+    Logger::print((String)"Getting lidar instance...");
     switch(lidar_type)
     {
     case LIDAR_NORTH:
@@ -36,8 +41,7 @@ Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
         }
         else
         {
-            System_printf("Making NORTH Lidar\n");
-            System_flush();
+            Logger::print((String)"Lidar instance to create - NORTH");
             lidar_north = new Lidar(lidar_type);
             return lidar_north;
         }
@@ -48,6 +52,7 @@ Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
         }
         else
         {
+            Logger::print((String)"Lidar instance to create - EAST");
             lidar_east = new Lidar(lidar_type);
             return lidar_east;
         }
@@ -58,6 +63,7 @@ Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
         }
         else
         {
+            Logger::print((String)"Lidar instance to create - SOUTH");
             lidar_south = new Lidar(lidar_type);
             return lidar_south;
         }
@@ -68,6 +74,7 @@ Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
         }
         else
         {
+            Logger::print((String)"Lidar instance to create - WEST");
             lidar_west = new Lidar(lidar_type);
             return lidar_west;
         }
@@ -78,12 +85,34 @@ Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
 
 uint16_t Lidar::get_distance()
 {
+    // Write hex 0x04 to 0x00
+    // Read reg  0x01, repeat until lsb goes low
+    // Read 2 bytes from 0x8f (high byte 0x0f, low byte 0x10)
+
+//    uint8_t write_buf = 0x04;
+//    uint8_t read_buf;
+//    write((uint8_t)0x00, &write_buf, 1);
+//    uint8_t temp;
+//    while(true) {
+//        read((uint8_t)0x01, &read_buf, 1);
+//        temp = read_buf << 7;
+//        temp = temp >> 7;
+//        System_printf("%x\n", temp);
+//        System_flush();
+//        if (temp == 0) break;
+//    }
+
+    Logger::print((String)"Getting distance!");
+
+
     uint16_t distance;
     uint8_t data_bytes[2];
 
     // Read two bytes from register 0x0f and 0x10 (autoincrement)
-    read(0x0f, data_bytes, 2);
+    Logger::print((String)"Reading distance from lidar now...");
+    read(0x8f, data_bytes, 2);
 
+    Logger::print_buffer((String)"Distance:", data_bytes);
     // Shift high byte and add to low byte
     distance = (data_bytes[0] << 8) | data_bytes[1];
 
@@ -106,8 +135,7 @@ uint16_t Lidar::get_velocity()
 
 void Lidar::init()
 {
-    System_printf("INIT\n");
-    System_flush();
+    Logger::print((String)"Initializing Lidar...");
     set_i2c_addr(default_addr);
     configure((uint8_t) 0);
 }
@@ -115,13 +143,8 @@ void Lidar::init()
 // Currently using template code from Garmin libraries
 void Lidar::set_i2c_addr(uint8_t new_addr)
 {
-    System_printf("Setting Address\n");
-    System_flush();
-    if (new_addr == default_addr) {
-        System_printf("Default addr. leaving set addr func.\n");
-        System_flush();
-        return;
-    }
+    Logger::print((String)"Setting lidar i2c address if necessary");
+    if (new_addr == default_addr) return;
 
     uint8_t dataBytes[2];
 
@@ -149,8 +172,7 @@ void Lidar::set_i2c_addr(uint8_t new_addr)
 // Currently using template code from Garmin libraries
 void Lidar::configure(uint8_t config)
 {
-    System_printf("Configure\n");
-    System_flush();
+    Logger::print((String)"Configuring lidar...");
     uint8_t sigCountMax;
     uint8_t acqConfigReg;
     uint8_t refCountMax;
@@ -159,8 +181,7 @@ void Lidar::configure(uint8_t config)
     switch (config)
     {
     case 0: // Default mode, balanced performance
-        System_printf("Default Mode\n");
-        System_flush();
+        Logger::print((String)"Config - Default Mode");
         sigCountMax     = 0x80; // Default
         acqConfigReg    = 0x08; // Default
         refCountMax     = 0x05; // Default
@@ -168,6 +189,7 @@ void Lidar::configure(uint8_t config)
         break;
 
     case 1: // Maximum range
+        Logger::print((String)"Config - Max Range");
         sigCountMax     = 0xff;
         acqConfigReg    = 0x08; // Default
         refCountMax     = 0x05; // Default
@@ -175,6 +197,7 @@ void Lidar::configure(uint8_t config)
         break;
 
     case 2: // High sensitivity detection, high erroneous measurements
+        Logger::print((String)"Config - High Sense, High Error");
         sigCountMax     = 0x80; // Default
         acqConfigReg    = 0x08; // Default
         refCountMax     = 0x05; // Default
@@ -182,6 +205,7 @@ void Lidar::configure(uint8_t config)
         break;
 
     case 3: // Low sensitivity detection, low erroneous measurements
+        Logger::print((String)"Config - Low Sense, Low Error");
         sigCountMax     = 0x80; // Default
         acqConfigReg    = 0x08; // Default
         refCountMax     = 0x05; // Default
@@ -189,27 +213,17 @@ void Lidar::configure(uint8_t config)
         break;
     }
 
-    System_printf("Writing for Configs1\n");
-    System_flush();
+    Logger::print((String)"Writing configuration!");
     write(0x02, &sigCountMax, 1);
-
-    System_printf("Writing for Configs2\n");
-    System_flush();
     write(0x04, &acqConfigReg, 1);
-
-    System_printf("Writing for Configs3\n");
-    System_flush();
     write(0x12, &refCountMax, 1);
-
-    System_printf("Writing for Configs4\n");
-    System_flush();
     write(0x1c, &thresholdBypass, 1);
+    Logger::print((String)"Writing configuration -- COMPLETE");
 }
 
 void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
 {
-    System_printf("Writing something\n");
-    System_flush();
+    Logger::print_buffer((String)"Writing data", data_bytes);
 
     I2C_Handle handle;
     I2C_Params params;
@@ -218,11 +232,13 @@ void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
     I2C_Params_init(&params);
     params.transferMode = I2C_MODE_CALLBACK;
     params.transferCallbackFxn = NULL; // Originally, NULL was "someI2CCallbackFunction" - actually is default
-    handle = I2C_open(0, &params); // Originally, 0 was "someI2C_configIndexValue"
+    params.bitRate = I2C_100kHz;
+
+    Logger::print((String)"Opening I2C transmission...");
+    handle = I2C_open(Board_I2C0, &params); // Originally, 0 was "someI2C_configIndexValue"
     if (!handle)
     {
-        System_printf("I2C did not open(write)\n");
-        System_flush();
+        Logger::print((String)"I2C Failed to Open!");
         // return exception something ??
     }
 
@@ -234,8 +250,7 @@ void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
     bool ret = I2C_transfer(handle, &i2cTransaction);
     if (!ret)
     {
-        System_printf("Unsuccessful I2C transfer\n (write)");
-        System_flush();
+        Logger::print((String)"Unsuccessful I2C transfer on write addr.");
     }
 
     i2cTransaction.writeBuf = data_bytes; // Originally, "someWriteBuffer"
@@ -244,55 +259,57 @@ void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
     ret = I2C_transfer(handle, &i2cTransaction);
     if (!ret)
     {
-        System_printf("Unsuccessful I2C transfer (write)\n");
-        System_flush();
+        Logger::print((String)"Unsuccessful I2C transfer on write data");
     }
 
     I2C_close(handle);
+    Logger::print((String)"Closed I2C transmission");
 }
 
 void Lidar::read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
 {
-    System_printf("Reading something\n");
-    System_flush();
+    Logger::print((String)"Reading data into buffer");
+    Logger::print_buffer((String)"Buffer contents:", data_bytes);
+
     I2C_Handle handle;
     I2C_Params params;
-    I2C_Transaction i2cTransaction;
 
     I2C_Params_init(&params);
     params.transferMode = I2C_MODE_CALLBACK;
     params.transferCallbackFxn = NULL; // Originally, NULL was "someI2CCallbackFunction" - actually is default
-    handle = I2C_open(0, &params); // Originally, 0 was "someI2C_configIndexValue"
+    params.bitRate = I2C_100kHz;
+
+    Logger::print((String)"Opening I2C transmission...");
+    handle = I2C_open(Board_I2C0, &params); // Originally, 0 was "someI2C_configIndexValue"
     if (!handle)
     {
-        System_printf("I2C did not open (read)\n");
-        System_flush();
+        Logger::print((String)"I2C Failed to Open!");
         // return exception something ??
     }
 
+    I2C_Transaction i2cTransaction;
     i2cTransaction.slaveAddress = m_current_addr; // Originally, "some7BitI2CSlaveAddress"
 
     i2cTransaction.writeBuf = &reg_addr; // Originally, "someWriteBuffer"
     i2cTransaction.writeCount = 1; // Originally, "numOfBytesToWrite"
-
     bool ret = I2C_transfer(handle, &i2cTransaction);
-    if (!ret)
+    while (!ret)
     {
-        System_printf("Unsuccessful I2C transfer (read)\n");
-        System_flush();
+        Logger::print((String)"Unsuccessful I2C transfer on write addr.");
     }
 
+    i2cTransaction.writeCount = 0;
     i2cTransaction.readBuf = data_bytes;
     i2cTransaction.readCount = num_bytes;
-
     ret = I2C_transfer(handle, &i2cTransaction);
     if (!ret)
     {
-        System_printf("Unsuccessful I2C transfer (read)\n");
-        System_flush();
+        Logger::print((String)"Unsuccessful I2C transfer on read data");
     }
 
+
     I2C_close(handle);
+    Logger::print((String)"Closed I2C transmission");
 }
 
 

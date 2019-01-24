@@ -1,6 +1,8 @@
 eclipse.preferences.version=1
 encoding//Debug/Sources/Lights/subdir_rules.mk=UTF-8
 encoding//Debug/Sources/Lights/subdir_vars.mk=UTF-8
+encoding//Debug/Sources/Logger/subdir_rules.mk=UTF-8
+encoding//Debug/Sources/Logger/subdir_vars.mk=UTF-8
 encoding//Debug/Sources/Objects/subdir_rules.mk=UTF-8
 encoding//Debug/Sources/Objects/subdir_vars.mk=UTF-8
 encoding//Debug/Sources/Scheduler/subdir_rules.mk=UTF-8

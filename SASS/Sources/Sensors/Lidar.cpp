@@ -223,7 +223,7 @@ void Lidar::configure(uint8_t config)
 
 void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
 {
-    Logger::print_buffer((String)"Writing data", data_bytes);
+    Logger::print_buffer((String)"Data to write:", data_bytes);
 
     I2C_Handle handle;
     I2C_Params params;
@@ -269,7 +269,7 @@ void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
 void Lidar::read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
 {
     Logger::print((String)"Reading data into buffer");
-    Logger::print_buffer((String)"Buffer contents:", data_bytes);
+    Logger::print_buffer((String)"Current Buffer contents:", data_bytes);
 
     I2C_Handle handle;
     I2C_Params params;
@@ -307,6 +307,7 @@ void Lidar::read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
         Logger::print((String)"Unsuccessful I2C transfer on read data");
     }
 
+    Logger::print_buffer((String)"New Buffer contents:", data_bytes);
 
     I2C_close(handle);
     Logger::print((String)"Closed I2C transmission");

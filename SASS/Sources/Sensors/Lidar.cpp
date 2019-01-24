@@ -13,6 +13,8 @@ uint8_t sources::sensors::Lidar::default_addr = 0;
 
 Lidar::Lidar(LidarInstanceType lidar_type) : m_current_addr(default_addr), m_lidar_type(lidar_type)
 {
+    System_printf("Constructor\n");
+    System_flush();
     init();
 }
 
@@ -23,6 +25,8 @@ Lidar::~Lidar()
 
 Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
 {
+    System_printf("Get Instance\n");
+    System_flush();
     switch(lidar_type)
     {
     case LIDAR_NORTH:
@@ -32,6 +36,8 @@ Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
         }
         else
         {
+            System_printf("Making NORTH Lidar\n");
+            System_flush();
             lidar_north = new Lidar(lidar_type);
             return lidar_north;
         }
@@ -100,14 +106,22 @@ uint16_t Lidar::get_velocity()
 
 void Lidar::init()
 {
+    System_printf("INIT\n");
+    System_flush();
     set_i2c_addr(default_addr);
-    configure(default_addr);
+    configure((uint8_t) 0);
 }
 
 // Currently using template code from Garmin libraries
 void Lidar::set_i2c_addr(uint8_t new_addr)
 {
-    if (new_addr == default_addr) return;
+    System_printf("Setting Address\n");
+    System_flush();
+    if (new_addr == default_addr) {
+        System_printf("Default addr. leaving set addr func.\n");
+        System_flush();
+        return;
+    }
 
     uint8_t dataBytes[2];
 
@@ -135,6 +149,8 @@ void Lidar::set_i2c_addr(uint8_t new_addr)
 // Currently using template code from Garmin libraries
 void Lidar::configure(uint8_t config)
 {
+    System_printf("Configure\n");
+    System_flush();
     uint8_t sigCountMax;
     uint8_t acqConfigReg;
     uint8_t refCountMax;
@@ -143,6 +159,8 @@ void Lidar::configure(uint8_t config)
     switch (config)
     {
     case 0: // Default mode, balanced performance
+        System_printf("Default Mode\n");
+        System_flush();
         sigCountMax     = 0x80; // Default
         acqConfigReg    = 0x08; // Default
         refCountMax     = 0x05; // Default
@@ -171,14 +189,28 @@ void Lidar::configure(uint8_t config)
         break;
     }
 
+    System_printf("Writing for Configs1\n");
+    System_flush();
     write(0x02, &sigCountMax, 1);
+
+    System_printf("Writing for Configs2\n");
+    System_flush();
     write(0x04, &acqConfigReg, 1);
+
+    System_printf("Writing for Configs3\n");
+    System_flush();
     write(0x12, &refCountMax, 1);
+
+    System_printf("Writing for Configs4\n");
+    System_flush();
     write(0x1c, &thresholdBypass, 1);
 }
 
 void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
 {
+    System_printf("Writing something\n");
+    System_flush();
+
     I2C_Handle handle;
     I2C_Params params;
     I2C_Transaction i2cTransaction;
@@ -189,7 +221,9 @@ void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
     handle = I2C_open(0, &params); // Originally, 0 was "someI2C_configIndexValue"
     if (!handle)
     {
-        System_printf("I2C did not open");
+        System_printf("I2C did not open(write)\n");
+        System_flush();
+        // return exception something ??
     }
 
     i2cTransaction.slaveAddress = m_current_addr; // Originally, "some7BitI2CSlaveAddress"
@@ -200,7 +234,8 @@ void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
     bool ret = I2C_transfer(handle, &i2cTransaction);
     if (!ret)
     {
-        System_printf("Unsuccessful I2C transfer");
+        System_printf("Unsuccessful I2C transfer\n (write)");
+        System_flush();
     }
 
     i2cTransaction.writeBuf = data_bytes; // Originally, "someWriteBuffer"
@@ -209,12 +244,17 @@ void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
     ret = I2C_transfer(handle, &i2cTransaction);
     if (!ret)
     {
-        System_printf("Unsuccessful I2C transfer");
+        System_printf("Unsuccessful I2C transfer (write)\n");
+        System_flush();
     }
+
+    I2C_close(handle);
 }
 
 void Lidar::read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
 {
+    System_printf("Reading something\n");
+    System_flush();
     I2C_Handle handle;
     I2C_Params params;
     I2C_Transaction i2cTransaction;
@@ -225,7 +265,9 @@ void Lidar::read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
     handle = I2C_open(0, &params); // Originally, 0 was "someI2C_configIndexValue"
     if (!handle)
     {
-        System_printf("I2C did not open");
+        System_printf("I2C did not open (read)\n");
+        System_flush();
+        // return exception something ??
     }
 
     i2cTransaction.slaveAddress = m_current_addr; // Originally, "some7BitI2CSlaveAddress"
@@ -236,7 +278,8 @@ void Lidar::read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
     bool ret = I2C_transfer(handle, &i2cTransaction);
     if (!ret)
     {
-        System_printf("Unsuccessful I2C transfer");
+        System_printf("Unsuccessful I2C transfer (read)\n");
+        System_flush();
     }
 
     i2cTransaction.readBuf = data_bytes;
@@ -245,8 +288,11 @@ void Lidar::read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
     ret = I2C_transfer(handle, &i2cTransaction);
     if (!ret)
     {
-        System_printf("Unsuccessful I2C transfer");
+        System_printf("Unsuccessful I2C transfer (read)\n");
+        System_flush();
     }
+
+    I2C_close(handle);
 }
 
 

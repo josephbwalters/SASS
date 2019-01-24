@@ -38,6 +38,8 @@ Void heartBeatFxn(UArg arg0, UArg arg1)
     while (1) {
         Task_sleep((UInt)arg0);
         GPIO_toggle(Board_LED0);
+        System_printf("Heartbeat\n");
+        System_flush();
     }
 }
 
@@ -47,11 +49,11 @@ void test_lidar()
 
     while(1)
     {
-        // uint16_t dist = lidar_north->get_distance();
+        //uint16_t dist = lidar_north->get_distance();
         System_printf("Distance!\n");
         // System_printf("Distance: %d\n", dist);
         System_flush();
-        Task_sleep(100);
+        Task_sleep(1000);
     }
 }
 

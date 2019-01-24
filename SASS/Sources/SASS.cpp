@@ -18,13 +18,15 @@
 /* Board Header file */
 #include <Sources/Board.h>
 
+#include <Sources/Sensors/Lidar.h>
+
 #define TASKSTACKSIZE   512
 
 Task_Struct task0Struct;
 Char task0Stack[TASKSTACKSIZE];
 
 Task_Struct task1Struct;
-Char task1Stack[TASKSTACKSIZE];
+Char task1Stack[2048];
 
 /*
  *  ======== heartBeatFxn ========
@@ -39,9 +41,24 @@ Void heartBeatFxn(UArg arg0, UArg arg1)
     }
 }
 
+void test_lidar()
+{
+    sources::sensors::Lidar* lidar_north = sources::sensors::Lidar::get_instance(LidarInstanceType::LIDAR_NORTH);
+
+    while(1)
+    {
+        // uint16_t dist = lidar_north->get_distance();
+        System_printf("Distance!\n");
+        // System_printf("Distance: %d\n", dist);
+        System_flush();
+        Task_sleep(100);
+    }
+}
+
 int main(void)
 {
     Task_Params taskParams0;
+    Task_Params taskParams1;
 
     /* Call board init functions */
     Board_initGeneral();
@@ -59,6 +76,12 @@ int main(void)
     taskParams0.stackSize = TASKSTACKSIZE;
     taskParams0.stack = &task0Stack;
     Task_construct(&task0Struct, (Task_FuncPtr)heartBeatFxn, &taskParams0, NULL);
+
+    Task_Params_init(&taskParams1);
+    taskParams1.arg0 = 1000;
+    taskParams1.stackSize = 2048;
+    taskParams1.stack = &task1Stack;
+    Task_construct(&task1Struct, (Task_FuncPtr)test_lidar, &taskParams1, NULL);
 
     /* Construct RADAR Monitoring Thread */
     // NOTE: This thread should be capable of either spawning another thread

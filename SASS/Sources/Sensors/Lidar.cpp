@@ -5,6 +5,12 @@
 
 using namespace sources::sensors;
 
+sources::sensors::Lidar* sources::sensors::Lidar::lidar_north = nullptr;
+sources::sensors::Lidar* sources::sensors::Lidar::lidar_east = nullptr;
+sources::sensors::Lidar* sources::sensors::Lidar::lidar_south = nullptr;
+sources::sensors::Lidar* sources::sensors::Lidar::lidar_west = nullptr;
+uint8_t sources::sensors::Lidar::default_addr = 0;
+
 Lidar::Lidar(LidarInstanceType lidar_type) : m_current_addr(default_addr), m_lidar_type(lidar_type)
 {
     init();

@@ -15,7 +15,7 @@ class Logger
 public:
     static void print(String statement);
     static void print_value(String statement, int value);
-    static void print_buffer(String statement, uint8_t * buffer);
+    static void print_buffer(String statement, uint8_t * buffer, uint16_t buffer_size);
 };
 
 

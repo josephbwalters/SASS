@@ -112,7 +112,7 @@ uint16_t Lidar::get_distance()
     Logger::print((String)"Reading distance from lidar now...");
     read(0x8f, data_bytes, 2);
 
-    Logger::print_buffer((String)"Distance:", data_bytes);
+    Logger::print_buffer((String)"Distance:", data_bytes, 2);
     // Shift high byte and add to low byte
     distance = (data_bytes[0] << 8) | data_bytes[1];
 
@@ -223,7 +223,7 @@ void Lidar::configure(uint8_t config)
 
 void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
 {
-    Logger::print_buffer((String)"Data to write:", data_bytes);
+    Logger::print_buffer((String)"Data to write:", data_bytes, num_bytes);
 
     I2C_Handle handle;
     I2C_Params params;
@@ -269,7 +269,7 @@ void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
 void Lidar::read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
 {
     Logger::print((String)"Reading data into buffer");
-    Logger::print_buffer((String)"Current Buffer contents:", data_bytes);
+    Logger::print_buffer((String)"Current Buffer contents:", data_bytes, num_bytes);
 
     I2C_Handle handle;
     I2C_Params params;
@@ -307,7 +307,7 @@ void Lidar::read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
         Logger::print((String)"Unsuccessful I2C transfer on read data");
     }
 
-    Logger::print_buffer((String)"New Buffer contents:", data_bytes);
+    Logger::print_buffer((String)"New Buffer contents:", data_bytes, num_bytes);
 
     I2C_close(handle);
     Logger::print((String)"Closed I2C transmission");

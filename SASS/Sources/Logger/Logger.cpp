@@ -15,14 +15,16 @@ void Logger::print_value(String statement, int value)
     System_flush();
 }
 
-void Logger::print_buffer(String statement, uint8_t * buffer)
+void Logger::print_buffer(String statement, uint8_t * buffer, uint16_t buffer_size)
 {
     System_printf("%s\n", statement);
-    int buffer_length = sizeof(buffer)/sizeof(buffer[0]);
-    for(int buffer_index = buffer_length-1; buffer_index >= 0; buffer_index--)
+    System_printf("0x");
+
+    for(int buffer_index = 0; buffer_index < buffer_size; buffer_index++)
     {
-        System_printf("%02x ", buffer[buffer_index]);
+        System_printf("%02x", buffer[buffer_index]);
     }
+
     System_printf("\n");
     System_flush();
 }

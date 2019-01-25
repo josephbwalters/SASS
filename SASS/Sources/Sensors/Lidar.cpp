@@ -231,7 +231,7 @@ void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
 
     I2C_Params_init(&params);
     params.transferMode = I2C_MODE_CALLBACK;
-    params.transferCallbackFxn = NULL; // Originally, NULL was "someI2CCallbackFunction" - actually is default
+    // params.transferCallbackFxn = NULL; // Originally, NULL was "someI2CCallbackFunction" - actually is default
     params.bitRate = I2C_100kHz;
 
     Logger::print((String)"Opening I2C transmission...");
@@ -312,5 +312,3 @@ void Lidar::read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
     I2C_close(handle);
     Logger::print((String)"Closed I2C transmission");
 }
-
-

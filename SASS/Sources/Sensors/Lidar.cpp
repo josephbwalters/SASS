@@ -3,11 +3,9 @@
 
 #include <ti/drivers/I2C.h>
 
-#include <Sources/Board.h>
+#include <Board.h>
 #include <Sources/Sensors/Lidar.h>
 #include <Sources/Logger/Logger.h>
-
-
 
 using namespace sources::sensors;
 using namespace sources::logger;

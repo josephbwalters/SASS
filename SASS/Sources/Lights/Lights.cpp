@@ -1,7 +1,10 @@
-#include "Lights.h"
+#define __MSP432P401R__
 
 // For easy access to drivers for pins
-#include <gpio.h>
+// #include <gpio.h>
+#include <ti/devices/msp432p4xx/driverlib/gpio.h>
+
+#include "Lights.h"
 
 using namespace sources;
 using namespace sources::lights;

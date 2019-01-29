@@ -11,7 +11,7 @@ var makeAssembly = false;
 var Executable = xdc.module('xdc.bld.Executable');
 
 var exeOpts = new Executable.Attrs({
-        cfgScript: '/Users/trent/Development/SASS/SASS/SASS.cfg',
+        cfgScript: '/Users/trent/workspace_v8/SASS/SASS.cfg',
         profile: 'release',
         cfgHome: 'xconfig_SASS',
 });
@@ -40,8 +40,8 @@ else {
 }
 
 var thisObj = {
-    cfg:        '/Users/trent/Development/SASS/SASS/SASS.cfg',
-    outputPath: '/Users/trent/Development/SASS/SASS/.config/xconfig_SASS',
+    cfg:        '/Users/trent/workspace_v8/SASS/SASS.cfg',
+    outputPath: '/Users/trent/workspace_v8/SASS/.config/xconfig_SASS',
     exeName:    'SASS' + suffix,
     exeIntName: 'SASS' + suffix.replace('.', '_'),
     targ:       targ,

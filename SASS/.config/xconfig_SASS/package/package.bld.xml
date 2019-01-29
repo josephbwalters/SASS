@@ -7,7 +7,7 @@
         <srcFile name="package/cfg/SASS_pem4f.c"/>
     </sources>
     <configscripts>
-        <srcFile name="/Users/trent/Development/SASS/SASS/SASS.cfg"/>
+        <srcFile name="/Users/trent/workspace_v8/SASS/SASS.cfg"/>
     </configscripts>
     <makefiles>
         <srcFile name="package.mak" src="package.bld"/>
@@ -20,12 +20,12 @@
     </makefiles>
     <targets>
         <target name="ti.targets.arm.elf.M4F"
-            version="ti.targets.arm.elf.M4F{1,0,18.1,4"
-            rawVersion="18.1.4"
+            version="ti.targets.arm.elf.M4F{1,0,18.1,5"
+            rawVersion="18.1.5"
             platform="ti.platforms.tiva:TM4C1294NCPDT:1"
             isa="v7M4"
             suffix="em4f"
-            rootDir="/Applications/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.4.LTS"
+            rootDir="/Applications/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.5.LTS"
             os="undefined"
             rts="ti.targets.arm.rtsarm">
             <model endian="little"
@@ -44,7 +44,7 @@
         isPartial="false"
         xCfgScript="package/cfg/SASS_pem4f.cfg"
         xCfgPrefix="package/cfg/SASS_pem4f"
-        cfgScript="/Users/trent/Development/SASS/SASS/SASS.cfg"
+        cfgScript="/Users/trent/workspace_v8/SASS/SASS.cfg"
         cfgArgs="null"
         />
     </configurations>
@@ -56,7 +56,7 @@
         profile="release"
         xCfgScript="package/cfg/SASS_pem4f.cfg"
         xCfgPrefix="package/cfg/SASS_pem4f"
-        cfgScript="/Users/trent/Development/SASS/SASS/SASS.cfg"
+        cfgScript="/Users/trent/workspace_v8/SASS/SASS.cfg"
         cfgArgs="null"
         />
     </executables>

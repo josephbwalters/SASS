@@ -1,37 +1,82 @@
+---
+# bigtime
+
+---
+
 ## Example Summary
 
-This example is intended to be a starting point for new development where
-a fuller set of kernel features and debug capabilities are enabled.
-
-## Peripherals Exercised
-
-* `Board_LED0`  - Indicates that the board was initialized within `main()`
+This application demonstrates how to use the SYS/BIOS Clock and Task modules in
+a C++ application, to create a real-time clock/calendar.
 
 ## Example Usage
 
-* The example lights `Board_LED0` as part of the initialization in `main()`.
-Then a heartBeat task toggles the LED at a rate determined by the `arg0`
-parameter for the constructed Task instance in the .c file.
+Run the application. The current times of two Clock objects (`id 1` and
+`id 2`) will be output to the console.  By default the program will
+terminate after 2 seconds.  The program can be modified to run longer, or
+continuously, by changing when the call to clockTerminate() is made.
+
+The default output:
+
+```
+bigTime started.
+id 1 : 0:0:0.0
+id 1 : August 19, 2010
+id 2 : 0:0:0
+id 2 : August 19, 2010
+id 1 : 0:0:0.1
+id 1 : August 19, 2010
+id 1 : 0:0:0.2
+id 1 : August 19, 2010
+id 1 : 0:0:0.3
+id 1 : August 19, 2010
+id 1 : 0:0:0.4
+id 1 : August 19, 2010
+id 1 : 0:0:0.5
+id 1 : August 19, 2010
+id 1 : 0:0:0.6
+id 1 : August 19, 2010
+id 1 : 0:0:0.7
+id 1 : August 19, 2010
+id 1 : 0:0:0.8
+id 1 : August 19, 2010
+id 1 : 0:0:0.9
+id 1 : August 19, 2010
+id 1 : 0:0:1.0
+id 1 : August 19, 2010
+id 2 : 0:0:1
+id 2 : August 19, 2010
+bigTime ended.
+```
 
 ## Application Design Details
 
-This examples is the same as the __Empty_Minimal__ example except many
-development and debug features are enabled. For example:
+* The C++ class object, Clock, is driven by a variety of SYS/BIOS objects: two
+Clock objects, two Task objects, and an Idle object. Each SYS/BIOS object has
+its own instantiation of the Clock.  When the Clock, Task, and Idle functions
+execute, they call their clock's tick function, advancing the connected timer
+by one second.
 
-* Logging is enabled
-* Assert checking is enabled
-* Kernel Idle task
-* Stack overflow checking
-* Default kernel heap is present
+* Because the functions execute at different rates, the attached clocks also
+advance at different rates.  For example, one of the Clock objects, `cl2`,
+has a period of one second.  When `cl2` runs, it advances its timer by
+one second. This results in an accurate clock.  On the other hand,
+`cl0` runs with every pass through the idle loop.  Therefore, the number of
+seconds passed for its attached timer indicates the time spent in the idle loop.
 
-> Please refer to the __Memory Footprint Reduction__ section in the
-> TI-RTOS User Guide *spruhd4.pdf* for a complete and detailed list of the
-> differences between the empty minimal and empty projects.
+> See the projects' `main` function for more information on how the SYS/BIOS
+objects are constructed.
+
+> You can experiment with advancing Clock at different rates
+by changing the `Clock::tick function`
+
+> Some targets utilize the RTOS analyzer to output the Clock times as
+`Log_info` events rather than using `System_printf`. To view the logs, open
+`Tools->RTOS Analyzer->Printf and Error Logs` and switch to the `Live
+Session` tab.
 
 ## References
-* For GNU and IAR users, please read the following website for details
-  about enabling [semi-hosting](http://processors.wiki.ti.com/index.php/TI-RTOS_Examples_SemiHosting)
-  in order to view console output.
+* For GNU and IAR users, please read the following website for details about
+enabling [semi-hosting](http://processors.wiki.ti.com/index.php/TI-RTOS_Examples_SemiHosting)
+in order to view console output.
 
-* For more help, search either the SYS/BIOS User Guide or the TI-RTOS
-  Getting Started Guide within your TI-RTOS installation.
+* For more help, search the SYS/BIOS User Guide.

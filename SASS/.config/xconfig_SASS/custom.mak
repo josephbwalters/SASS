@@ -7,5 +7,5 @@
 #       or equal to the generated config header
 #
 linker.cmd: package/cfg/SASS_pem4f.xdl
-	$(SED) 's"^\"\(package/cfg/SASS_pem4fcfg.cmd\)\"$""\"/Users/trent/Development/SASS/SASS/.config/xconfig_SASS/\1\""' package/cfg/SASS_pem4f.xdl > $@
+	$(SED) 's"^\"\(package/cfg/SASS_pem4fcfg.cmd\)\"$""\"/Users/trent/workspace_v8/SASS/.config/xconfig_SASS/\1\""' package/cfg/SASS_pem4f.xdl > $@
 	-$(SETDATE) -r:max package/cfg/SASS_pem4f.h compiler.opt compiler.opt.defs

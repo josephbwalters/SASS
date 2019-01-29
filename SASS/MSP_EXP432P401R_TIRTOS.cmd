@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016, Texas Instruments Incorporated
+ * Copyright (c) 2015-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,16 +30,23 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- *  ======== MSP_EXP432P401R.cmd ========
+ *  ======== MSP_EXP432P401R_TIRTOS.cmd ========
  *  Define the memory block start/length for the MSP_EXP432P401R M4
  */
+
+--stack_size=1024   /* C stack is also used for ISR stack */
+
+HEAPSIZE = 0x8000;  /* Size of heap buffer used by HeapMem */
 
 MEMORY
 {
     MAIN       (RX) : origin = 0x00000000, length = 0x00040000
     INFO       (RX) : origin = 0x00200000, length = 0x00004000
-    SRAM_CODE  (RWX): origin = 0x01000000, length = 0x00010000
-    SRAM_DATA  (RW) : origin = 0x20000000, length = 0x00010000
+    ALIAS
+    {
+    SRAM_CODE  (RWX): origin = 0x01000000
+    SRAM_DATA  (RW) : origin = 0x20000000
+    } length = 0x00010000
 }
 
 /* Section allocation in memory */
@@ -47,18 +54,23 @@ MEMORY
 SECTIONS
 {
     .text   :   > MAIN
+    .TI.ramfunc : {} load=MAIN, run=SRAM_CODE, table(BINIT)
     .const  :   > MAIN
     .cinit  :   > MAIN
     .pinit  :   > MAIN
+    .init_array : > MAIN
 
-#ifdef __TI_COMPILER_VERSION__
-#if __TI_COMPILER_VERSION__ >= 15009000
-    .TI.ramfunc : {} load=MAIN, run=SRAM_CODE, table(BINIT)
-#endif
-#endif
     .data   :   > SRAM_DATA
     .bss    :   > SRAM_DATA
     .sysmem :   > SRAM_DATA
+
+    /* Heap buffer used by HeapMem */
+    .priheap   : {
+        __primary_heap_start__ = .;
+        . += HEAPSIZE;
+        __primary_heap_end__ = .;
+    } > SRAM_DATA align 8
+
     .stack  :   > SRAM_DATA (HIGH)
 }
 

@@ -3,6 +3,13 @@
 
 #include <stdint.h>
 
+#define SLAVE_ADDR 0x62
+
+#define DEVICE_COMMAND_REG 0x00
+#define SYSTEM_STATUS_REG 0x01
+#define DISTANCE_REG 0x8f
+#define POWER_CONTROL_REG 0x65
+
 enum LidarInstanceType
 {
     LIDAR_NORTH,

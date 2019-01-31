@@ -7,6 +7,15 @@
 #include <Sources/Sensors/Lidar.h>
 #include <Sources/Logger/Logger.h>
 
+#include <pthread.h>
+
+
+#define __MSP432P401R__
+#include <ti/devices/msp432p4xx/driverlib/gpio.h>
+
+/* Example/Board Header files */
+#include "Board.h"
+
 using namespace sources::sensors;
 using namespace sources::logger;
 
@@ -19,7 +28,7 @@ uint8_t sources::sensors::Lidar::default_addr = 0x62;
 Lidar::Lidar(LidarInstanceType lidar_type) : m_current_addr(default_addr), m_lidar_type(lidar_type)
 {
     Logger::print((String)"Creating instance...");
-    init();
+    //init();
 }
 
 Lidar::~Lidar()
@@ -81,54 +90,222 @@ Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
     };
 }
 
+// TODO: Unnecessary ?
+//uint16_t Lidar::get_distance()
+//{
+//    Logger::print((String)"Getting distance!");
+//
+//    uint16_t distance;
+//    uint8_t data_bytes[2];
+//
+//    // Read two bytes from register 0x0f and 0x10 (autoincrement)
+//    Logger::print((String)"Reading distance from lidar now...");
+//    read(0x8f, data_bytes, 2);
+//
+//    Logger::print_buffer((String)"Distance:", data_bytes, 2);
+//    // Shift high byte and add to low byte
+//    distance = (data_bytes[0] << 8) | data_bytes[1];
+//
+//    return (distance);
+//}
+
+// TODO: Check if we can do this
+//uint16_t Lidar::get_velocity()
+//{
+//    uint16_t velocity;
+//    uint8_t data_bytes[2];
+//
+//    // Read two bytes from register 0x0f and 0x10 (autoincrement)
+//    read(0x0f, data_bytes, 2);
+//
+//    // Shift high byte and add to low byte
+//    velocity = (data_bytes[0] << 8) | data_bytes[1];
+//
+//    return (velocity);
+//}
+
 uint16_t Lidar::get_distance()
 {
-    // Write hex 0x04 to 0x00
-    // Read reg  0x01, repeat until lsb goes low
-    // Read 2 bytes from 0x8f (high byte 0x0f, low byte 0x10)
+    uint16_t dist = 0;
+    bool retVal = false;
+    I2C_Handle      i2c;
+    I2C_Params      i2cParams;
+    I2C_Transaction i2cTransaction;
+    uint8_t i = 0, k = 0;
 
-//    uint8_t write_buf = 0x04;
-//    uint8_t read_buf;
-//    write((uint8_t)0x00, &write_buf, 1);
-//    uint8_t temp;
-//    while(true) {
-//        read((uint8_t)0x01, &read_buf, 1);
-//        temp = read_buf << 7;
-//        temp = temp >> 7;
-//        System_printf("%x\n", temp);
-//        System_flush();
-//        if (temp == 0) break;
-//    }
-
-    Logger::print((String)"Getting distance!");
+    /* Buffers used in this code example */
+    uint8_t             txBuffer[10];
+    uint8_t             rxBuffer[10];
 
 
-    uint16_t distance;
-    uint8_t data_bytes[2];
+    while(k++ < 100)
+    {
+        /* Initialize all buffers */
+        for (i = 0; i < 10; i++) {
+            rxBuffer[i] = 0x00;
+            txBuffer[i] = 0x00;
+        }
 
-    // Read two bytes from register 0x0f and 0x10 (autoincrement)
-    Logger::print((String)"Reading distance from lidar now...");
-    read(0x8f, data_bytes, 2);
+        /* Call driver init functions */
+        I2C_init();
 
-    Logger::print_buffer((String)"Distance:", data_bytes, 2);
-    // Shift high byte and add to low byte
-    distance = (data_bytes[0] << 8) | data_bytes[1];
+        /* Create I2C for usage */
+        I2C_Params_init(&i2cParams);
+        i2cParams.transferMode = I2C_MODE_BLOCKING;
+        i2cParams.bitRate = I2C_100kHz;
 
-    return (distance);
-}
+        //printf("Opening connection\n");
+        i2c = I2C_open(Board_I2C_TMP, &i2cParams);
 
-uint16_t Lidar::get_velocity()
-{
-    uint16_t velocity;
-    uint8_t data_bytes[2];
+        if (i2c == NULL) {
+            Logger::print((String)"Error Initializing I2C!\n");
 
-    // Read two bytes from register 0x0f and 0x10 (autoincrement)
-    read(0x0f, data_bytes, 2);
+        } else {
+            Logger::print((String)"I2C Initialized!\n");
+        }
 
-    // Shift high byte and add to low byte
-    velocity = (data_bytes[0] << 8) | data_bytes[1];
 
-    return (velocity);
+        Logger::print((String)"I2C Config1!\n");
+
+        // Config 1
+        txBuffer[0] = 0x02;
+        txBuffer[1] = 0x80;
+
+        i2cTransaction.slaveAddress = SLAVE_ADDR;
+        i2cTransaction.writeBuf = txBuffer;
+        i2cTransaction.writeCount = 2;
+        i2cTransaction.readBuf = rxBuffer;
+        i2cTransaction.readCount = 0;
+
+        Logger::print((String)"Attempting to write");
+        /* Re-try writing to slave till I2C_transfer returns true */
+        do {
+            Logger::print((String)"Attempting transfer");
+            retVal = I2C_transfer(i2c, &i2cTransaction);
+        } while(!retVal);
+
+
+        Logger::print((String)"I2C Config2!\n");
+
+        // Config 2
+        txBuffer[0] = 0x04;
+        txBuffer[1] = 0x08;
+
+        i2cTransaction.slaveAddress = SLAVE_ADDR;
+        i2cTransaction.writeBuf = txBuffer;
+        i2cTransaction.writeCount = 2;
+        i2cTransaction.readBuf = rxBuffer;
+        i2cTransaction.readCount = 0;
+
+        retVal = I2C_transfer(i2c, &i2cTransaction);
+
+        Logger::print((String)"I2C Config3!\n");
+
+        // Config 3
+        txBuffer[0] = 0x12;
+        txBuffer[1] = 0x05;
+
+        i2cTransaction.slaveAddress = SLAVE_ADDR;
+        i2cTransaction.writeBuf = txBuffer;
+        i2cTransaction.writeCount = 2;
+        i2cTransaction.readBuf = rxBuffer;
+        i2cTransaction.readCount = 0;
+
+        /* Re-try writing to slave till I2C_transfer returns true */
+        do {
+            retVal = I2C_transfer(i2c, &i2cTransaction);
+        } while(!retVal);
+
+        Logger::print((String)"I2C Config4!\n");
+
+        // Config 4
+        txBuffer[0] = 0x1c;
+        txBuffer[1] = 0x00;
+
+        /* Write the actual 0x13 bytes */
+        i2cTransaction.slaveAddress = SLAVE_ADDR;
+        i2cTransaction.writeBuf = txBuffer;
+        i2cTransaction.writeCount = 2;
+        i2cTransaction.readBuf = rxBuffer;
+        i2cTransaction.readCount = 0;
+
+        /* Re-try writing to slave till I2C_transfer returns true */
+        do {
+            retVal = I2C_transfer(i2c, &i2cTransaction);
+        } while(!retVal);
+
+        Logger::print((String)"I2C Write to device to read!\n");
+
+        // Write 04 to 00
+        txBuffer[0] = 0x00;
+        txBuffer[1] = 0x04;
+
+        i2cTransaction.slaveAddress = SLAVE_ADDR;
+        i2cTransaction.writeBuf = txBuffer;
+        i2cTransaction.writeCount = 2;
+        i2cTransaction.readBuf = rxBuffer;
+        i2cTransaction.readCount = 0;
+
+        /* Re-try reading from slave till I2C_transfer returns true */
+        do {
+            retVal = I2C_transfer(i2c, &i2cTransaction);
+        } while(!retVal);
+
+
+        // Read 0x01 until bit 0 goes low
+        txBuffer[0] = 0x01;
+        rxBuffer[0] = 0xFF;
+
+        while((rxBuffer[0] & 0x01) != 0x00)
+        {
+            i2cTransaction.slaveAddress = SLAVE_ADDR;
+            i2cTransaction.writeBuf = txBuffer;
+            i2cTransaction.writeCount = 1;
+            i2cTransaction.readBuf = rxBuffer;
+            i2cTransaction.readCount = 1;
+
+            do {
+                retVal = I2C_transfer(i2c, &i2cTransaction);
+            } while(!retVal);
+
+        }
+
+        Logger::print((String)"I2C Getting dist!\n");
+
+        // Read two bytes from 0x8f (High byte 0x0f then low byte 0x10) to obtain the 16-bit measured distance in centimeters.
+        txBuffer[0] = 0x8f;
+
+        rxBuffer[0] = 0x00;
+        rxBuffer[1] = 0x00;
+
+        i2cTransaction.slaveAddress = SLAVE_ADDR;
+        i2cTransaction.writeBuf = txBuffer;
+        i2cTransaction.writeCount = 1;
+        i2cTransaction.readBuf = rxBuffer;
+        i2cTransaction.readCount = 2;
+
+        /* Re-try reading from slave till I2C_transfer returns true */
+        do {
+            retVal = I2C_transfer(i2c, &i2cTransaction);
+        } while(!retVal);
+
+        dist = (rxBuffer[0] << 8) | rxBuffer[1];
+        Logger::print_value((String)"Distance (cm)", dist);
+
+        if (dist < (uint16_t)100) {
+            GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN3);
+            GPIO_toggleOutputOnPin(GPIO_PORT_P7, GPIO_PIN3);
+        }
+
+        Logger::print((String)"I2C master/slave transfer complete\n");
+
+        /* Deinitialized I2C */
+        I2C_close(i2c);
+        Logger::print((String)"I2C closed!\n");
+
+        //sleep(1);
+    }
+    return dist;
 }
 
 void Lidar::init()

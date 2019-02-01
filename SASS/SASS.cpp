@@ -16,11 +16,14 @@
 
 #include <Board.h>
 
+#include <Sources/Lights/Lights.h>
 #include <Sources/Sensors/Lidar.h>
 #include <Sources/Logger/Logger.h>
+#include <Sources/Directions.h>
 
 using namespace sources::logger;
 using namespace sources::sensors;
+using namespace sources::lights;
 
 // Stack size for new tasks
 #define STACK_SIZE_SMALL 512
@@ -29,9 +32,11 @@ using namespace sources::sensors;
 
 void *demoThread(void *Uarg0)
 {
+    Lights lights;
+    Lidar*  lidar_north = Lidar::get_instance(LidarInstanceType::LIDAR_NORTH);
+
     while(1)
     {
-        Lidar*  lidar_north = Lidar::get_instance(LidarInstanceType::LIDAR_NORTH);
         uint16_t dist = lidar_north->get_distance();
         Logger::print_value((String)"Distance is", dist);
 
@@ -40,13 +45,11 @@ void *demoThread(void *Uarg0)
 
         if(dist < 200)
         {
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
+            lights.set_yellow(Directions::NORTH);
         }
         else
         {
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
+            lights.set_red(Directions::NORTH);
         }
     }
 
@@ -88,8 +91,9 @@ int main()
     Board_initGeneral();
 
     // Initialize GPIO pins
-    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN3);
-    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN4);
+//    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN3);
+//    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN4);
+    Lights::init();
 
     /* Initialize the attributes structure with default values */
     pthread_attr_init(&attrs);
@@ -109,13 +113,6 @@ int main()
         /* pthread_create() failed */
         while (1) {}
     }
-
-//    Logger::print((String)"Creating Lidar task");
-//    Task_Params_init(&taskParams1);
-//    taskParams1.arg0 = 1000;
-//    taskParams1.stackSize = TASK_STACK_SIZE_LARGE;
-//    taskParams1.stack = &task1Stack;
-//    Task_construct(&task1Struct, (Task_FuncPtr)test_lidar, &taskParams1, NULL);
 
     BIOS_start();    /* does not return */
     return(0);

@@ -26,15 +26,17 @@ protected:
 public:
     Lights();
 
+    static void init();
+
     void control(Commands c, Directions d);
 
-    void stop(Directions direction);
+    void set_red(Directions direction);
 
-    void all_stop();
+    void set_all_red();
 
     void panic();
 
-    void proceed(Directions direction);
+    void set_yellow(Directions direction);
 
     void wait();
 

@@ -15,65 +15,60 @@ Lights::Lights()
     bool waiting = true;
 }
 
-void Lights::control(Commands c, Directions d)
+void Lights::init()
 {
-    m_command = c;
-    m_direction = d;
+    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN4);
+    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN5);
+    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN6);
+    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN7);
 }
 
-void Lights::stop(Directions direction)
+void Lights::set_red(Directions direction)
 {
-    if (m_direction == Directions::NORTH)
+    switch (direction)
     {
-        GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN4);
-        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
-    }
-    else if (m_direction == Directions::EAST)
-    {
-        GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN5);
-        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
+    case Directions::NORTH:
+        GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
+        break;
+    case Directions::EAST:
+        GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
+        break;
     }
 }
 
-void Lights::all_stop()
+void Lights::set_all_red()
 {
-    stop(Directions::NORTH);
-    stop(Directions::EAST);
+    set_red(Directions::NORTH);
+    set_red(Directions::EAST);
 }
 
 void Lights::panic()
 {
     m_panic_flag = true;
-    all_stop();
+    set_all_red();
 }
 
-void Lights::proceed(Directions direction)
+void Lights::set_yellow(Directions direction)
 {
-    if (m_direction == Directions::NORTH)
+    switch (direction)
     {
-        GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN6);
+    case Directions::NORTH:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
-    }
-    else if (m_direction == Directions::EAST)
-    {
-        GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN7);
+        break;
+    case Directions::EAST:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
+        break;
     }
 }
 
 void Lights::wait()
 {
-    // Set P7.4 and P7.5 as outputs
-    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN4);
-    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN5);
-
     // Toggle red lights
     GPIO_toggleOutputOnPin(GPIO_PORT_P7, GPIO_PIN4);
     GPIO_toggleOutputOnPin(GPIO_PORT_P7, GPIO_PIN5);
 
     // TODO: Timer based delay. (Use 1 second)
-    for (int i = 500000; i > 0; i--)
-        ;
+    for (int i = 500000; i > 0; i--);
 }
 
 void Lights::safe()
@@ -85,32 +80,28 @@ void Lights::light_thread(void)
 {
     if (m_panic_flag)
     {
-        all_stop();
+        set_all_red();
     }
 
-    if (m_command == Commands::PANIC)
+    switch (m_command)
     {
+    case Commands::PANIC:
         panic();
-    }
-    else if (m_command == Commands::SAFE)
-    {
+        break;
+    case Commands::SAFE:
         safe();
-    }
-    else if (m_command == Commands::PROCEED)
-    {
-        proceed(m_direction);
-    }
-    else if (m_command == Commands::STOP)
-    {
-        stop(m_direction);
-    }
-    else if (m_command == Commands::WAIT)
-    {
+        break;
+    case Commands::PROCEED:
+        set_yellow(m_direction);
+        break;
+    case Commands::STOP:
+        set_red(m_direction);
+        break;
+    case Commands::WAIT:
         wait();
-    }
-    else
-    {
-        ; // TODO: Handle invalid command failure
+        break;
+    default:
+        ; // Catch/Throw an error
     }
 }
 

@@ -46,12 +46,14 @@ void *demoThread(void *Uarg0)
         if(dist < 200)
         {
             GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
-            lights.set_yellow(Directions::NORTH);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
+            //lights.set_yellow(Directions::NORTH);
         }
         else
         {
             GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
-            lights.set_red(Directions::NORTH);
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
+            //lights.set_red(Directions::NORTH);
         }
     }
 

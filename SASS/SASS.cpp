@@ -45,10 +45,12 @@ void *demoThread(void *Uarg0)
 
         if(dist < 200)
         {
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
             lights.set_yellow(Directions::NORTH);
         }
         else
         {
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
             lights.set_red(Directions::NORTH);
         }
     }
@@ -91,7 +93,7 @@ int main()
     Board_initGeneral();
 
     // Initialize GPIO pins
-//    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN3);
+    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN3);
 //    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN4);
     Lights::init();
 

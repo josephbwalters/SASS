@@ -89,6 +89,34 @@ void *demoThread(void *Uarg0)
     return 0;
 }
 
+void *mosfetToggleThread(void *Uarg0)
+{
+    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
+
+    bool is_on = 0;
+
+    while(1)
+    {
+        for(int i = 0; i < 1000000; i++)
+        {
+            // Delay
+        }
+
+        if(is_on == 0)
+        {
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
+            is_on = 1;
+        }
+        else
+        {
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
+            is_on = 0;
+        }
+    }
+}
+
 int main()
 {
     pthread_t           thread;
@@ -100,7 +128,6 @@ int main()
 
     // Initialize GPIO pins
     GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN3);
-//    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN4);
     Lights::init();
 
     /* Initialize the attributes structure with default values */
@@ -116,7 +143,7 @@ int main()
         while (1) {}
     }
 
-    retc = pthread_create(&thread, &attrs, demoThread, NULL);
+    retc = pthread_create(&thread, &attrs, mosfetToggleThread, NULL);
     if (retc != 0) {
         /* pthread_create() failed */
         while (1) {}

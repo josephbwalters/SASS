@@ -1,12 +1,12 @@
-#include "Scheduler.h"
-#include "../Lights/Lights.h"
-#include "../Commands.h"
-#include "../Directions.h"
+#include <Sources/TLC/Scheduler.h>
+#include <Sources/LLHA/Lights/Lights.h>
+#include <Sources/Commands.h>
+#include <Sources/Directions.h>
 
 using namespace sources;
 
-using namespace sources::scheduler;
-using namespace sources::lights;
+using namespace sources::tlc::scheduler;
+using namespace sources::llha::lights;
 
 void Scheduler::scheduler_thread()
 {

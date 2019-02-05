@@ -20,6 +20,8 @@ enum LidarInstanceType
 
 namespace sources
 {
+namespace llha
+{
 namespace sensors
 {
 
@@ -53,6 +55,6 @@ private:
 };
 
 
-}} // sources::sensors
+}}} // sources::llha::sensors
 
 #endif // LIDAR_H_

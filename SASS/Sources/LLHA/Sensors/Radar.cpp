@@ -1,6 +1,6 @@
-#include <Sources/Sensors/Radar.h>
+#include <Sources/LLHA/Sensors/Radar.h>
 
-using namespace sources::sensors;
+using namespace sources::llha::sensors;
 
 Radar::Radar()
 {

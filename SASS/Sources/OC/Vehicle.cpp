@@ -1,6 +1,6 @@
-#include "Vehicle.h"
+#include <Sources/OC/Vehicle.h>
 
-using namespace sources::objects;
+using namespace sources::oc;
 
 Vehicle::Vehicle(Directions dir, float s)
 {

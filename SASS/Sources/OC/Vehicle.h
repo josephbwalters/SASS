@@ -2,17 +2,19 @@
 #define VEHICLE_H_
 
 // Custom Headers
-#include "../Directions.h"
+#include <Sources/Directions.h>
+
+#include <Sources/OC/DetectedObject.h>
 
 using namespace sources;
 
 namespace sources
 {
-namespace objects
+namespace oc
 {
 
 
-class Vehicle
+class Vehicle : public DetectedObject
 {
 private:
     Directions direction;
@@ -28,7 +30,7 @@ public:
 };
 
 
-}} // sources::objects
+}} // sources::oc
 
 
 

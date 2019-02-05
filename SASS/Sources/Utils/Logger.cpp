@@ -1,7 +1,7 @@
 #include <xdc/runtime/System.h>
-#include <Sources/Logger/Logger.h>
+#include <Sources/Utils/Logger.h>
 
-using namespace sources::logger;
+using namespace sources::utils;
 
 void Logger::print(String statement)
 {

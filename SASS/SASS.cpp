@@ -85,13 +85,11 @@ void *demoThread(void *Uarg0)
         // GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
 
     }*/
-
-    return 0;
 }
 
 void *mosfetToggleThread(void *Uarg0)
 {
-    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
+    // GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
 
     bool is_on = 0;
 
@@ -106,12 +104,18 @@ void *mosfetToggleThread(void *Uarg0)
         {
             GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
             GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
             is_on = 1;
         }
         else
         {
             GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
             GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
             is_on = 0;
         }
     }

@@ -1,3 +1,5 @@
+#define __MSP432P401R__
+
 /* XDC module Headers */
 #include <xdc/std.h>
 #include <xdc/runtime/Diags.h>
@@ -11,19 +13,18 @@
 #include <ti/drivers/GPIO.h>
 #include <ti/drivers/I2C.h>
 
-#define __MSP432P401R__
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
 
 #include <Board.h>
 
-#include <Sources/Lights/Lights.h>
-#include <Sources/Sensors/Lidar.h>
-#include <Sources/Logger/Logger.h>
+#include <Sources/LLHA/Lights/Lights.h>
+#include <Sources/LLHA/Sensors/Lidar.h>
+#include <Sources/Utils/Logger.h>
 #include <Sources/Directions.h>
 
-using namespace sources::logger;
-using namespace sources::sensors;
-using namespace sources::lights;
+using namespace sources::utils;
+using namespace sources::llha::sensors;
+using namespace sources::llha::lights;
 
 // Stack size for new tasks
 #define STACK_SIZE_SMALL 512
@@ -33,7 +34,7 @@ using namespace sources::lights;
 void *demoThread(void *Uarg0)
 {
     Lights lights;
-    Lidar*  lidar_north = Lidar::get_instance(LidarInstanceType::LIDAR_NORTH);
+    Lidar* lidar_north = Lidar::get_instance(LidarInstanceType::LIDAR_NORTH);
 
     while(1)
     {
@@ -60,32 +61,6 @@ void *demoThread(void *Uarg0)
             //lights.set_red(Directions::NORTH);
         }
     }
-
-    /*bool is_on = 0;
-
-    while(1)
-    {
-        for(int i = 0; i < 1000000; i++)
-        {
-            // Delay
-        }
-
-        if(is_on == 0)
-        {
-            GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN0);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
-            is_on = 1;
-        }
-        else
-        {
-            GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
-            is_on = 0;
-        }
-        // GPIO_toggleOutputOnPin(GPIO_PORT_P1, GPIO_PIN0);
-
-    }*/
-
     return 0;
 }
 

@@ -6,7 +6,7 @@
 
 namespace sources
 {
-namespace logger
+namespace utils
 {
 
 
@@ -19,7 +19,7 @@ public:
 };
 
 
-}} // sources::logger
+}} // sources::utils
 
 
 

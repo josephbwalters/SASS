@@ -1,3 +1,5 @@
+#define __MSP432P401R__
+
 #include <xdc/runtime/System.h>
 #include <xdc/std.h>
 
@@ -5,25 +7,24 @@
 
 #include <pthread.h>
 
-#define __MSP432P401R__
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
 
 #include <Board.h>
 
-#include <Sources/Sensors/Lidar.h>
-#include <Sources/Logger/Logger.h>
+#include <Sources/LLHA/Sensors/Lidar.h>
+#include <Sources/Utils/Logger.h>
 
 /* Example/Board Header files */
 
 
-using namespace sources::sensors;
-using namespace sources::logger;
+using namespace sources::llha::sensors;
+using namespace sources::utils;
 
-sources::sensors::Lidar* sources::sensors::Lidar::lidar_north = nullptr;
-sources::sensors::Lidar* sources::sensors::Lidar::lidar_east = nullptr;
-sources::sensors::Lidar* sources::sensors::Lidar::lidar_south = nullptr;
-sources::sensors::Lidar* sources::sensors::Lidar::lidar_west = nullptr;
-uint8_t sources::sensors::Lidar::default_addr = 0x62;
+sources::llha::sensors::Lidar* sources::llha::sensors::Lidar::lidar_north = nullptr;
+sources::llha::sensors::Lidar* sources::llha::sensors::Lidar::lidar_east = nullptr;
+sources::llha::sensors::Lidar* sources::llha::sensors::Lidar::lidar_south = nullptr;
+sources::llha::sensors::Lidar* sources::llha::sensors::Lidar::lidar_west = nullptr;
+uint8_t sources::llha::sensors::Lidar::default_addr = 0x62;
 
 Lidar::Lidar(LidarInstanceType lidar_type) : m_current_addr(default_addr), m_lidar_type(lidar_type)
 {

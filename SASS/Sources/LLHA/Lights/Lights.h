@@ -2,12 +2,14 @@
 #define LIGHTS_H_
 
 // Our custom headers
-#include "../Directions.h"
-#include "../Commands.h"
+#include <Sources/Commands.h>
+#include <Sources/Directions.h>
 
 using namespace sources;
 
 namespace sources
+{
+namespace llha
 {
 namespace lights
 {
@@ -46,6 +48,6 @@ public:
 };
 
 
-}} // sources::lights
+}}} // sources::llha::lights
 
 #endif // LIGHTS_H_

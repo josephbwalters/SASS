@@ -3,12 +3,14 @@
 
 #include <deque>
 
-#include "../Lights/Lights.h"
+#include <Sources/LLHA/Lights/Lights.h>
 
 using namespace std;
-using namespace sources::lights;
+using namespace sources::llha::lights;
 
 namespace sources
+{
+namespace tlc
 {
 namespace scheduler
 {
@@ -28,7 +30,7 @@ public:
 };
 
 
-}} // sources::scheduler
+}}} // sources::tlc::scheduler
 
 
 

@@ -11,6 +11,8 @@ enum RadarInstanceType
 
 namespace sources
 {
+namespace llha
+{
 namespace sensors
 {
 
@@ -35,6 +37,6 @@ private:
 };
 
 
-}} // sources::sensors
+}}} // sources::llha::sensors
 
 #endif // RADAR_H_

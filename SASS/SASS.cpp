@@ -48,7 +48,9 @@ void *demoThread(void *Uarg0)
         {
             GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
 
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
             GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
             //lights.set_yellow(Directions::NORTH);
         }
@@ -56,7 +58,9 @@ void *demoThread(void *Uarg0)
         {
             GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
 
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
             GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
             //lights.set_red(Directions::NORTH);
         }
@@ -125,7 +129,7 @@ int main()
         while (1) {}
     }
 
-    retc = pthread_create(&thread, &attrs, mosfetToggleThread, NULL);
+    retc = pthread_create(&thread, &attrs, demoThread, NULL);
     if (retc != 0) {
         /* pthread_create() failed */
         while (1) {}

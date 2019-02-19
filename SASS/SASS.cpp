@@ -65,8 +65,6 @@ void *demoThread(void *Uarg0)
             //lights.set_red(Directions::NORTH);
         }
     }
-
-    return 0;
 }
 
 void *mosfetToggleThread(void *Uarg0)

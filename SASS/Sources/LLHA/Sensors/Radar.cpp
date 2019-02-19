@@ -12,6 +12,11 @@
 using namespace sources::llha::sensors;
 using namespace sources::utils;
 
+sources::llha::sensors::Radar* sources::llha::sensors::Radar::radar_north = nullptr;
+sources::llha::sensors::Radar* sources::llha::sensors::Radar::radar_east = nullptr;
+sources::llha::sensors::Radar* sources::llha::sensors::Radar::radar_south = nullptr;
+sources::llha::sensors::Radar* sources::llha::sensors::Radar::radar_west = nullptr;
+
 Radar::Radar(RadarInstanceType radar_type) : m_radar_type(radar_type)
 {
     Logger::print((String)"Creating instance...");
@@ -99,32 +104,66 @@ void Radar::init()
     spiParams.dataSize = 8;       // 8-bit data size
 }
 
-double Radar::get_distance()
+uint16_t Radar::get_distance()
 {
-    spi = SPI_open(Board_SPI0, &spiParams);
+    uint16_t dist = 0;
+    bool transferOK = false;
+
+    spi = SPI_open(m_hardware_module, &spiParams);
     if (spi == NULL)
     {
-        while (1);  // SPI_open() failed
+        Logger::print((String)"Error initializing SPI.\n");
+        // TODO: Throw exception
+    }
+    else
+    {
+        Logger::print((String)"I2C initialized.\n");
     }
 
     // Fill in transmitBuffer
 
-    spiTransaction.count = 10; // Need to reconsider message size
-    spiTransaction.txBuf = (void *)transmitBuffer;
-    spiTransaction.rxBuf = (void *)receiveBuffer;
+    txBuffer[0] = 0x0F;
+
+    spiTransaction.count = 1;
+    spiTransaction.txBuf = txBuffer;
+    spiTransaction.rxBuf = rxBuffer;
 
     transferOK = SPI_transfer(spi, &spiTransaction);
     if (!transferOK)
     {
-        // Error in SPI or transfer already in progress.
-        while (1);
+        Logger::print((String)"Error starting SPI transaction.\n");
     }
 
-    return 0.00;
+    rxBuffer[0] = 0x00;
+    rxBuffer[1] = 0x00;
+    rxBuffer[2] = 0x00;
+
+    spiTransaction.count = 3; // 2 distance + 1 velocity
+    spiTransaction.txBuf = txBuffer;
+    spiTransaction.rxBuf = rxBuffer;
+
+    transferOK = SPI_transfer(spi, &spiTransaction);
+    if (!transferOK)
+    {
+        Logger::print((String)"Error starting SPI transaction.\n");
+    }
+
+    return dist;
 }
 
 double Radar::get_velocity()
 {
     // TEMPORARY RETURN
     return 0.00;
+}
+
+void *Radar::radarTestThread(void *args)
+{
+    Radar* radar_north = Radar::get_instance(RadarInstanceType::RADAR_NORTH);
+
+    while(1)
+    {
+        uint16_t dist = radar_north->get_distance();
+        Logger::print_value((String)"Distance is", dist);
+    }
 }

@@ -23,10 +23,11 @@ class Radar
 {
 public:
     static Radar* get_instance(RadarInstanceType radar_type);
-
-    double get_distance();
-    double get_velocity();
     void init();
+
+    uint16_t get_distance();
+    double get_velocity();
+    static void *radarTestThread(void *args);
 
 private:
     Radar(RadarInstanceType radar_type);
@@ -39,9 +40,8 @@ private:
     SPI_Handle      spi;
     SPI_Params      spiParams;
     SPI_Transaction spiTransaction;
-    uint8_t         transmitBuffer[10]; // Need to reconsider message size
-    uint8_t         receiveBuffer[10];
-    bool            transferOK;
+    uint8_t         txBuffer[10]; // Need to reconsider message size
+    uint8_t         rxBuffer[10];
 
     static Radar* radar_north;
     static Radar* radar_east;

@@ -32,10 +32,10 @@ class Lidar
 {
 public:
     static Lidar* get_instance(LidarInstanceType lidar_type);
+    void init();
 
     uint16_t get_distance();
     uint16_t get_velocity();
-    void init();
     void set_i2c_addr(uint8_t new_addr);
     void configure(uint8_t config);
     void write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes);

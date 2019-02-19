@@ -158,14 +158,14 @@ void Lidar::init()
 uint16_t Lidar::get_distance()
 {
     uint16_t dist = 0;
-    bool retVal = false;
+    bool transferOK = false;
 
     // printf("Opening connection\n");
-    i2c = I2C_open(Board_I2C1, &i2cParams);
+    i2c = I2C_open(m_hardware_module, &i2cParams);
 
     if (i2c == NULL) {
         Logger::print((String)"Error Initializing I2C!\n");
-
+        // TODO: Throw exception
     }
     else {
         Logger::print((String)"I2C Initialized!\n");
@@ -187,8 +187,8 @@ uint16_t Lidar::get_distance()
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
         Logger::print((String)"Attempting transfer");
-        retVal = I2C_transfer(i2c, &i2cTransaction);
-    } while(!retVal);
+        transferOK = I2C_transfer(i2c, &i2cTransaction);
+    } while(!transferOK);
 
     Logger::print((String)"I2C Config2!\n");
 
@@ -202,7 +202,7 @@ uint16_t Lidar::get_distance()
     i2cTransaction.readBuf = rxBuffer;
     i2cTransaction.readCount = 0;
 
-    retVal = I2C_transfer(i2c, &i2cTransaction);
+    transferOK = I2C_transfer(i2c, &i2cTransaction);
 
     Logger::print((String)"I2C Config3!\n");
 
@@ -218,8 +218,8 @@ uint16_t Lidar::get_distance()
 
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
-        retVal = I2C_transfer(i2c, &i2cTransaction);
-    } while(!retVal);
+        transferOK = I2C_transfer(i2c, &i2cTransaction);
+    } while(!transferOK);
 
     Logger::print((String)"I2C Config4!\n");
 
@@ -236,8 +236,8 @@ uint16_t Lidar::get_distance()
 
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
-        retVal = I2C_transfer(i2c, &i2cTransaction);
-    } while(!retVal);
+        transferOK = I2C_transfer(i2c, &i2cTransaction);
+    } while(!transferOK);
 
     Logger::print((String)"I2C Write to device to read!\n");
 
@@ -253,8 +253,8 @@ uint16_t Lidar::get_distance()
 
     /* Re-try reading from slave till I2C_transfer returns true */
     do {
-        retVal = I2C_transfer(i2c, &i2cTransaction);
-    } while(!retVal);
+        transferOK = I2C_transfer(i2c, &i2cTransaction);
+    } while(!transferOK);
 
 
     // Read 0x01 until bit 0 goes low
@@ -270,8 +270,8 @@ uint16_t Lidar::get_distance()
         i2cTransaction.readCount = 1;
 
         do {
-            retVal = I2C_transfer(i2c, &i2cTransaction);
-        } while(!retVal);
+            transferOK = I2C_transfer(i2c, &i2cTransaction);
+        } while(!transferOK);
 
     }
 
@@ -291,8 +291,8 @@ uint16_t Lidar::get_distance()
 
     /* Re-try reading from slave till I2C_transfer returns true */
     do {
-        retVal = I2C_transfer(i2c, &i2cTransaction);
-    } while(!retVal);
+        transferOK = I2C_transfer(i2c, &i2cTransaction);
+    } while(!transferOK);
 
     dist = (rxBuffer[0] << 8) | rxBuffer[1];
     Logger::print_value((String)"Distance (cm)", dist);

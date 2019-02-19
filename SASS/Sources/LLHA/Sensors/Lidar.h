@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include <ti/drivers/I2C.h>
+
 #define SLAVE_ADDR 0x62
 
 #define DEVICE_COMMAND_REG 0x00
@@ -47,6 +49,14 @@ private:
     uint8_t m_current_addr;
 
     LidarInstanceType m_lidar_type;
+    uint_least8_t m_hardware_module;
+
+    // I2C-related variables
+    I2C_Handle      i2c;
+    I2C_Params      i2cParams;
+    I2C_Transaction i2cTransaction;
+    uint8_t         txBuffer[10];
+    uint8_t         rxBuffer[10];
 
     static Lidar* lidar_north;
     static Lidar* lidar_east;

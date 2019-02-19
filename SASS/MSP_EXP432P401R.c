@@ -459,6 +459,14 @@ const I2CMSP432_HWAttrsV1 i2cMSP432HWAttrs[MSP_EXP432P401R_I2CCOUNT] = {
         .clockSource = EUSCI_B_I2C_CLOCKSOURCE_SMCLK,
         .dataPin = I2CMSP432_P6_4_UCB1SDA,
         .clkPin = I2CMSP432_P6_5_UCB1SCL
+    },
+    {
+        .baseAddr = EUSCI_B0_BASE,
+        .intNum = INT_EUSCIB0,
+        .intPriority = (~0),
+        .clockSource = EUSCI_B_I2C_CLOCKSOURCE_SMCLK,
+        .dataPin = I2CMSP432_P1_6_UCB0SDA,
+        .clkPin = I2CMSP432_P1_7_UCB0SCL
     }
 };
 
@@ -472,6 +480,11 @@ const I2C_Config I2C_config[MSP_EXP432P401R_I2CCOUNT] = {
         .fxnTablePtr = &I2CMSP432_fxnTable,
         .object = &i2cMSP432Objects[MSP_EXP432P401R_I2CB1],
         .hwAttrs = &i2cMSP432HWAttrs[MSP_EXP432P401R_I2CB1]
+    },
+    {
+        .fxnTablePtr = &I2CMSP432_fxnTable,
+        .object = &i2cMSP432Objects[MSP_EXP432P401R_I2CB2],
+        .hwAttrs = &i2cMSP432HWAttrs[MSP_EXP432P401R_I2CB2]
     }
 };
 
@@ -745,6 +758,38 @@ const SPIMSP432DMA_HWAttrsV1 spiMSP432DMAHWAttrs[MSP_EXP432P401R_SPICOUNT] = {
         .simoPin = SPIMSP432DMA_P3_6_UCB2SIMO,
         .somiPin = SPIMSP432DMA_P3_7_UCB2SOMI,
         .stePin  = SPIMSP432DMA_P2_4_UCB2STE,
+        .pinMode  = EUSCI_SPI_4PIN_UCxSTE_ACTIVE_LOW,
+        .minDmaTransferSize = 10
+    },
+    { // BEGIN ADDITIONS
+        .baseAddr = EUSCI_A0_BASE,
+        .bitOrder = EUSCI_A_SPI_MSB_FIRST,
+        .clockSource = EUSCI_A_SPI_CLOCKSOURCE_SMCLK,
+        .defaultTxBufValue = 0xFF,
+        .dmaIntNum = INT_DMA_INT3, // Might need to verify
+        .intPriority = (~0),
+        .rxDMAChannelIndex = DMA_CH1_EUSCIA0RX,
+        .txDMAChannelIndex = DMA_CH0_EUSCIA0TX,
+        .clkPin  = SPIMSP432DMA_P1_1_UCA0CLK,
+        .simoPin = SPIMSP432DMA_P1_3_UCA0SIMO,
+        .somiPin = SPIMSP432DMA_P1_2_UCA0SOMI,
+        .stePin  = SPIMSP432DMA_P1_0_UCA0STE,
+        .pinMode  = EUSCI_SPI_4PIN_UCxSTE_ACTIVE_LOW,
+        .minDmaTransferSize = 10
+    },
+    {
+        .baseAddr = EUSCI_A1_BASE,
+        .bitOrder = EUSCI_A_SPI_MSB_FIRST,
+        .clockSource = EUSCI_A_SPI_CLOCKSOURCE_SMCLK,
+        .defaultTxBufValue = 0xFF,
+        .dmaIntNum = INT_DMA_INT1, // Might need to verify
+        .intPriority = (~0),
+        .rxDMAChannelIndex = DMA_CH3_EUSCIA1RX,
+        .txDMAChannelIndex = DMA_CH2_EUSCIA1TX,
+        .clkPin  = SPIMSP432DMA_P2_1_UCA1CLK,
+        .simoPin = SPIMSP432DMA_P2_3_UCA1SIMO,
+        .somiPin = SPIMSP432DMA_P2_2_UCA1SOMI,
+        .stePin  = SPIMSP432DMA_P2_0_UCA1STE,
         .pinMode  = EUSCI_SPI_4PIN_UCxSTE_ACTIVE_LOW,
         .minDmaTransferSize = 10
     }

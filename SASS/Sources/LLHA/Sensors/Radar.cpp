@@ -3,6 +3,8 @@
 #include <xdc/runtime/System.h>
 #include <xdc/std.h>
 
+#include <ti/sysbios/knl/Task.h>
+
 #include <Board.h>
 #include <Sources/GreenBoard.h>
 
@@ -98,10 +100,13 @@ Radar* Radar::get_instance(RadarInstanceType radar_type)
 
 void Radar::init()
 {
+    Logger::print((String)"Beginning initialization...");
     SPI_init();  // Initialize the SPI driver
 
     SPI_Params_init(&spiParams);  // Initialize SPI parameters
     spiParams.dataSize = 8;       // 8-bit data size
+
+    Logger::print((String)"Finished initialization.");
 }
 
 uint16_t Radar::get_distance()
@@ -148,6 +153,9 @@ uint16_t Radar::get_distance()
         Logger::print((String)"Error starting SPI transaction.\n");
     }
 
+    SPI_close(spi);
+    Logger::print((String)"SPI closed!\n");
+
     return dist;
 }
 
@@ -165,5 +173,6 @@ void *Radar::radarTestThread(void *args)
     {
         uint16_t dist = radar_north->get_distance();
         Logger::print_value((String)"Distance is", dist);
+        Task_yield();
     }
 }

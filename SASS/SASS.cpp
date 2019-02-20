@@ -9,6 +9,7 @@
 
 /* BIOS module Headers */
 #include <ti/sysbios/BIOS.h>
+#include <ti/sysbios/knl/Task.h>
 
 #include <ti/drivers/GPIO.h>
 #include <ti/drivers/I2C.h>
@@ -104,7 +105,11 @@ void *mosfetToggleThread(void *args)
 
 void *printThread(void *args)
 {
-    Logger::print((String)"Print thread running.");
+    while(1)
+    {
+        Logger::print((String)"Print thread running.");
+        Task_yield();
+    }
 }
 
 int main()

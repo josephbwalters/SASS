@@ -19,6 +19,7 @@
 
 #include <Sources/LLHA/Lights/Lights.h>
 #include <Sources/LLHA/Sensors/Lidar.h>
+#include <Sources/LLHA/Sensors/Radar.h>
 #include <Sources/Utils/Logger.h>
 #include <Sources/Directions.h>
 
@@ -31,7 +32,7 @@ using namespace sources::llha::lights;
 #define STACK_SIZE_MEDIUM 1024
 #define STACK_SIZE_LARGE 2048
 
-void *demoThread(void *Uarg0)
+void *demoThread(void *args)
 {
     Lights lights;
     Lidar* lidar_north = Lidar::get_instance(LidarInstanceType::LIDAR_NORTH);
@@ -67,7 +68,7 @@ void *demoThread(void *Uarg0)
     }
 }
 
-void *mosfetToggleThread(void *Uarg0)
+void *mosfetToggleThread(void *args)
 {
     // GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
 
@@ -101,18 +102,23 @@ void *mosfetToggleThread(void *Uarg0)
     }
 }
 
+void *printThread(void *args)
+{
+    Logger::print((String)"Print thread running.");
+}
+
 int main()
 {
-    pthread_t           thread;
-    pthread_attr_t      attrs;
-    struct sched_param  priParam;
-    int                 retc;
-
     Board_initGeneral();
 
     // Initialize GPIO pins
     GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN3);
     Lights::init();
+
+    pthread_t           thread;
+    pthread_attr_t      attrs;
+    struct sched_param  priParam;
+    int                 retc;
 
     /* Initialize the attributes structure with default values */
     pthread_attr_init(&attrs);
@@ -122,14 +128,41 @@ int main()
     retc = pthread_attr_setschedparam(&attrs, &priParam);
     retc |= pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_DETACHED);
     retc |= pthread_attr_setstacksize(&attrs, STACK_SIZE_LARGE);
-    if (retc != 0) {
+    if (retc) {
         /* failed to set attributes */
+        // TODO: Throw exception
         while (1) {}
     }
 
-    retc = pthread_create(&thread, &attrs, demoThread, NULL);
-    if (retc != 0) {
+    retc = pthread_create(&thread, &attrs, Radar::radarTestThread, NULL);
+    if (retc) {
         /* pthread_create() failed */
+        // TODO: Throw exception
+        while (1) {}
+    }
+
+    pthread_t           print_thread;
+    pthread_attr_t      print_attrs;
+    struct sched_param  print_priParam;
+
+    /* Initialize the attributes structure with default values */
+    pthread_attr_init(&print_attrs);
+
+    /* Set priority, detach state, and stack size attributes */
+    print_priParam.sched_priority = 1;
+    retc = pthread_attr_setschedparam(&print_attrs, &print_priParam);
+    retc |= pthread_attr_setdetachstate(&print_attrs, PTHREAD_CREATE_DETACHED);
+    retc |= pthread_attr_setstacksize(&print_attrs, STACK_SIZE_LARGE);
+    if (retc) {
+        /* failed to set attributes */
+        // TODO: Throw exception
+        while (1) {}
+    }
+
+    retc = pthread_create(&print_thread, &attrs, printThread, NULL);
+    if (retc) {
+        /* pthread_create() failed */
+        // TODO: Throw exception
         while (1) {}
     }
 

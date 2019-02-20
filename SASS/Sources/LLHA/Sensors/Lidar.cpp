@@ -3,19 +3,13 @@
 #include <xdc/runtime/System.h>
 #include <xdc/std.h>
 
-#include <ti/drivers/I2C.h>
-
-#include <pthread.h>
-
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
 
 #include <Board.h>
+#include <Sources/GreenBoard.h>
 
-#include <Sources/LLHA/Sensors/Lidar.h>
 #include <Sources/Utils/Logger.h>
-
-/* Example/Board Header files */
-
+#include <Sources/LLHA/Sensors/Lidar.h>
 
 using namespace sources::llha::sensors;
 using namespace sources::utils;
@@ -29,7 +23,26 @@ uint8_t sources::llha::sensors::Lidar::default_addr = 0x62;
 Lidar::Lidar(LidarInstanceType lidar_type) : m_current_addr(default_addr), m_lidar_type(lidar_type)
 {
     Logger::print((String)"Creating instance...");
-    //init();
+
+    switch(lidar_type)
+    {
+    case LIDAR_NORTH:
+        m_hardware_module = LIDAR_N;
+        break;
+    case LIDAR_EAST:
+        m_hardware_module = LIDAR_E;
+        break;
+    case LIDAR_SOUTH:
+        m_hardware_module = LIDAR_S;
+        break;
+    case LIDAR_WEST:
+        m_hardware_module = LIDAR_W;
+        break;
+    default:
+        // TODO: Throw exception
+    };
+
+    init();
 }
 
 Lidar::~Lidar()
@@ -87,7 +100,7 @@ Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
             return lidar_west;
         }
     default:
-        return nullptr;
+        return nullptr; // TODO: Throw exception
     };
 }
 
@@ -125,21 +138,10 @@ Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
 //    return (velocity);
 //}
 
-uint16_t Lidar::get_distance()
+void Lidar::init()
 {
-    uint16_t dist = 0;
-    bool retVal = false;
-    I2C_Handle      i2c;
-    I2C_Params      i2cParams;
-    I2C_Transaction i2cTransaction;
-    uint8_t i = 0, k = 0;
-
-    /* Buffers used in this code example */
-    uint8_t             txBuffer[10];
-    uint8_t             rxBuffer[10];
-
     /* Initialize all buffers */
-    for (i = 0; i < 10; i++) {
+    for (uint8_t i = 0; i < 10; i++) {
         rxBuffer[i] = 0x00;
         txBuffer[i] = 0x00;
     }
@@ -151,13 +153,19 @@ uint16_t Lidar::get_distance()
     I2C_Params_init(&i2cParams);
     i2cParams.transferMode = I2C_MODE_BLOCKING;
     i2cParams.bitRate = I2C_100kHz;
+}
+
+uint16_t Lidar::get_distance()
+{
+    uint16_t dist = 0;
+    bool transferOK = false;
 
     // printf("Opening connection\n");
-    i2c = I2C_open(Board_I2C_TMP, &i2cParams);
+    i2c = I2C_open(m_hardware_module, &i2cParams);
 
     if (i2c == NULL) {
         Logger::print((String)"Error Initializing I2C!\n");
-
+        // TODO: Throw exception
     }
     else {
         Logger::print((String)"I2C Initialized!\n");
@@ -179,8 +187,8 @@ uint16_t Lidar::get_distance()
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
         Logger::print((String)"Attempting transfer");
-        retVal = I2C_transfer(i2c, &i2cTransaction);
-    } while(!retVal);
+        transferOK = I2C_transfer(i2c, &i2cTransaction);
+    } while(!transferOK);
 
     Logger::print((String)"I2C Config2!\n");
 
@@ -194,7 +202,7 @@ uint16_t Lidar::get_distance()
     i2cTransaction.readBuf = rxBuffer;
     i2cTransaction.readCount = 0;
 
-    retVal = I2C_transfer(i2c, &i2cTransaction);
+    transferOK = I2C_transfer(i2c, &i2cTransaction);
 
     Logger::print((String)"I2C Config3!\n");
 
@@ -210,8 +218,8 @@ uint16_t Lidar::get_distance()
 
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
-        retVal = I2C_transfer(i2c, &i2cTransaction);
-    } while(!retVal);
+        transferOK = I2C_transfer(i2c, &i2cTransaction);
+    } while(!transferOK);
 
     Logger::print((String)"I2C Config4!\n");
 
@@ -228,8 +236,8 @@ uint16_t Lidar::get_distance()
 
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
-        retVal = I2C_transfer(i2c, &i2cTransaction);
-    } while(!retVal);
+        transferOK = I2C_transfer(i2c, &i2cTransaction);
+    } while(!transferOK);
 
     Logger::print((String)"I2C Write to device to read!\n");
 
@@ -245,8 +253,8 @@ uint16_t Lidar::get_distance()
 
     /* Re-try reading from slave till I2C_transfer returns true */
     do {
-        retVal = I2C_transfer(i2c, &i2cTransaction);
-    } while(!retVal);
+        transferOK = I2C_transfer(i2c, &i2cTransaction);
+    } while(!transferOK);
 
 
     // Read 0x01 until bit 0 goes low
@@ -262,8 +270,8 @@ uint16_t Lidar::get_distance()
         i2cTransaction.readCount = 1;
 
         do {
-            retVal = I2C_transfer(i2c, &i2cTransaction);
-        } while(!retVal);
+            transferOK = I2C_transfer(i2c, &i2cTransaction);
+        } while(!transferOK);
 
     }
 
@@ -283,8 +291,8 @@ uint16_t Lidar::get_distance()
 
     /* Re-try reading from slave till I2C_transfer returns true */
     do {
-        retVal = I2C_transfer(i2c, &i2cTransaction);
-    } while(!retVal);
+        transferOK = I2C_transfer(i2c, &i2cTransaction);
+    } while(!transferOK);
 
     dist = (rxBuffer[0] << 8) | rxBuffer[1];
     Logger::print_value((String)"Distance (cm)", dist);
@@ -296,13 +304,6 @@ uint16_t Lidar::get_distance()
     Logger::print((String)"I2C closed!\n");
 
     return dist;
-}
-
-void Lidar::init()
-{
-    Logger::print((String)"Initializing LiDAR...");
-    set_i2c_addr(default_addr);
-    configure((uint8_t) 0);
 }
 
 // Currently using template code from Garmin libraries

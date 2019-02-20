@@ -76,7 +76,8 @@ extern "C" {
 #define Board_GPIO_TMP116_EN        MSP_EXP432P401R_GPIO_TMP116_EN
 
 #define Board_I2C0                  MSP_EXP432P401R_I2CB0
-#define Board_I2C_TMP               MSP_EXP432P401R_I2CB1
+#define Board_I2C1                  MSP_EXP432P401R_I2CB1
+#define Board_I2C2                  MSP_EXP432P401R_I2CB2
 
 #define Board_I2CSLAVE0             MSP_EXP432P401R_I2CSLAVEB0
 
@@ -93,6 +94,8 @@ extern "C" {
 #define Board_SPI1                  MSP_EXP432P401R_SPIB2
 #define Board_SPI2                  MSP_EXP432P401R_SPIB3
 #define Board_SPI3                  MSP_EXP432P401R_SPIB4
+#define Board_SPI4                  MSP_EXP432P401R_SPIB5
+#define Board_SPI5                  MSP_EXP432P401R_SPIB6
 #define Board_SPI_CS1               MSP_EXP432P401R_SPI_CS1
 #define Board_SPI_CS2               MSP_EXP432P401R_SPI_CS2
 

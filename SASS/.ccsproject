@@ -5,11 +5,14 @@
 	<deviceVariant value="MSP432P401R"/>
 	<deviceFamily value="MSP432"/>
 	<deviceEndianness value="little"/>
-	<codegenToolVersion value="18.1.4.LTS"/>
+	<codegenToolVersion value="18.1.5.LTS"/>
 	<isElfFormat value="true"/>
-	<rts value="libc.a"/>
+	<connection value="common/targetdb/connections/TIXDS110_Connection.xml"/>
+	<rts value=""/>
 	<createSlaveProjects value=""/>
-	<templateProperties value="id=com_ti_rtsc_tirtosmsp430_example_100.projectspec.empty_MSP_EXP432P401R_TI,type=rtsc,products=com.ti.rtsc.TIRTOSmsp430,xdcToolsVersion=3_32_00_06_core,target=ti.targets.arm.elf.M4F,platform=ti.platforms.msp432:MSP432P401R,buildProfile=release,isHybrid=true,configuroOptions= --compileOptions &quot;${COMPILER_FLAGS} &quot;"/>
-	<origin value="/Users/jwalters/ti/tirtos_msp43x_2_20_00_06/resources/msp_exp432P401RLaunchpad/driverExamples/tiDriverExamples/emptyExamples/com_ti_rtsc_tirtosmsp430_example_100.projectspec"/>
+	<ignoreDefaultDeviceSettings value="true"/>
+	<ignoreDefaultCCSSettings value="true"/>
+	<templateProperties value="id=bigtime_MSP_EXP432P401R_tirtos_ccs.projectspec.bigtime_MSP_EXP432P401R_tirtos_ccs,type=rtsc,xdcToolsVersion=3_51_01_18_core,target=ti.targets.arm.elf.M4F,platform=ti.platforms.msp432:MSP432P401R,buildProfile=release,isHybrid=true,configuroOptions= --compileOptions &quot;${COMPILER_FLAGS} &quot;"/>
+	<origin value="/Users/trent/ti/simplelink_msp432p4_sdk_2_40_00_10/examples/rtos/MSP_EXP432P401R/sysbios/bigtime/tirtos/ccs/bigtime_MSP_EXP432P401R_tirtos_ccs.projectspec"/>
 	<filesToOpen value=""/>
 </projectOptions>

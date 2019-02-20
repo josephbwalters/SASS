@@ -1,0 +1,53 @@
+clean::
+	$(RM) package/xconfig_SASS.sch
+	$(RM) package/.vers_g200
+	$(RM) package/.vers_r200
+	$(RM) package/.vers_b200
+	$(RM) package/.xdc-F07
+	$(RM) package/xconfig_SASS.java
+	$(RM) package/xconfig_SASS.class
+	$(RM) package/package_xconfig_SASS.c
+	$(RM) package/package.defs.h
+	$(RM) package/xconfig_SASS.ccs
+
+.interfaces: package/xconfig_SASS.sch package/.vers_g200 package/.vers_r200 package/.vers_b200 package/.xdc-F07 package/xconfig_SASS.java package/package_xconfig_SASS.c package/package.defs.h package/xconfig_SASS.ccs 
+package/package.xdc.inc: package/.vers_g200
+package/.vers_g200:
+package/package.xdc.inc: package/.vers_r200
+package/.vers_r200:
+package/package.xdc.inc: package/.vers_b200
+package/.vers_b200:
+
+.interfaces: 
+
+# schema include file dependencies
+package.xs:
+package/package.xdc.inc: package.xs
+
+# schema update dependencies
+package/package.xdc.inc: xdc/IPackage.xdc
+xdc/IPackage.xdc:
+vpath xdc/IPackage.xdc $(XPKGVPATH)
+
+ifneq (clean,$(MAKECMDGOALS))
+/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/shelf/java/antlr.jar:
+package/package.xdc.inc: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/shelf/java/antlr.jar
+/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/spec/java/package.jar:
+package/package.xdc.inc: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/spec/java/package.jar
+/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/shelf/java/ecj.jar:
+package/package.xdc.inc: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/shelf/java/ecj.jar
+/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/intern/cmd/java/package.jar:
+package/package.xdc.inc: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/intern/cmd/java/package.jar
+/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/intern/xsr/java/package.jar:
+package/package.xdc.inc: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/intern/xsr/java/package.jar
+/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/shelf/java/tar.jar:
+package/package.xdc.inc: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/shelf/java/tar.jar
+/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/global/java/package.jar:
+package/package.xdc.inc: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/global/java/package.jar
+/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/intern/gen/java/package.jar:
+package/package.xdc.inc: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/intern/gen/java/package.jar
+/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/shelf/java/js.jar:
+package/package.xdc.inc: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/shelf/java/js.jar
+endif
+# goals for files generated during schema generation but unspecified by schema's pattern rule
+

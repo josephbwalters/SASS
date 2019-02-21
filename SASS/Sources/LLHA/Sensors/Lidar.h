@@ -2,15 +2,19 @@
 #define LIDAR_H_
 
 #include <stdint.h>
-
 #include <ti/drivers/I2C.h>
 
 #define SLAVE_ADDR 0x62
 
+// Registers on the LiDAR-Lite v3 HP device
 #define DEVICE_COMMAND_REG 0x00
 #define SYSTEM_STATUS_REG 0x01
 #define DISTANCE_REG 0x8f
 #define POWER_CONTROL_REG 0x65
+#define PEAK_DETECTION_REG 0x1c
+#define REFERENCE_COUNT_REG 0x12
+#define ACQUISITION_CONFIG_REG 0x04
+#define MAX_ACQUISITION_COUNT_REG 0x02
 
 enum LidarInstanceType
 {
@@ -32,14 +36,9 @@ class Lidar
 {
 public:
     static Lidar* get_instance(LidarInstanceType lidar_type);
-    void init();
 
     uint16_t get_distance();
     uint16_t get_velocity();
-    void set_i2c_addr(uint8_t new_addr);
-    void configure(uint8_t config);
-    void write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes);
-    void read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes);
 
 private:
     Lidar(LidarInstanceType lidar_type);
@@ -62,6 +61,16 @@ private:
     static Lidar* lidar_east;
     static Lidar* lidar_south;
     static Lidar* lidar_west;
+
+    void init();
+    void config_1();
+    void config_2();
+    void config_3();
+    void config_4();
+    void start_reading();
+    void wait_until_ready();
+    uint16_t read_dist();
+
 };
 
 

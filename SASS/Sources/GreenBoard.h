@@ -27,6 +27,7 @@
 #define RED_S_PIN
 #define RED_W_PIN
 
+
 #define YELLOW_N_PORT GPIO_PORT_P7
 #define YELLOW_E_PORT GPIO_PORT_P7
 #define YELLOW_S_PORT

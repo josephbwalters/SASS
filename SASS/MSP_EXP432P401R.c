@@ -815,16 +815,6 @@ const SPI_Config SPI_config[MSP_EXP432P401R_SPICOUNT] = {
         .fxnTablePtr = &SPIMSP432DMA_fxnTable,
         .object = &spiMSP432DMAObjects[MSP_EXP432P401R_SPIB4],
         .hwAttrs = &spiMSP432DMAHWAttrs[MSP_EXP432P401R_SPIB4]
-    },
-    {
-        .fxnTablePtr = &SPIMSP432DMA_fxnTable,
-        .object = &spiMSP432DMAObjects[MSP_EXP432P401R_SPIB5],
-        .hwAttrs = &spiMSP432DMAHWAttrs[MSP_EXP432P401R_SPIB5]
-    },
-    {
-        .fxnTablePtr = &SPIMSP432DMA_fxnTable,
-        .object = &spiMSP432DMAObjects[MSP_EXP432P401R_SPIB6],
-        .hwAttrs = &spiMSP432DMAHWAttrs[MSP_EXP432P401R_SPIB6]
     }
 };
 

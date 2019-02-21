@@ -1,38 +1,29 @@
 #define __MSP432P401R__
-// #define DEBUG
 
-/* XDC module Headers */
 #include <xdc/runtime/System.h>
 #include <xdc/std.h>
 
-/* Device drivers for GPIO */
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
 
-/* Board specific configurations */
 #include <Board.h>
 #include <Sources/GreenBoard.h>
 
-/* Custom headers for our modules */
+#include <Sources/Utils/Logger.h>
 #include <Sources/LLHA/Sensors/Lidar.h>
 
 using namespace sources::llha::sensors;
+using namespace sources::utils;
 
-// Initialize LiDAR instances to null for multiton pattern
 sources::llha::sensors::Lidar* sources::llha::sensors::Lidar::lidar_north = nullptr;
 sources::llha::sensors::Lidar* sources::llha::sensors::Lidar::lidar_east = nullptr;
 sources::llha::sensors::Lidar* sources::llha::sensors::Lidar::lidar_south = nullptr;
 sources::llha::sensors::Lidar* sources::llha::sensors::Lidar::lidar_west = nullptr;
+uint8_t sources::llha::sensors::Lidar::default_addr = 0x62;
 
-// Set default address for LiDAR-Lite
-uint8_t sources::llha::sensors::Lidar::default_addr = SLAVE_ADDR;
-
-/**
-    Constructor determines the direction and initializes the radar sensor.
-
-    @param lidar_type (representing the direction/ports of the sensor).
-*/
 Lidar::Lidar(LidarInstanceType lidar_type) : m_current_addr(default_addr), m_lidar_type(lidar_type)
 {
+    Logger::print((String)"Creating instance...");
+
     switch(lidar_type)
     {
     case LIDAR_NORTH:
@@ -49,7 +40,6 @@ Lidar::Lidar(LidarInstanceType lidar_type) : m_current_addr(default_addr), m_lid
         break;
     default:
         // TODO: Throw exception
-        break;
     };
 
     init();
@@ -60,56 +50,96 @@ Lidar::~Lidar()
     // Destructor
 }
 
-/**
-    LiDAR follows the `multiton` design pattern, 
-    therefore we check to see if an object in the specified direction exists before instantiating.
-    
-    @param lidar_type (representing the direction/ports of the sensor).
-*/
 Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
 {
+    Logger::print((String)"Getting lidar instance...");
     switch(lidar_type)
     {
-
     case LIDAR_NORTH:
-        if (lidar_north == nullptr)
+        if(lidar_north != nullptr)
         {
+            return lidar_north;
+        }
+        else
+        {
+            Logger::print((String)"Lidar instance to create - NORTH");
             lidar_north = new Lidar(lidar_type);
+            return lidar_north;
         }
-        return lidar_north;
-    
     case LIDAR_EAST:
-        if (lidar_east == nullptr)
+        if(lidar_north != nullptr)
         {
+            return lidar_east;
+        }
+        else
+        {
+            Logger::print((String)"Lidar instance to create - EAST");
             lidar_east = new Lidar(lidar_type);
+            return lidar_east;
         }
-        return lidar_east;
-    
     case LIDAR_SOUTH:
-        if (lidar_south == nullptr)
+        if(lidar_north != nullptr)
         {
+            return lidar_south;
+        }
+        else
+        {
+            Logger::print((String)"Lidar instance to create - SOUTH");
             lidar_south = new Lidar(lidar_type);
+            return lidar_south;
         }
-        return lidar_south;
-    
     case LIDAR_WEST:
-        if (lidar_west == nullptr)
+        if(lidar_north != nullptr)
         {
-            lidar_west = new Lidar(lidar_type);
+            return lidar_west;
         }
-        return lidar_west;
-    
+        else
+        {
+            Logger::print((String)"Lidar instance to create - WEST");
+            lidar_west = new Lidar(lidar_type);
+            return lidar_west;
+        }
     default:
-        // TODO: Throw exception
-        return nullptr; 
+        return nullptr; // TODO: Throw exception
     };
 }
 
-/**
-    Initializes hardware on MSP432 for I2C communication.
-*/
+// TODO: Unnecessary ?
+//uint16_t Lidar::get_distance()
+//{
+//    Logger::print((String)"Getting distance!");
+//
+//    uint16_t distance;
+//    uint8_t data_bytes[2];
+//
+//    // Read two bytes from register 0x0f and 0x10 (autoincrement)
+//    Logger::print((String)"Reading distance from lidar now...");
+//    read(0x8f, data_bytes, 2);
+//
+//    Logger::print_buffer((String)"Distance:", data_bytes, 2);
+//    // Shift high byte and add to low byte
+//    distance = (data_bytes[0] << 8) | data_bytes[1];
+//
+//    return (distance);
+//}
+
+// TODO: Check if we can do this
+//uint16_t Lidar::get_velocity()
+//{
+//    uint16_t velocity;
+//    uint8_t data_bytes[2];
+//
+//    // Read two bytes from register 0x0f and 0x10 (autoincrement)
+//    read(0x0f, data_bytes, 2);
+//
+//    // Shift high byte and add to low byte
+//    velocity = (data_bytes[0] << 8) | data_bytes[1];
+//
+//    return (velocity);
+//}
+
 void Lidar::init()
-{    
+{
     /* Initialize all buffers */
     for (uint8_t i = 0; i < 10; i++) {
         rxBuffer[i] = 0x00;
@@ -125,14 +155,26 @@ void Lidar::init()
     i2cParams.bitRate = I2C_100kHz;
 }
 
-/**
-    Sets LiDAR-Lite v3 config  (part1)
-*/
-void Lidar::config_1()
-{    
+uint16_t Lidar::get_distance()
+{
+    uint16_t dist = 0;
     bool transferOK = false;
 
-    txBuffer[0] = MAX_ACQUISITION_COUNT_REG;
+    // printf("Opening connection\n");
+    i2c = I2C_open(m_hardware_module, &i2cParams);
+
+    if (i2c == NULL) {
+        Logger::print((String)"Error Initializing I2C!\n");
+        // TODO: Throw exception
+    }
+    else {
+        Logger::print((String)"I2C Initialized!\n");
+    }
+
+    Logger::print((String)"I2C Config1!\n");
+
+    // Config 1
+    txBuffer[0] = 0x02;
     txBuffer[1] = 0x80;
 
     i2cTransaction.slaveAddress = SLAVE_ADDR;
@@ -141,20 +183,17 @@ void Lidar::config_1()
     i2cTransaction.readBuf = rxBuffer;
     i2cTransaction.readCount = 0;
 
+    Logger::print((String)"Attempting to write");
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
+        Logger::print((String)"Attempting transfer");
         transferOK = I2C_transfer(i2c, &i2cTransaction);
     } while(!transferOK);
-}
 
-/**
-    Sets LiDAR-Lite v3 config  (part2)
-*/
-void Lidar::config_2()
-{
-    bool transferOK = false;
+    Logger::print((String)"I2C Config2!\n");
 
-    txBuffer[0] = ACQUISITION_CONFIG_REG;
+    // Config 2
+    txBuffer[0] = 0x04;
     txBuffer[1] = 0x08;
 
     i2cTransaction.slaveAddress = SLAVE_ADDR;
@@ -163,20 +202,12 @@ void Lidar::config_2()
     i2cTransaction.readBuf = rxBuffer;
     i2cTransaction.readCount = 0;
 
-    /* Re-try writing to slave till I2C_transfer returns true */
-    do {
-        transferOK = I2C_transfer(i2c, &i2cTransaction);
-    } while(!transferOK);
-}
+    transferOK = I2C_transfer(i2c, &i2cTransaction);
 
-/**
-    Sets LiDAR-Lite v3 config  (part3)
-*/
-void Lidar::config_3()
-{
-    bool transferOK = false;
+    Logger::print((String)"I2C Config3!\n");
 
-    txBuffer[0] = REFERENCE_COUNT_REG;
+    // Config 3
+    txBuffer[0] = 0x12;
     txBuffer[1] = 0x05;
 
     i2cTransaction.slaveAddress = SLAVE_ADDR;
@@ -189,16 +220,11 @@ void Lidar::config_3()
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
     } while(!transferOK);
-}
 
-/**
-    Sets LiDAR-Lite v3 config  (part4)
-*/
-void Lidar::config_4()
-{
-    bool transferOK = false;
+    Logger::print((String)"I2C Config4!\n");
 
-    txBuffer[0] = PEAK_DETECTION_REG;
+    // Config 4
+    txBuffer[0] = 0x1c;
     txBuffer[1] = 0x00;
 
     /* Write the actual 0x13 bytes */
@@ -212,17 +238,11 @@ void Lidar::config_4()
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
     } while(!transferOK);
-}
 
-/**
-    Sets LiDAR-Lite v3 config  (part5)
-    This sends a start command to the device
-*/
-void Lidar::start_reading()
-{
-    bool transferOK = false;
+    Logger::print((String)"I2C Write to device to read!\n");
 
-    txBuffer[0] = DEVICE_COMMAND_REG;
+    // Write 04 to 00
+    txBuffer[0] = 0x00;
     txBuffer[1] = 0x04;
 
     i2cTransaction.slaveAddress = SLAVE_ADDR;
@@ -235,17 +255,10 @@ void Lidar::start_reading()
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
     } while(!transferOK);
-}
 
-/**
-    Sets LiDAR-Lite v3 config  (part6)
-    This reads the status register until it is empty, which indicates that we can get a distance.
-*/
-void Lidar::wait_until_ready()
-{
-    bool transferOK = false;
 
-    txBuffer[0] = SYSTEM_STATUS_REG;
+    // Read 0x01 until bit 0 goes low
+    txBuffer[0] = 0x01;
     rxBuffer[0] = 0xFF;
 
     while((rxBuffer[0] & 0x01) != 0x00)
@@ -259,19 +272,13 @@ void Lidar::wait_until_ready()
         do {
             transferOK = I2C_transfer(i2c, &i2cTransaction);
         } while(!transferOK);
+
     }
-}
 
-/**
-    Reads from LiDAR device to get distance.
+    Logger::print((String)"I2C Getting dist!\n");
 
-    @return distance to the nearest moving object that the LiDAR detected.
-*/
-uint16_t Lidar::read_dist()
-{
-    bool transferOK = false;
-
-    txBuffer[0] = DISTANCE_REG;
+    // Read two bytes from 0x8f (High byte 0x0f then low byte 0x10) to obtain the 16-bit measured distance in centimeters.
+    txBuffer[0] = 0x8f;
 
     rxBuffer[0] = 0x00;
     rxBuffer[1] = 0x00;
@@ -287,47 +294,187 @@ uint16_t Lidar::read_dist()
         transferOK = I2C_transfer(i2c, &i2cTransaction);
     } while(!transferOK);
 
-    uint16_t dist = (rxBuffer[0] << 8) | rxBuffer[1];
+    dist = (rxBuffer[0] << 8) | rxBuffer[1];
+    Logger::print_value((String)"Distance (cm)", dist);
+
+    Logger::print((String)"I2C master/slave transfer complete\n");
+
+    /* Deinitialized I2C */
+    I2C_close(i2c);
+    Logger::print((String)"I2C closed!\n");
 
     return dist;
 }
 
-/**
-    Gets distance from LiDAR device.
-
-    @return distance to the nearest moving object that the LiDAR detected.
-*/
-uint16_t Lidar::get_distance()
+// Currently using template code from Garmin libraries
+void Lidar::set_i2c_addr(uint8_t new_addr)
 {
-    uint16_t dist = 0;
+    Logger::print((String)"Setting LiDAR I2C address if necessary");
+    if (new_addr == default_addr) return;
 
-    i2c = I2C_open(m_hardware_module, &i2cParams);
+    uint8_t dataBytes[2];
 
-    if (i2c == NULL) {
-        // TODO: Throw exception
+    // Read UNIT_ID serial number bytes and write them into I2C_ID byte locations
+    read(0x16, dataBytes, 2);
+    write(0x18, dataBytes, 2);
+
+    // Write the new I2C device address to registers
+    // left shift by one to work around data alignment issue in v3HP
+    dataBytes[0] = (new_addr << 1);
+    write(0x1a, dataBytes, 1);
+
+    // Enable the new I2C device address using the default I2C device address
+    read(0x1e, dataBytes, 1);
+    dataBytes[0] = dataBytes[0] | (1 << 4); // set bit to enable the new address
+    write(0x1e, dataBytes, 1);
+
+    // Disabling default device
+    m_current_addr = new_addr;
+    read (0x1e, dataBytes, 1);
+    dataBytes[0] = dataBytes[0] | (1 << 3); // set bit to disable default address
+    write(0x1e, dataBytes, 1);
+}
+
+// Currently using template code from Garmin libraries
+void Lidar::configure(uint8_t config)
+{
+    Logger::print((String)"Configuring LiDAR...");
+    uint8_t sigCountMax;
+    uint8_t acqConfigReg;
+    uint8_t refCountMax;
+    uint8_t thresholdBypass;
+
+    switch (config)
+    {
+    case 0: // Default mode, balanced performance
+        Logger::print((String)"Config - Default Mode");
+        sigCountMax     = 0x80; // Default
+        acqConfigReg    = 0x08; // Default
+        refCountMax     = 0x05; // Default
+        thresholdBypass = 0x00; // Default
+        break;
+
+    case 1: // Maximum range
+        Logger::print((String)"Config - Max Range");
+        sigCountMax     = 0xff;
+        acqConfigReg    = 0x08; // Default
+        refCountMax     = 0x05; // Default
+        thresholdBypass = 0x00; // Default
+        break;
+
+    case 2: // High sensitivity detection, high erroneous measurements
+        Logger::print((String)"Config - High Sense, High Error");
+        sigCountMax     = 0x80; // Default
+        acqConfigReg    = 0x08; // Default
+        refCountMax     = 0x05; // Default
+        thresholdBypass = 0x80;
+        break;
+
+    case 3: // Low sensitivity detection, low erroneous measurements
+        Logger::print((String)"Config - Low Sense, Low Error");
+        sigCountMax     = 0x80; // Default
+        acqConfigReg    = 0x08; // Default
+        refCountMax     = 0x05; // Default
+        thresholdBypass = 0xb0;
+        break;
     }
 
-    config_1();
-    config_2();
-    config_3();
-    config_4();
-
-    start_reading();
-    wait_until_ready();
-
-    dist = read_dist();
-
-    I2C_close(i2c);
-
-    return dist;
+    Logger::print((String)"Writing configuration!");
+    write(0x02, &sigCountMax, 1);
+    write(0x04, &acqConfigReg, 1);
+    write(0x12, &refCountMax, 1);
+    write(0x1c, &thresholdBypass, 1);
+    Logger::print((String)"Writing configuration -- COMPLETE");
 }
 
-/**
-    Calculates velocity from previously seen distances.
-
-    @return distance to the nearest moving object that the LiDAR detected.
-*/
-uint16_t Lidar::get_velocity()
+void Lidar::write(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
 {
-    return 0;
+    Logger::print_buffer((String)"Data to write:", data_bytes, num_bytes);
+
+    I2C_Handle handle;
+    I2C_Params params;
+    I2C_Transaction i2cTransaction;
+
+    I2C_Params_init(&params);
+    params.transferMode = I2C_MODE_CALLBACK;
+    // params.transferCallbackFxn = NULL; // Originally, NULL was "someI2CCallbackFunction" - actually is default
+    params.bitRate = I2C_100kHz;
+
+    Logger::print((String)"Opening I2C transmission...");
+    handle = I2C_open(Board_I2C0, &params); // Originally, 0 was "someI2C_configIndexValue"
+    if (!handle)
+    {
+        Logger::print((String)"I2C Failed to Open!");
+        // return exception something ??
+    }
+
+    i2cTransaction.slaveAddress = m_current_addr; // Originally, "some7BitI2CSlaveAddress"
+
+    i2cTransaction.writeBuf = &reg_addr; // Originally, "someWriteBuffer"
+    i2cTransaction.writeCount = 1; // Originally, "numOfBytesToWrite"
+
+    bool ret = I2C_transfer(handle, &i2cTransaction);
+    if (!ret)
+    {
+        Logger::print((String)"Unsuccessful I2C transfer on write addr.");
+    }
+
+    i2cTransaction.writeBuf = data_bytes; // Originally, "someWriteBuffer"
+    i2cTransaction.writeCount = num_bytes; // Originally, "numOfBytesToWrite"
+
+    ret = I2C_transfer(handle, &i2cTransaction);
+    if (!ret)
+    {
+        Logger::print((String)"Unsuccessful I2C transfer on write data");
+    }
+
+    I2C_close(handle);
+    Logger::print((String)"Closed I2C transmission");
+}
+
+void Lidar::read(uint8_t reg_addr, uint8_t * data_bytes, uint16_t num_bytes)
+{
+    Logger::print((String)"Reading data into buffer");
+    Logger::print_buffer((String)"Current Buffer contents:", data_bytes, num_bytes);
+
+    I2C_Handle handle;
+    I2C_Params params;
+
+    I2C_Params_init(&params);
+    params.transferMode = I2C_MODE_CALLBACK;
+    params.transferCallbackFxn = NULL; // Originally, NULL was "someI2CCallbackFunction" - actually is default
+    params.bitRate = I2C_100kHz;
+
+    Logger::print((String)"Opening I2C transmission...");
+    handle = I2C_open(Board_I2C0, &params); // Originally, 0 was "someI2C_configIndexValue"
+    if (!handle)
+    {
+        Logger::print((String)"I2C Failed to Open!");
+        // return exception something ??
+    }
+
+    I2C_Transaction i2cTransaction;
+    i2cTransaction.slaveAddress = m_current_addr; // Originally, "some7BitI2CSlaveAddress"
+
+    i2cTransaction.writeBuf = &reg_addr; // Originally, "someWriteBuffer"
+    i2cTransaction.writeCount = 1; // Originally, "numOfBytesToWrite"
+    bool ret = I2C_transfer(handle, &i2cTransaction);
+    while (!ret)
+    {
+        Logger::print((String)"Unsuccessful I2C transfer on write addr.");
+    }
+
+    i2cTransaction.writeCount = 0;
+    i2cTransaction.readBuf = data_bytes;
+    i2cTransaction.readCount = num_bytes;
+    ret = I2C_transfer(handle, &i2cTransaction);
+    if (!ret)
+    {
+        Logger::print((String)"Unsuccessful I2C transfer on read data");
+    }
+
+    Logger::print_buffer((String)"New Buffer contents:", data_bytes, num_bytes);
+
+    I2C_close(handle);
+    Logger::print((String)"Closed I2C transmission");
 }

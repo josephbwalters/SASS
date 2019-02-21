@@ -1,6 +1,7 @@
 #ifndef RADAR_H_
 #define RADAR_H_
 
+#include <stdint.h>
 #include <ti/drivers/SPI.h>
 
 enum RadarInstanceType

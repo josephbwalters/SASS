@@ -1,39 +1,47 @@
 #define __MSP432P401R__
+// #define DEBUG
+
+/* Standard Headers */
+#include <stdio.h>
 
 /* XDC module Headers */
 #include <xdc/std.h>
 #include <xdc/runtime/Diags.h>
 #include <xdc/runtime/System.h>
 
+/* POSIX thread support */
 #include <pthread.h>
 
 /* BIOS module Headers */
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Task.h>
 
-#include <ti/drivers/GPIO.h>
-#include <ti/drivers/I2C.h>
-
+/* Device drivers for GPIO */
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
+#include <ti/drivers/GPIO.h>
 
+/* Board specific configurations */
 #include <Board.h>
 
+/* Custom headers for our modules */
 #include <Sources/LLHA/Lights/Lights.h>
 #include <Sources/LLHA/Sensors/Lidar.h>
 #include <Sources/LLHA/Sensors/Radar.h>
-#include <Sources/Utils/Logger.h>
 #include <Sources/Directions.h>
 
-using namespace sources::utils;
 using namespace sources::llha::sensors;
 using namespace sources::llha::lights;
 
-// Stack size for new tasks
+// Stack sizes for new tasks
 #define STACK_SIZE_SMALL 512
 #define STACK_SIZE_MEDIUM 1024
 #define STACK_SIZE_LARGE 2048
 
-void *demoThread(void *args)
+/**
+    Thread to toggle mosfets based on LiDAR input
+    This can be migrated to the LiDAR class!
+*/
+void *lidarDemoThread(void *args)
 {
     Lights lights;
     Lidar* lidar_north = Lidar::get_instance(LidarInstanceType::LIDAR_NORTH);
@@ -41,7 +49,6 @@ void *demoThread(void *args)
     while(1)
     {
         uint16_t dist = lidar_north->get_distance();
-        Logger::print_value((String)"Distance is", dist);
 
         // RED: P7.4
         // YELLOW: P7.6
@@ -69,6 +76,9 @@ void *demoThread(void *args)
     }
 }
 
+/**
+    Thread to toggle all of our mosfets
+*/
 void *mosfetToggleThread(void *args)
 {
     // GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
@@ -103,15 +113,22 @@ void *mosfetToggleThread(void *args)
     }
 }
 
+/**
+    Simple thread that prints to  the console
+*/
 void *printThread(void *args)
 {
     while(1)
     {
-        Logger::print((String)"Print thread running.");
+        printf("Print thread running.");
         Task_yield();
     }
 }
 
+/**
+    Initial control loop for device
+    Starts threads and gives control of the overall device to those threads.
+*/
 int main()
 {
     Board_initGeneral();

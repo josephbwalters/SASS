@@ -120,7 +120,7 @@ void *printThread(void *args)
 {
     while(1)
     {
-        printf("Print thread running.");
+        printf("Print thread running.\n");
         Task_yield();
     }
 }

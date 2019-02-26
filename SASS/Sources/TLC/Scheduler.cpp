@@ -1,6 +1,9 @@
+#include <stdio.h>
+
+#include <ti/sysbios/knl/Task.h>
+
 #include <Sources/TLC/Scheduler.h>
 #include <Sources/LLHA/Lights/Lights.h>
-#include <Sources/Commands.h>
 #include <Sources/Directions.h>
 
 using namespace sources;
@@ -8,28 +11,32 @@ using namespace sources;
 using namespace sources::tlc::scheduler;
 using namespace sources::llha::lights;
 
-void Scheduler::scheduler_thread()
+Scheduler::Scheduler()
 {
-    while(true)
+
+}
+
+void *Scheduler::scheduler_thread(void* args)
+{
+    Scheduler* scheduler = new Scheduler();
+
+    while (1)
     {
         // TODO: Implement Panic feature
         // TODO: Implement with directions input into the queue, not numbers!
-        if (!m_traffic_queue.empty())
+        while (!scheduler->m_traffic_queue.empty())
         {
-            if (m_traffic_queue.front() == 1)
-            {
-                m_lights.control(Commands::PROCEED, Directions::NORTH);
-                // Timed delay
-            }
-            else if (m_traffic_queue.front() == 2)
-            {
-                m_lights.control(Commands::PROCEED, Directions::EAST);
-                // Timed delay
-            }
+            printf("Processing vehicle...\n");
+            Vehicle vehicle = scheduler->m_traffic_queue.front();
+            Directions direction = vehicle.get_direction();
+
+            scheduler->m_lights.schedule(direction);
+            scheduler->m_lights.wait();
         }
-        else
-        {
-            m_lights.wait();
-        }
+
+        scheduler->m_lights.set_all_red();
+        printf("All lights set red.\n");
+
+        Task_yield();
     }
 }

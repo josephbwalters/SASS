@@ -3,6 +3,9 @@
 #include <xdc/runtime/System.h>
 #include <xdc/std.h>
 
+/* Standard Headers */
+#include <stdio.h>
+
 #include <ti/sysbios/knl/Task.h>
 
 #include <Board.h>
@@ -175,6 +178,7 @@ void *Radar::radarTestThread(void *args)
     while(1)
     {
         uint16_t dist = radar_north->get_distance();
+        printf("Distance: %d\n", dist);
         Task_yield();
     }
 }

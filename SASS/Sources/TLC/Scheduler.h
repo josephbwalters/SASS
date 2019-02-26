@@ -4,9 +4,11 @@
 #include <deque>
 
 #include <Sources/LLHA/Lights/Lights.h>
+#include <Sources/OC/Vehicle.h>
 
 using namespace std;
 using namespace sources::llha::lights;
+using namespace sources::oc;
 
 namespace sources
 {
@@ -18,15 +20,15 @@ namespace scheduler
 
 class Scheduler
 {
-private:
-    Lights m_lights;
-    deque<int> m_traffic_queue;
-
-protected:
-
 public:
     Scheduler();
-    void scheduler_thread();
+
+    // Thread-able method(s)
+    static void *scheduler_thread(void *args);
+
+private:
+    Lights m_lights;
+    deque<Vehicle> m_traffic_queue;
 };
 
 

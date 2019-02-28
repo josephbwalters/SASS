@@ -14,8 +14,6 @@ namespace sources
 {
 namespace tlc
 {
-namespace scheduler
-{
 
 
 class Scheduler
@@ -28,12 +26,10 @@ public:
 
 private:
     Lights m_lights;
-    deque<Vehicle> m_traffic_queue;
+    deque<Vehicle> m_vehicle_queue;
 };
 
 
-}}} // sources::tlc::scheduler
-
-
+}} // sources::tlc
 
 #endif // SCHEDULER_H_

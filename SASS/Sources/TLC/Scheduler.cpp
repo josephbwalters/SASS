@@ -8,12 +8,12 @@
 
 using namespace sources;
 
-using namespace sources::tlc::scheduler;
+using namespace sources::tlc;
 using namespace sources::llha::lights;
 
 Scheduler::Scheduler()
 {
-
+    m_vehicle_queue = new deque();
 }
 
 void *Scheduler::scheduler_thread(void* args)
@@ -24,10 +24,10 @@ void *Scheduler::scheduler_thread(void* args)
     {
         // TODO: Implement Panic feature
         // TODO: Implement with directions input into the queue, not numbers!
-        while (!scheduler->m_traffic_queue.empty())
+        while (!scheduler->m_vehicle_queue.empty())
         {
             printf("Processing vehicle...\n");
-            Vehicle vehicle = scheduler->m_traffic_queue.front();
+            Vehicle vehicle = scheduler->m_vehicle_queue.front();
             Directions direction = vehicle.get_direction();
 
             scheduler->m_lights.schedule(direction);

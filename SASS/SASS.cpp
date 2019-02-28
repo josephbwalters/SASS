@@ -32,7 +32,7 @@
 
 using namespace sources::llha::sensors;
 using namespace sources::llha::lights;
-using namespace sources::tlc::scheduler;
+using namespace sources::tlc;
 
 // Stack sizes for new tasks
 #define STACK_SIZE_SMALL 512

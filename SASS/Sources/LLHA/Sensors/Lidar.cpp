@@ -1,18 +1,18 @@
 #define __MSP432P401R__
 // #define DEBUG
 
+/* System headers */
+#include <ti/devices/msp432p4xx/driverlib/gpio.h>
+
 /* XDC module Headers */
 #include <xdc/runtime/System.h>
 #include <xdc/std.h>
-
-/* Device drivers for GPIO */
-#include <ti/devices/msp432p4xx/driverlib/gpio.h>
 
 /* Board specific configurations */
 #include <Board.h>
 #include <Sources/GreenBoard.h>
 
-/* Custom headers for our modules */
+/* Custom headers */
 #include <Sources/LLHA/Sensors/Lidar.h>
 #include <Sources/LLHA/Lights/Lights.h>
 
@@ -106,6 +106,9 @@ Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
         return nullptr; 
     };
 }
+
+
+
 
 /**
     Initializes hardware on MSP432 for I2C communication.
@@ -309,6 +312,7 @@ uint16_t Lidar::get_distance()
         // TODO: Throw exception
     }
 
+    // TODO: Check if we need to do the config everytime we want a distance or not
     config_1();
     config_2();
     config_3();

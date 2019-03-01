@@ -1,10 +1,3 @@
-/*
- * Classifier.h
- *
- *  Created on: Feb 4, 2019
- *      Author: jwalters
- */
-
 #ifndef CLASSIFIER_H_
 #define CLASSIFIER_H_
 

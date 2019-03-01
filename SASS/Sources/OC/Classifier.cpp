@@ -1,14 +1,10 @@
-/*
- * Classifier.cpp
- *
- *  Created on: Feb 4, 2019
- *      Author: jwalters
- */
-
+/* Standard headers */
 #include <stdio.h>
 
+/* SYS/BIOS headers */
 #include <ti/sysbios/knl/Task.h>
 
+/* Custom headers */
 #include <Sources/OC/Classifier.h>
 
 using namespace sources;

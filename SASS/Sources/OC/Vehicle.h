@@ -3,7 +3,6 @@
 
 // Custom Headers
 #include <Sources/Directions.h>
-
 #include <Sources/OC/DetectedObject.h>
 
 using namespace sources;

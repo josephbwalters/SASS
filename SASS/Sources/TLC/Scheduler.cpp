@@ -1,12 +1,13 @@
+/* Standard headers */
 #include <stdio.h>
 
+/* SYS/BIOS headers */
 #include <ti/sysbios/knl/Task.h>
 
+/* Custom headers */
 #include <Sources/TLC/Scheduler.h>
 #include <Sources/LLHA/Lights/Lights.h>
 #include <Sources/Directions.h>
-
-using namespace sources;
 
 using namespace std;
 using namespace sources;

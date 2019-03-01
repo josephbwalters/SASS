@@ -1,20 +1,21 @@
 #define __MSP432P401R__
+// #define DEBUG
 
 /* Standard Headers */
 #include <stdio.h>
 
-// #define DEBUG
+/* XDC module headers */
 #include <xdc/runtime/System.h>
 #include <xdc/std.h>
 
-/* Standard Headers */
-#include <stdio.h>
-
+/* SYS/BIOS headers */
 #include <ti/sysbios/knl/Task.h>
 
+/* Board specfic headers */
 #include <Board.h>
 #include <Sources/GreenBoard.h>
 
+/* Custom headers */
 #include <Sources/LLHA/Sensors/Radar.h>
 
 using namespace sources::llha::sensors;
@@ -116,6 +117,7 @@ void Radar::init()
 
 /**
     Reads from mmwave device to get distance.
+    TODO: Split function up!
 
     @return distance to the nearest moving object that the radar detected.
 */

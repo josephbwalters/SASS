@@ -1,7 +1,9 @@
 #define __MSP432P401R__
 
+/* System headers */ 
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
 
+/* Custom headers */
 #include <Sources/LLHA/Lights/Lights.h>
 
 using namespace sources;

@@ -1,7 +1,7 @@
 #ifndef LIGHTS_H_
 #define LIGHTS_H_
 
-// Our custom headers
+/* Custom headers */
 #include <Sources/Directions.h>
 
 using namespace sources;

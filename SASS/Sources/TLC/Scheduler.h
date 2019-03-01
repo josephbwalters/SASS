@@ -1,10 +1,11 @@
 #ifndef SCHEDULER_H_
 #define SCHEDULER_H_
 
+/* Data-structure headers */
 #include <deque>
-
 #include <pthread.h>
 
+/* Custom headers */
 #include <Sources/LLHA/Lights/Lights.h>
 #include <Sources/OC/Vehicle.h>
 

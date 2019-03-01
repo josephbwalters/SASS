@@ -1031,6 +1031,7 @@
 #include <ti/drivers/esm/esm.h>
 #include <ti/drivers/crc/crc.h>
 #include <ti/drivers/uart/UART.h>
+#include <ti/drivers/spi/SPI.h>
 #include <ti/drivers/gpio/gpio.h>
 #include <ti/drivers/mailbox/mailbox.h>
 #include <ti/control/mmwave/mmwave.h>
@@ -2263,11 +2264,24 @@ void MmwDemo_mssInitTask(UArg arg0, UArg arg1)
     Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINP8_PADBM, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
     Pinmux_Set_FuncSel(SOC_XWR16XX_PINP8_PADBM, SOC_XWR16XX_PINP8_PADBM_DSS_UART_TX);
 
+    /* SPI Pinmux */ 
+    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PIND13_PADAD, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+    Pinmux_Set_FuncSel(SOC_XWR16XX_PIND13_PADAD, SOC_XWR16XX_PIND13_PADAD_SPIA_MOSI);
+    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINE14_PADAE, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+    Pinmux_Set_FuncSel(SOC_XWR16XX_PINE14_PADAE, SOC_XWR16XX_PINE14_PADAE_SPIA_MISO);
+    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINE13_PADAF, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+    Pinmux_Set_FuncSel(SOC_XWR16XX_PINE13_PADAF, SOC_XWR16XX_PINE13_PADAF_SPIA_CLK);
+    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINC13_PADAG, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+    Pinmux_Set_FuncSel(SOC_XWR16XX_PINC13_PADAG, SOC_XWR16XX_PINC13_PADAG_SPIA_CSN);
+
     /* Initialize the UART */
     UART_init();
 
     /* Initialize the GPIO */
     GPIO_init();
+
+    /* Initialize the SPI */
+    SPI_init();
 
     /* Initialize the Mailbox */
     Mailbox_init(MAILBOX_TYPE_MSS);
@@ -2487,6 +2501,53 @@ void _MmwDemo_mssAssert(int32_t expression, const char *file, int32_t line)
     if (!expression) {
         CLI_write ("MSS Exception: %s, line %d.\n",file,line);
     }
+}
+
+void send_over_spi()
+{
+    bool transferOK = false;
+
+    SPI_Handle      handle;
+    SPI_Params      params;
+    SPI_Transaction spiTransaction;
+
+    SPI_Params_init(&params);
+    params.mode = SPI_SLAVE;
+    params.frameFormat = SPI_POL0_PHA0;
+    params.pinMode = SPI_PINMODE_4PIN_CS;
+    params.shiftFormat = SPI_MSB_FIRST;
+    params.dmaEnable = 0;
+    //params.txDummyValue = 12U;
+    //params.transferMode = SPI_MODE_BLOCKING;
+    //params.dmaHandle = gDmaHandle;
+    params.dataSize = 8U;
+    params.u.slaveParams.chipSelect = 1U;
+    // params.u.slaveParams.dmaCfg.txDmaChanNum =1U;
+    // params.u.slaveParams.dmaCfg.rxDmaChanNum =0U;
+
+    handle = SPI_open(0, &params);
+    if (!handle)
+    {
+      System_printf("SPI did not open");
+    }
+
+    uint8_t txBuffer[1];
+    uint8_t rxBuffer[1];
+
+    txBuffer[0] = 17U;
+    rxBuffer[0] = 0;
+
+    spiTransaction.count = 1;
+    spiTransaction.txBuf = txBuffer;
+    spiTransaction.rxBuf = rxBuffer;
+
+    transferOK = SPI_transfer(handle, &spiTransaction);
+    if (!transferOK)
+    {
+      System_printf("Unsuccessful SPI transfer");
+    }
+
+    SPI_close(handle);
 }
 
 /**

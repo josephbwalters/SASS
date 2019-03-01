@@ -3,6 +3,8 @@
 
 #include <deque>
 
+#include <pthread.h>
+
 #include <Sources/LLHA/Lights/Lights.h>
 #include <Sources/OC/Vehicle.h>
 
@@ -19,14 +21,24 @@ namespace tlc
 class Scheduler
 {
 public:
-    Scheduler();
+    static Scheduler* get_instance();
+
+    Lights* get_lights();
+    deque<Vehicle>* get_vehicle_queue();
+    pthread_mutex_t* get_queue_mutex();
 
     // Thread-able method(s)
-    static void *scheduler_thread(void *args);
+    static void *scheduler_thread(void *refs);
 
 private:
-    Lights m_lights;
-    deque<Vehicle> m_vehicle_queue;
+    Scheduler();
+    virtual ~Scheduler();
+
+    Lights lights;
+    deque<Vehicle> vehicle_queue;
+    pthread_mutex_t queue_mutex;
+
+    static Scheduler* scheduler;
 };
 
 

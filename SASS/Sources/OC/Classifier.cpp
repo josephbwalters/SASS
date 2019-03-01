@@ -62,7 +62,7 @@ Classifier* Classifier::get_instance(Directions direction)
     };
 }
 
-void *Classifier::classifier_thread(void* args)
+void *Classifier::classifier_thread(void *args)
 {
     while(1)
     {

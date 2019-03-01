@@ -7,6 +7,9 @@
 #include <xdc/runtime/System.h>
 #include <xdc/std.h>
 
+/* Standard Headers */
+#include <stdio.h>
+
 #include <ti/sysbios/knl/Task.h>
 
 #include <Board.h>

@@ -16,17 +16,16 @@ namespace oc
 
 class Vehicle : public DetectedObject
 {
-private:
-    Directions direction;
-    float speed;
-
-protected:
-
 public:
-    Vehicle(Directions dir, float s);
-    void set_speed(float s);
-    Directions get_direction();
+    Vehicle(Directions direction);
+
+    void set_speed(float speed);
     float get_speed();
+    Directions get_direction();
+
+private:
+    Directions m_direction;
+    float m_speed;
 };
 
 

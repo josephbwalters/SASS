@@ -28,6 +28,8 @@ public:
 
     uint16_t get_distance();
     double get_velocity();
+
+    // Thread-able method(s)
     static void *radarTestThread(void *args);
 
 private:

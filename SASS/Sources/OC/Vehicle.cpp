@@ -2,25 +2,24 @@
 
 using namespace sources::oc;
 
-Vehicle::Vehicle(Directions dir, float s)
+Vehicle::Vehicle(Directions direction) : m_direction(direction)
 {
-   direction = dir;
-   speed = s;
+
 }
 
-void Vehicle::set_speed(float s)
+void Vehicle::set_speed(float speed)
 {
-     speed = s;
+     m_speed = speed;
 }
 
 Directions Vehicle::get_direction()
 {
-    return direction;
+    return m_direction;
 }
 
 float Vehicle::get_speed()
 {
-    return speed;
+    return m_speed;
 }
 
 

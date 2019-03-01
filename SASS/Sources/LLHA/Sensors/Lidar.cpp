@@ -14,8 +14,10 @@
 
 /* Custom headers for our modules */
 #include <Sources/LLHA/Sensors/Lidar.h>
+#include <Sources/LLHA/Lights/Lights.h>
 
 using namespace sources::llha::sensors;
+using namespace sources::llha::lights;
 
 // Initialize LiDAR instances to null for multiton pattern
 sources::llha::sensors::Lidar* sources::llha::sensors::Lidar::lidar_north = nullptr;
@@ -330,4 +332,42 @@ uint16_t Lidar::get_distance()
 uint16_t Lidar::get_velocity()
 {
     return 0;
+}
+
+/**
+    Thread to toggle MOSFETs based on LiDAR input.
+*/
+void *Lidar::lidarDemoThread(void *args)
+{
+    Lights lights;
+    Lidar* lidar_north = Lidar::get_instance(LidarInstanceType::LIDAR_NORTH);
+
+    while(1)
+    {
+        uint16_t dist = lidar_north->get_distance();
+
+        // RED: P7.4
+        // YELLOW: P7.6
+
+        if(dist < 200)
+        {
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
+
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
+            //lights.set_yellow(Directions::NORTH);
+        }
+        else
+        {
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
+
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
+            //lights.set_red(Directions::NORTH);
+        }
+    }
 }

@@ -27,91 +27,17 @@
 #include <Sources/LLHA/Lights/Lights.h>
 #include <Sources/LLHA/Sensors/Lidar.h>
 #include <Sources/LLHA/Sensors/Radar.h>
+#include <Sources/TLC/Scheduler.h>
 #include <Sources/Directions.h>
 
 using namespace sources::llha::sensors;
 using namespace sources::llha::lights;
+using namespace sources::tlc;
 
 // Stack sizes for new tasks
 #define STACK_SIZE_SMALL 512
 #define STACK_SIZE_MEDIUM 1024
 #define STACK_SIZE_LARGE 2048
-
-/**
-    Thread to toggle mosfets based on LiDAR input
-    This can be migrated to the LiDAR class!
-*/
-void *lidarDemoThread(void *args)
-{
-    Lights lights;
-    Lidar* lidar_north = Lidar::get_instance(LidarInstanceType::LIDAR_NORTH);
-
-    while(1)
-    {
-        uint16_t dist = lidar_north->get_distance();
-
-        // RED: P7.4
-        // YELLOW: P7.6
-
-        if(dist < 200)
-        {
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
-
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
-            //lights.set_yellow(Directions::NORTH);
-        }
-        else
-        {
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
-
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
-            //lights.set_red(Directions::NORTH);
-        }
-    }
-}
-
-/**
-    Thread to toggle all of our mosfets
-*/
-void *mosfetToggleThread(void *args)
-{
-    // GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
-
-    bool is_on = 0;
-
-    while(1)
-    {
-        for(int i = 0; i < 1000000; i++)
-        {
-            // Delay
-        }
-
-        if(is_on == 0)
-        {
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
-            is_on = 1;
-        }
-        else
-        {
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
-            is_on = 0;
-        }
-    }
-}
 
 /**
     Simple thread that prints to  the console
@@ -133,8 +59,6 @@ int main()
 {
     Board_initGeneral();
 
-    // Initialize GPIO pins
-    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN3);
     Lights::init();
 
     pthread_t           thread;
@@ -156,7 +80,7 @@ int main()
         while (1) {}
     }
 
-    retc = pthread_create(&thread, &attrs, Radar::radarTestThread, NULL);
+    retc = pthread_create(&thread, &attrs, Scheduler::scheduler_thread, NULL);
     if (retc) {
         /* pthread_create() failed */
         // TODO: Throw exception

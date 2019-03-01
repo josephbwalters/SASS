@@ -3,35 +3,45 @@
 
 #include <deque>
 
+#include <pthread.h>
+
 #include <Sources/LLHA/Lights/Lights.h>
+#include <Sources/OC/Vehicle.h>
 
 using namespace std;
 using namespace sources::llha::lights;
+using namespace sources::oc;
 
 namespace sources
 {
 namespace tlc
 {
-namespace scheduler
-{
 
 
 class Scheduler
 {
-private:
-    Lights m_lights;
-    deque<int> m_traffic_queue;
-
-protected:
-
 public:
+    static Scheduler* get_instance();
+
+    Lights* get_lights();
+    deque<Vehicle>* get_vehicle_queue();
+    pthread_mutex_t* get_queue_mutex();
+
+    // Thread-able method(s)
+    static void *scheduler_thread(void *refs);
+
+private:
     Scheduler();
-    void scheduler_thread();
+    virtual ~Scheduler();
+
+    Lights lights;
+    deque<Vehicle> vehicle_queue;
+    pthread_mutex_t queue_mutex;
+
+    static Scheduler* scheduler;
 };
 
 
-}}} // sources::tlc::scheduler
-
-
+}} // sources::tlc
 
 #endif // SCHEDULER_H_

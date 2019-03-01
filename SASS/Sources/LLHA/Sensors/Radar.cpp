@@ -1,4 +1,8 @@
 #define __MSP432P401R__
+
+/* Standard Headers */
+#include <stdio.h>
+
 // #define DEBUG
 #include <xdc/runtime/System.h>
 #include <xdc/std.h>
@@ -107,6 +111,7 @@ void Radar::init()
     SPI_init();
     SPI_Params_init(&spiParams); 
     spiParams.dataSize = 8;
+    spiParams.mode = SPI_MASTER;
 }
 
 /**
@@ -124,6 +129,8 @@ uint16_t Radar::get_distance()
     {
         // TODO: Throw exception
     }
+
+    printf("SPI opened.\n");
 
     // Fill transmit buffer
     txBuffer[0] = 0x0F;
@@ -154,6 +161,10 @@ uint16_t Radar::get_distance()
 
     SPI_close(spi);
 
+    printf("SPI closed.\n");
+
+    dist = (rxBuffer[0] << 8) | rxBuffer[1];
+
     return dist;
 }
 
@@ -173,12 +184,14 @@ double Radar::get_velocity()
 */
 void *Radar::radarTestThread(void *args)
 {
-    Radar* radar_north = Radar::get_instance(RadarInstanceType::RADAR_NORTH);
+    // Instantiating RADAR_EAST due to availability of pins on red board.
+    Radar* radar_north = Radar::get_instance(RadarInstanceType::RADAR_EAST);
 
     while(1)
     {
+        printf("Getting distance...\n");
         uint16_t dist = radar_north->get_distance();
-        printf("Distance: %d\n", dist);
+        printf("Distance: %d cm\n", dist);
         Task_yield();
     }
 }

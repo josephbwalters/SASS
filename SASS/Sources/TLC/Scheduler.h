@@ -1,11 +1,20 @@
+/*
+ * Scheduler.h
+ * Created by: Joseph Walters, Trent Sellers (University of Central Florida)
+ * Date: March 6, 2019
+ * Last modified: March 6, 2019
+ */
+
 #ifndef SCHEDULER_H_
 #define SCHEDULER_H_
 
-/* Data-structure headers */
+/* Standard headers */
 #include <deque>
+
+/* POSIX thread support */
 #include <pthread.h>
 
-/* Custom headers */
+/* SASS-specific headers */
 #include <Sources/LLHA/Lights/Lights.h>
 #include <Sources/OC/Vehicle.h>
 

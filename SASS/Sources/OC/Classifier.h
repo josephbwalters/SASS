@@ -1,6 +1,14 @@
+/*
+ * Classifier.h
+ * Created by: Joseph Walters, Trent Sellers (University of Central Florida)
+ * Date: March 6, 2019
+ * Last modified: March 6, 2019
+ */
+
 #ifndef CLASSIFIER_H_
 #define CLASSIFIER_H_
 
+/* SASS-specific headers */
 #include <Sources/Directions.h>
 
 namespace sources

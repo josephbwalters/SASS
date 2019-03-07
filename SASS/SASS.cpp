@@ -1,10 +1,17 @@
+/*
+ * SASS.cpp
+ * Created by: Joseph Walters, Trent Sellers (University of Central Florida)
+ * Date: March 6, 2019
+ * Last modified: March 6, 2019
+ */
+
 #define __MSP432P401R__
 // #define DEBUG
 
-/* Standard Headers */
+/* Standard headers */
 #include <stdio.h>
 
-/* XDC module Headers */
+/* XDC module headers */
 #include <xdc/std.h>
 #include <xdc/runtime/Diags.h>
 #include <xdc/runtime/System.h>
@@ -12,7 +19,7 @@
 /* POSIX thread support */
 #include <pthread.h>
 
-/* BIOS module Headers */
+/* BIOS module headers */
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Task.h>
 
@@ -20,10 +27,10 @@
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
 #include <ti/drivers/GPIO.h>
 
-/* Board specific configurations */
+/* Board specific headers */
 #include <Board.h>
 
-/* Custom headers for our modules */
+/* SASS-specific headers */
 #include <Sources/LLHA/Lights/Lights.h>
 #include <Sources/LLHA/Sensors/Lidar.h>
 #include <Sources/LLHA/Sensors/Radar.h>

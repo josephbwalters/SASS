@@ -1,18 +1,24 @@
+/*
+ * Lights.cpp
+ * Created by: Joseph Walters, Trent Sellers (University of Central Florida)
+ * Date: March 6, 2019
+ * Last modified: March 6, 2019
+ */
+
 #define __MSP432P401R__
 
 /* System headers */ 
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
 
-/* Custom headers */
+/* SASS-specific headers */
 #include <Sources/LLHA/Lights/Lights.h>
 
 using namespace sources;
 using namespace sources::llha::lights;
 
-Lights::Lights()
+Lights::Lights() : m_panic_flag(false), m_waiting(true)
 {
-    bool panic_flag = false;
-    bool waiting = true;
+
 }
 
 void Lights::init()

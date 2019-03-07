@@ -1,7 +1,18 @@
+/*
+ * RADAR.h
+ * Created by: Joseph Walters, Trent Sellers (University of Central Florida)
+ * Date: March 6, 2019
+ * Last modified: March 6, 2019
+ */
+
 #ifndef RADAR_H_
 #define RADAR_H_
 
+/* Standard headers */
 #include <stdint.h>
+#include <tuple>
+
+/* System headers */
 #include <ti/drivers/SPI.h>
 
 enum RadarInstanceType
@@ -11,6 +22,8 @@ enum RadarInstanceType
     RADAR_SOUTH,
     RADAR_WEST
 };
+
+using namespace std;
 
 namespace sources
 {
@@ -27,7 +40,8 @@ public:
     void init();
 
     uint16_t get_distance();
-    double get_velocity();
+    uint16_t get_velocity();
+    tuple<uint16_t, uint16_t> get_data();
 
     // Thread-able method(s)
     static void *radarTestThread(void *args);

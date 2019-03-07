@@ -1,7 +1,14 @@
+/*
+ * Lights.h
+ * Created by: Joseph Walters, Trent Sellers (University of Central Florida)
+ * Date: March 6, 2019
+ * Last modified: March 6, 2019
+ */
+
 #ifndef LIGHTS_H_
 #define LIGHTS_H_
 
-/* Custom headers */
+/* SASS-specific headers */
 #include <Sources/Directions.h>
 
 using namespace sources;

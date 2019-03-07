@@ -1,10 +1,17 @@
+/*
+ * Classifier.cpp
+ * Created by: Joseph Walters, Trent Sellers (University of Central Florida)
+ * Date: March 6, 2019
+ * Last modified: March 6, 2019
+ */
+
 /* Standard headers */
 #include <stdio.h>
 
-/* SYS/BIOS headers */
+/* System headers */
 #include <ti/sysbios/knl/Task.h>
 
-/* Custom headers */
+/* SASS-specific headers */
 #include <Sources/OC/Classifier.h>
 
 using namespace sources;

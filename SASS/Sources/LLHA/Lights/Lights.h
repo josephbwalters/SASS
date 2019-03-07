@@ -1,7 +1,12 @@
+/*
+ * Lights.h
+ * Created by: Joseph Walters, Trent Sellers
+ */
+
 #ifndef LIGHTS_H_
 #define LIGHTS_H_
 
-// Our custom headers
+/* SASS-specific headers */
 #include <Sources/Directions.h>
 
 using namespace sources;

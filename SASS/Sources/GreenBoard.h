@@ -1,8 +1,15 @@
+/*
+ * GreenBoard.h
+ * Created by: Joseph Walters, Trent Sellers 
+ */
+
 #ifndef GREENBOARD_H_
 #define GREENBOARD_H_
 
+/* Device drivers for GPIO */
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
 
+/* Board-specific headers */
 #include <Board.h>
 
 // RADAR assignment
@@ -36,10 +43,5 @@
 #define YELLOW_E_PIN GPIO_PIN7
 #define YELLOW_S_PIN
 #define YELLOW_W_PIN
-
-
-
-
-
 
 #endif // GREENBOARD_H_

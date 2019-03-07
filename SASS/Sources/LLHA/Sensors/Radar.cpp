@@ -1,20 +1,26 @@
-#define __MSP432P401R__
+/*
+ * RADAR.cpp
+ * Created by: Joseph Walters, Trent Sellers 
+ */
 
-/* Standard Headers */
+#define __MSP432P401R__
+// #define DEBUG
+
+/* Standard headers */
 #include <stdio.h>
 
-// #define DEBUG
+/* XDC module headers */
 #include <xdc/runtime/System.h>
 #include <xdc/std.h>
 
-/* Standard Headers */
-#include <stdio.h>
-
+/* System headers */
 #include <ti/sysbios/knl/Task.h>
 
+/* Board-specific headers */
 #include <Board.h>
 #include <Sources/GreenBoard.h>
 
+/* SASS-specific headers */
 #include <Sources/LLHA/Sensors/Radar.h>
 
 using namespace sources::llha::sensors;
@@ -56,7 +62,7 @@ Radar::Radar(RadarInstanceType radar_type) : m_radar_type(radar_type)
 
 Radar::~Radar()
 {
-    // Destructor
+    // TODO: Clean up (if necessary)
 }
 
 /**
@@ -115,13 +121,39 @@ void Radar::init()
 }
 
 /**
-    Reads from mmwave device to get distance.
+    Reads from mmWave device to get distance.
 
     @return distance to the nearest moving object that the radar detected.
 */
 uint16_t Radar::get_distance()
 {
-    uint16_t dist = 0;
+    tuple<uint16_t, uint16_t> radar_data;
+    radar_data = get_data();
+
+    uint16_t distance = get<0>(radar_data);
+
+    return distance;
+}
+
+/**
+    Reads from mmWave device to get velocity.
+
+    @return velocity of the nearest moving object that the radar detected.
+*/
+uint16_t Radar::get_velocity()
+{
+    tuple<uint16_t, uint16_t> radar_data;
+    radar_data = get_data();
+
+    uint16_t velocity = get<1>(radar_data);
+
+    return velocity;
+}
+
+tuple<uint16_t, uint16_t> Radar::get_data()
+{
+    uint16_t distance = 0;
+    uint16_t velocity = 0;
     bool transferOK = false;
 
     spi = SPI_open(m_hardware_module, &spiParams);
@@ -163,24 +195,18 @@ uint16_t Radar::get_distance()
 
     printf("SPI closed.\n");
 
-    dist = (rxBuffer[0] << 8) | rxBuffer[1];
+    distance = (rxBuffer[0] << 8) | rxBuffer[1];
 
-    return dist;
+    velocity = rxBuffer[2];
+
+    tuple<uint16_t, uint16_t> radar_data;
+    radar_data = make_tuple(distance, velocity);
+
+    return radar_data;
 }
 
 /**
-    Reads from mmwave device to get velocity.
-
-    @return velocity of the nearest moving object that the radar detected.
-*/
-double Radar::get_velocity()
-{
-    // TEMPORARY RETURN
-    return 0.00;
-}
-
-/**
-    Test thread for mmwave reading.
+    Test thread for mmWave reading.
 */
 void *Radar::radarTestThread(void *args)
 {

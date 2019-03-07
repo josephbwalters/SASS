@@ -1,18 +1,25 @@
+/*
+ * Lidar.cpp
+ * Created by: Joseph Walters, Trent Sellers 
+ * Date: March 6, 2019
+ * Last modified: March 6, 2019
+ */
+
 #define __MSP432P401R__
 // #define DEBUG
 
-/* XDC module Headers */
+/* System headers */
+#include <ti/devices/msp432p4xx/driverlib/gpio.h>
+
+/* XDC module headers */
 #include <xdc/runtime/System.h>
 #include <xdc/std.h>
 
-/* Device drivers for GPIO */
-#include <ti/devices/msp432p4xx/driverlib/gpio.h>
-
-/* Board specific configurations */
+/* Board-specific headers */
 #include <Board.h>
 #include <Sources/GreenBoard.h>
 
-/* Custom headers for our modules */
+/* SASS-specific headers */
 #include <Sources/LLHA/Sensors/Lidar.h>
 #include <Sources/LLHA/Lights/Lights.h>
 
@@ -59,7 +66,7 @@ Lidar::Lidar(LidarInstanceType lidar_type) : m_current_addr(default_addr), m_lid
 
 Lidar::~Lidar()
 {
-    // Destructor
+    // TODO: Clean up (if necessary)
 }
 
 /**
@@ -107,6 +114,9 @@ Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
     };
 }
 
+
+
+
 /**
     Initializes hardware on MSP432 for I2C communication.
 */
@@ -128,7 +138,7 @@ void Lidar::init()
 }
 
 /**
-    Sets LiDAR-Lite v3 config  (part1)
+    Sets LiDAR-Lite v3HP config  (part 1)
 */
 void Lidar::config_1()
 {    
@@ -150,7 +160,7 @@ void Lidar::config_1()
 }
 
 /**
-    Sets LiDAR-Lite v3 config  (part2)
+    Sets LiDAR-Lite v3HP config  (part 2)
 */
 void Lidar::config_2()
 {
@@ -172,7 +182,7 @@ void Lidar::config_2()
 }
 
 /**
-    Sets LiDAR-Lite v3 config  (part3)
+    Sets LiDAR-Lite v3HP config  (part 3)
 */
 void Lidar::config_3()
 {
@@ -194,7 +204,7 @@ void Lidar::config_3()
 }
 
 /**
-    Sets LiDAR-Lite v3 config  (part4)
+    Sets LiDAR-Lite v3HP config  (part 4)
 */
 void Lidar::config_4()
 {
@@ -217,7 +227,7 @@ void Lidar::config_4()
 }
 
 /**
-    Sets LiDAR-Lite v3 config  (part5)
+    Sets LiDAR-Lite v3HP config  (part 5)
     This sends a start command to the device
 */
 void Lidar::start_reading()
@@ -240,7 +250,7 @@ void Lidar::start_reading()
 }
 
 /**
-    Sets LiDAR-Lite v3 config  (part6)
+    Sets LiDAR-Lite v3HP config  (part 6)
     This reads the status register until it is empty, which indicates that we can get a distance.
 */
 void Lidar::wait_until_ready()
@@ -309,6 +319,7 @@ uint16_t Lidar::get_distance()
         // TODO: Throw exception
     }
 
+    // TODO: Check if we need to do the config every time we want a distance or not
     config_1();
     config_2();
     config_3();

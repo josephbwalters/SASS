@@ -1,12 +1,18 @@
+/*
+ * Scheduler.cpp
+ * Created by: Joseph Walters, Trent Sellers 
+ */
+
+/* Standard headers */
 #include <stdio.h>
 
+/* System headers */
 #include <ti/sysbios/knl/Task.h>
 
+/* SASS-specific headers */
 #include <Sources/TLC/Scheduler.h>
 #include <Sources/LLHA/Lights/Lights.h>
 #include <Sources/Directions.h>
-
-using namespace sources;
 
 using namespace std;
 using namespace sources;
@@ -22,7 +28,7 @@ Scheduler::Scheduler()
 
 Scheduler::~Scheduler()
 {
-
+    // TODO: Clean up (if necessary)
 }
 
 Scheduler* Scheduler::get_instance()

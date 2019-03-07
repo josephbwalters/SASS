@@ -1,14 +1,15 @@
 /*
  * Classifier.cpp
- *
- *  Created on: Feb 4, 2019
- *      Author: jwalters
+ * Created by: Joseph Walters, Trent Sellers 
  */
 
+/* Standard headers */
 #include <stdio.h>
 
+/* System headers */
 #include <ti/sysbios/knl/Task.h>
 
+/* SASS-specific headers */
 #include <Sources/OC/Classifier.h>
 
 using namespace sources;

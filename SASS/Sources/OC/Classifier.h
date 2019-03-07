@@ -21,6 +21,8 @@ public:
     static Classifier* get_instance(Directions direction);
 
     static void *classifier_thread(void* args);
+    static void *watchman(void *args);
+    static void callback_hwi(uint_least8_t index);
 
 private:
     Classifier(Directions direction);

@@ -13,8 +13,8 @@ namespace sources
 enum class Directions
 {
     NORTH,
-    SOUTH,
     EAST,
+    SOUTH,
     WEST
 };
 

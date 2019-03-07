@@ -1,6 +1,6 @@
 /*
  * Lidar.cpp
- * Created by: Joseph Walters, Trent Sellers (University of Central Florida)
+ * Created by: Joseph Walters, Trent Sellers 
  * Date: March 6, 2019
  * Last modified: March 6, 2019
  */

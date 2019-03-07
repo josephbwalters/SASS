@@ -1,8 +1,6 @@
 /*
  * Vehicle.cpp
- * Created by: Joseph Walters, Trent Sellers (University of Central Florida)
- * Date: March 6, 2019
- * Last modified: March 6, 2019
+ * Created by: Joseph Walters, Trent Sellers 
  */
 
 /* SASS-specific headers */

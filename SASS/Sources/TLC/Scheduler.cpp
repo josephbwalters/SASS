@@ -74,7 +74,7 @@ void *Scheduler::scheduler_thread(void *args)
             scheduler->get_vehicle_queue()->pop_front();
         }
 
-        scheduler->get_lights()->set_all_red();
+        // scheduler->get_lights()->set_all_red();
         printf("All lights set red.\n");
 
         Task_yield();

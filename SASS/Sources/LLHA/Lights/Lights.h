@@ -35,7 +35,7 @@ public:
 
     // Thread-able method(s)
     void *light_thread(void *args);
-    static void *mosfetToggleThread(void *args);
+    static void *mosfet_toggle_thread(void *args);
 
 private:
     Directions m_direction;

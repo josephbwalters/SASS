@@ -7,6 +7,7 @@
 
 /* System headers */ 
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
+#include <ti/sysbios/knl/Task.h>
 
 /* SASS-specific headers */
 #include <Sources/LLHA/Lights/Lights.h>
@@ -21,6 +22,7 @@ Lights::Lights() : m_panic_flag(false), m_waiting(true)
 
 void Lights::init()
 {
+    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN3);
     GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN4);
     GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN5);
     GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN6);
@@ -114,7 +116,7 @@ void *Lights::light_thread(void *args)
 /**
     Thread to toggle all of our mosfets
 */
-void *Lights::mosfetToggleThread(void *args)
+void *Lights::mosfet_toggle_thread(void *args)
 {
     // GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
 
@@ -145,5 +147,7 @@ void *Lights::mosfetToggleThread(void *args)
             GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
             is_on = 0;
         }
+
+        Task_yield();
     }
 }

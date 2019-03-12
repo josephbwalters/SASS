@@ -134,6 +134,11 @@ typedef enum MSP_EXP432P401R_GPIOName {
     MSP_EXP432P401R_LCD_POWER,
     MSP_EXP432P401R_LCD_ENABLE,
 
+    /* SASS-specific configuration - MMW 1 */
+    MSP_EXP432P401R_GPIO_MMW1,
+    /* SASS-specific configuration - MMW 2 */
+    MSP_EXP432P401R_GPIO_MMW2,
+
     MSP_EXP432P401R_GPIOCOUNT
 } MSP_EXP432P401R_GPIOName;
 
@@ -143,7 +148,9 @@ typedef enum MSP_EXP432P401R_GPIOName {
  */
 typedef enum MSP_EXP432P401R_I2CName {
     MSP_EXP432P401R_I2CB0 = 0,
+    /* SASS-specific configuration - LV3HP2 2 */
     MSP_EXP432P401R_I2CB1,
+    /* SASS-specific configuration - LV3HP2 1 */
     MSP_EXP432P401R_I2CB2,
 
     MSP_EXP432P401R_I2CCOUNT
@@ -210,7 +217,9 @@ typedef enum MSP_EXP432P401R_SPIName {
     MSP_EXP432P401R_SPIB2,
     MSP_EXP432P401R_SPIB3,
     MSP_EXP432P401R_SPIB4,
+    /* SASS-specific configuration - MMW 1 */
     MSP_EXP432P401R_SPIB5,
+    /* SASS-specific configuration - MMW 2 */
     MSP_EXP432P401R_SPIB6,
 
     MSP_EXP432P401R_SPICOUNT

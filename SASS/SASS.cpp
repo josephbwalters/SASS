@@ -37,19 +37,19 @@
 #include <Sources/TLC/Scheduler.h>
 #include <Sources/Directions.h>
 
-using namespace sources::llha::sensors;
-using namespace sources::llha::lights;
-using namespace sources::tlc;
-
 // Stack sizes for new tasks
 #define STACK_SIZE_SMALL 512
 #define STACK_SIZE_MEDIUM 1024
 #define STACK_SIZE_LARGE 2048
 
+using namespace sources::llha::sensors;
+using namespace sources::llha::lights;
+using namespace sources::tlc;
+
 /**
     Simple thread that prints to  the console
 */
-void *printThread(void *args)
+void *test_print_thread(void *args)
 {
     while(1)
     {
@@ -66,47 +66,46 @@ int main()
 {
     Board_initGeneral();
 
-    Lights::init();
-
-    // Call GPIO driver init function
     GPIO_init();
 
-    // Turn on user LED
-    GPIO_write(Board_GPIO_LED0, Board_GPIO_LED_ON);
+    Lights::init();
 
-    // Install Button callback
     GPIO_setCallback(Board_GPIO_BUTTON0, Classifier::callback_hwi);
-
-    // Enable interrupts
     GPIO_enableInt(Board_GPIO_BUTTON0);
+    GPIO_setCallback(Board_GPIO_BUTTON1, Classifier::callback_hwi);
+    GPIO_enableInt(Board_GPIO_BUTTON1);
+    GPIO_setCallback(Board_GPIO_MMW1, Classifier::callback_hwi);
+    GPIO_enableInt(Board_GPIO_MMW1);
+    GPIO_setCallback(Board_GPIO_MMW2, Classifier::callback_hwi);
+    GPIO_enableInt(Board_GPIO_MMW2);
 
-    pthread_t           thread;
-    pthread_attr_t      attrs;
-    struct sched_param  priParam;
+    pthread_t           scheduler_handle;
+    pthread_attr_t      scheduler_attrs;
+    struct sched_param  scheduler_priParam;
     int                 retc;
 
     /* Initialize the attributes structure with default values */
-    pthread_attr_init(&attrs);
+    pthread_attr_init(&scheduler_attrs);
 
     /* Set priority, detach state, and stack size attributes */
-    priParam.sched_priority = 1;
-    retc = pthread_attr_setschedparam(&attrs, &priParam);
-    retc |= pthread_attr_setdetachstate(&attrs, PTHREAD_CREATE_DETACHED);
-    retc |= pthread_attr_setstacksize(&attrs, STACK_SIZE_LARGE);
+    scheduler_priParam.sched_priority = 1;
+    retc = pthread_attr_setschedparam(&scheduler_attrs, &scheduler_priParam);
+    retc |= pthread_attr_setdetachstate(&scheduler_attrs, PTHREAD_CREATE_DETACHED);
+    retc |= pthread_attr_setstacksize(&scheduler_attrs, STACK_SIZE_LARGE);
     if (retc) {
         /* failed to set attributes */
         // TODO: Throw exception
         while (1) {}
     }
 
-    retc = pthread_create(&thread, &attrs, Scheduler::scheduler_thread, NULL);
+    retc = pthread_create(&scheduler_handle, &scheduler_attrs, Scheduler::scheduler_thread, NULL);
     if (retc) {
         /* pthread_create() failed */
         // TODO: Throw exception
         while (1) {}
     }
 
-    pthread_t           print_thread;
+    pthread_t           print_handle;
     pthread_attr_t      print_attrs;
     struct sched_param  print_priParam;
 
@@ -124,14 +123,14 @@ int main()
         while (1) {}
     }
 
-    retc = pthread_create(&print_thread, &print_attrs, printThread, NULL);
+    retc = pthread_create(&print_handle, &print_attrs, test_print_thread, NULL);
     if (retc) {
         /* pthread_create() failed */
         // TODO: Throw exception
         while (1) {}
     }
 
-    pthread_t           watchman_thread;
+    pthread_t           watchman_handle;
     pthread_attr_t      watchman_attrs;
     struct sched_param  watchman_priParam;
 
@@ -149,12 +148,37 @@ int main()
         while (1) {}
     }
 
-    retc = pthread_create(&watchman_thread, &watchman_attrs, Classifier::watchman, NULL);
+    retc = pthread_create(&watchman_handle, &watchman_attrs, Classifier::watchman, NULL);
     if (retc) {
         /* pthread_create() failed */
         // TODO: Throw exception
         while (1) {}
     }
+
+//    pthread_t           mosfet_handle;
+//    pthread_attr_t      mosfet_attrs;
+//    struct sched_param  mosfet_priParam;
+//
+//    /* Initialize the attributes structure with default values */
+//    pthread_attr_init(&mosfet_attrs);
+//
+//    /* Set priority, detach state, and stack size attributes */
+//    mosfet_priParam.sched_priority = 1;
+//    retc = pthread_attr_setschedparam(&mosfet_attrs, &mosfet_priParam);
+//    retc |= pthread_attr_setdetachstate(&mosfet_attrs, PTHREAD_CREATE_DETACHED);
+//    retc |= pthread_attr_setstacksize(&mosfet_attrs, STACK_SIZE_LARGE);
+//    if (retc) {
+//        /* failed to set attributes */
+//        // TODO: Throw exception
+//        while (1) {}
+//    }
+//
+//    retc = pthread_create(&mosfet_handle, &mosfet_attrs, Lights::mosfet_toggle_thread, NULL);
+//    if (retc) {
+//        /* pthread_create() failed */
+//        // TODO: Throw exception
+//        while (1) {}
+//    }
 
     BIOS_start();    /* does not return */
     return(0);

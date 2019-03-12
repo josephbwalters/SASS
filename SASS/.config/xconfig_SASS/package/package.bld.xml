@@ -7,7 +7,7 @@
         <srcFile name="package/cfg/SASS_pem4f.c"/>
     </sources>
     <configscripts>
-        <srcFile name="/Users/jwalters/Documents/school/school2019/SASS/SASS/SASS.cfg"/>
+        <srcFile name="/Users/trent/Development/SASS/SASS/SASS.cfg"/>
     </configscripts>
     <makefiles>
         <srcFile name="package.mak" src="package.bld"/>
@@ -44,7 +44,7 @@
         isPartial="false"
         xCfgScript="package/cfg/SASS_pem4f.cfg"
         xCfgPrefix="package/cfg/SASS_pem4f"
-        cfgScript="/Users/jwalters/Documents/school/school2019/SASS/SASS/SASS.cfg"
+        cfgScript="/Users/trent/Development/SASS/SASS/SASS.cfg"
         cfgArgs="null"
         />
     </configurations>
@@ -56,7 +56,7 @@
         profile="release"
         xCfgScript="package/cfg/SASS_pem4f.cfg"
         xCfgPrefix="package/cfg/SASS_pem4f"
-        cfgScript="/Users/jwalters/Documents/school/school2019/SASS/SASS/SASS.cfg"
+        cfgScript="/Users/trent/Development/SASS/SASS/SASS.cfg"
         cfgArgs="null"
         />
     </executables>

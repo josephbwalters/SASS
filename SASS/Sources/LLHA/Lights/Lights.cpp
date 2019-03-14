@@ -73,7 +73,35 @@ void Lights::set_yellow(Directions direction)
 
 void Lights::schedule(Directions direction)
 {
-
+    switch (direction)
+    {
+    case Directions::NORTH:
+        set_yellow(Directions::NORTH);
+        set_red(Directions::EAST);
+        set_red(Directions::SOUTH);
+        set_red(Directions::WEST);
+        break;
+    case Directions::EAST:
+        set_yellow(Directions::EAST);
+        set_red(Directions::SOUTH);
+        set_red(Directions::WEST);
+        set_red(Directions::NORTH);
+        break;
+    case Directions::SOUTH:
+        set_yellow(Directions::SOUTH);
+        set_red(Directions::WEST);
+        set_red(Directions::NORTH);
+        set_red(Directions::EAST);
+        break;
+    case Directions::WEST:
+        set_yellow(Directions::WEST);
+        set_red(Directions::NORTH);
+        set_red(Directions::EAST);
+        set_red(Directions::SOUTH);
+        break;
+    default:
+        // TODO: Throw exception
+    };
 }
 
 void Lights::set_all_red()

@@ -108,7 +108,8 @@ Classifier* Classifier::get_instance(Directions direction)
 
 uint8_t Classifier::track()
 {
-    uint16_t dist = m_lidar->get_distance();
+    // uint16_t dist = m_lidar->get_distance();
+    uint16_t dist = 200;
 
     if (dist < 300)
     {
@@ -123,20 +124,23 @@ void *Classifier::classifier_thread(void *args)
     Directions direction;
     direction = static_cast<Directions>((int)args);
 
-    printf("Created classifier thread.\n");
+    printf("[Classifier]: Created classifier thread.\n");
 
-    Classifier* classifier = get_instance(direction);
+    Classifier* classifier = Classifier::get_instance(direction);
     Scheduler* scheduler = Scheduler::get_instance();
 
     while (1)
     {
         Vehicle current_vehicle(direction);
+        printf("[Classifier]: Vehicle detected.\n");
         uint8_t status = 0;
         bool safe_exit = false;
 
+        int i = 0;
+
         while (safe_exit == false)
         {
-            printf("Monitoring the intersection...\n");
+            printf("[Classifier]: Tracking vehicle...\n");
 
             status = classifier->track();
 
@@ -149,14 +153,22 @@ void *Classifier::classifier_thread(void *args)
                 safe_exit = false;
             }
 
+            safe_exit = false;
+            if(i == 12)
+            {
+                safe_exit = true;
+            }
+
+            i++;
             Task_yield();
         }
 
         // Send vehicle to queue
         scheduler->get_vehicle_queue()->push_back(current_vehicle);
+        printf("[Classifier]: Vehicle stopped and added to queue.\n");
     }
 
-    printf("Exiting classifier thread...\n");
+    printf("[Classifier]: Exiting classifier thread...\n");
 
     pthread_exit(NULL);
 }

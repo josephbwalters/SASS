@@ -26,7 +26,7 @@
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
 #include <ti/drivers/GPIO.h>
 
-/* Board specific headers */
+/* Board-specific headers */
 #include <Board.h>
 
 /* SASS-specific headers */
@@ -99,31 +99,6 @@ int main()
     }
 
     retc = pthread_create(&scheduler_handle, &scheduler_attrs, Scheduler::scheduler_thread, NULL);
-    if (retc) {
-        /* pthread_create() failed */
-        // TODO: Throw exception
-        while (1) {}
-    }
-
-    pthread_t           print_handle;
-    pthread_attr_t      print_attrs;
-    struct sched_param  print_priParam;
-
-    /* Initialize the attributes structure with default values */
-    pthread_attr_init(&print_attrs);
-
-    /* Set priority, detach state, and stack size attributes */
-    print_priParam.sched_priority = 1;
-    retc = pthread_attr_setschedparam(&print_attrs, &print_priParam);
-    retc |= pthread_attr_setdetachstate(&print_attrs, PTHREAD_CREATE_DETACHED);
-    retc |= pthread_attr_setstacksize(&print_attrs, STACK_SIZE_LARGE);
-    if (retc) {
-        /* failed to set attributes */
-        // TODO: Throw exception
-        while (1) {}
-    }
-
-    retc = pthread_create(&print_handle, &print_attrs, test_print_thread, NULL);
     if (retc) {
         /* pthread_create() failed */
         // TODO: Throw exception

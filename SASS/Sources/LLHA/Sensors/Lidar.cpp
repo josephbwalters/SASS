@@ -8,6 +8,8 @@
 #define __MSP432P401R__
 // #define DEBUG
 
+#include <stdio.h>
+
 /* System headers */
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
 

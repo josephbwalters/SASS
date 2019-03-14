@@ -8,6 +8,10 @@
 
 /* System headers */
 #include <ti/sysbios/knl/Task.h>
+#include <ti/drivers/Timer.h>
+
+/* Board-specific headers */
+#include <Board.h>
 
 /* SASS-specific headers */
 #include <Sources/TLC/Scheduler.h>
@@ -59,24 +63,56 @@ void *Scheduler::scheduler_thread(void *args)
 {
     Scheduler* scheduler = get_instance();
 
+    Timer_init();
+
+    Timer_Handle    timer_handle;
+    Timer_Params    timer_params;
+
+    Timer_Params_init(&timer_params);
+    timer_params.periodUnits = Timer_PERIOD_US;
+    timer_params.period = 3000000;
+    timer_params.timerMode  = Timer_ONESHOT_BLOCKING;
+    timer_params.timerCallback = NULL;
+
+    timer_handle = Timer_open(Board_TIMER0, &timer_params);
+    if (timer_handle == NULL) {
+        // Timer_open() failed
+        // TODO: Throw exception
+    }
+
     while (1)
     {
         // TODO: Implement Panic feature
         // TODO: Implement with directions input into the queue, not numbers!
         while (!scheduler->get_vehicle_queue()->empty())
         {
-            printf("Processing vehicle...\n");
+            printf("[Scheduler]: Processing vehicle...\n");
             Vehicle vehicle = scheduler->get_vehicle_queue()->front();
             Directions direction = vehicle.get_direction();
 
             scheduler->get_lights()->schedule(direction);
-            scheduler->get_lights()->wait();
+            scheduler->get_lights()->set_all_red();
+
+            printf("[Scheduler]: Starting 3-second timer...\n");
+            int status = Timer_start(timer_handle);
+
+            if (status == Timer_STATUS_ERROR) {
+                //Timer_start() failed
+                // TODO: Throw exception
+            }
+
+            Timer_stop(timer_handle);
+            printf("[Scheduler]: Timer expired.\n");
+
             scheduler->get_vehicle_queue()->pop_front();
+            printf("[Scheduler]: Vehicle exited and removed from queue.\n");
         }
 
-        // scheduler->get_lights()->set_all_red();
-        printf("All lights set red.\n");
+        scheduler->get_lights()->set_all_red();
+        printf("[Scheduler]: All lights set red.\n");
 
         Task_yield();
     }
+
+    Timer_close(timer_handle);
 }

@@ -35,9 +35,11 @@ void Lights::set_red(Directions direction)
     {
     case Directions::NORTH:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
         break;
     case Directions::EAST:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
         break;
     case Directions::SOUTH:
         // Future: Add functionality for south direction
@@ -56,9 +58,11 @@ void Lights::set_yellow(Directions direction)
     {
     case Directions::NORTH:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
         break;
     case Directions::EAST:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
         break;
     case Directions::SOUTH:
         // Future: Add functionality for south direction

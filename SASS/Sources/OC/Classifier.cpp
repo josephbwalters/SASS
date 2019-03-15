@@ -3,6 +3,8 @@
  * Created by: Joseph Walters, Trent Sellers 
  */
 
+#define __MSP432P401R__
+
 /* Standard headers */
 #include <stdio.h>
 
@@ -14,6 +16,11 @@
 #include <ti/sysbios/knl/Idle.h>
 #include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/knl/Task.h>
+#include <ti/drivers/Timer.h>
+#include <ti/devices/msp432p4xx/driverlib/gpio.h>
+
+/* Board-specific headers */
+#include <Board.h>
 
 /* SASS-specific headers */
 #include <Sources/OC/Classifier.h>
@@ -45,17 +52,24 @@ Classifier::Classifier(Directions direction) : m_direction(direction)
     case Directions::NORTH:
         m_lidar = Lidar::get_instance(LidarInstanceType::LIDAR_NORTH);
         m_radar = Radar::get_instance(RadarInstanceType::RADAR_NORTH);
+        printf("Initialized classifier north with sensors.\n");
+        break;
     case Directions::EAST:
         m_lidar = Lidar::get_instance(LidarInstanceType::LIDAR_EAST);
         m_radar = Radar::get_instance(RadarInstanceType::RADAR_EAST);
+        printf("Initialized classifier east with sensors.\n");
+        break;
     case Directions::SOUTH:
         m_lidar = Lidar::get_instance(LidarInstanceType::LIDAR_SOUTH);
         m_radar = Radar::get_instance(RadarInstanceType::RADAR_SOUTH);
+        break;
     case Directions::WEST:
         m_lidar = Lidar::get_instance(LidarInstanceType::LIDAR_WEST);
         m_radar = Radar::get_instance(RadarInstanceType::RADAR_WEST);
+        break;
     default:
         // TODO: Throw exception
+        printf("Did not initialize sensors in classifier.\n");
     };
 }
 
@@ -108,10 +122,10 @@ Classifier* Classifier::get_instance(Directions direction)
 
 uint8_t Classifier::track()
 {
-    // uint16_t dist = m_lidar->get_distance();
-    uint16_t dist = 200;
+    uint16_t dist = m_lidar->get_distance();
+    // uint16_t dist = 60; // 100
 
-    if (dist < 300)
+    if (dist < 50)
     {
         return 1;
     }
@@ -124,7 +138,7 @@ void *Classifier::classifier_thread(void *args)
     Directions direction;
     direction = static_cast<Directions>((int)args);
 
-    printf("[Classifier]: Created classifier thread.\n");
+    printf("[Classifier %d]: Created classifier thread.\n", direction);
 
     Classifier* classifier = Classifier::get_instance(direction);
     Scheduler* scheduler = Scheduler::get_instance();
@@ -132,43 +146,44 @@ void *Classifier::classifier_thread(void *args)
     while (1)
     {
         Vehicle current_vehicle(direction);
-        printf("[Classifier]: Vehicle detected.\n");
+        printf("[Classifier %d]: Vehicle detected.\n", direction);
         uint8_t status = 0;
-        bool safe_exit = false;
 
-        int i = 0;
-
-        while (safe_exit == false)
+        while (status == 0)
         {
-            printf("[Classifier]: Tracking vehicle...\n");
+            printf("[Classifier %d]: Tracking vehicle...\n", direction);
 
             status = classifier->track();
 
-            if(status == 1)
-            {
-                safe_exit = true;
-            }
-            else
-            {
-                safe_exit = false;
-            }
+            // DEBUGGING ONLY
+//            if(scheduler->get_vehicle_queue()->empty())
+//            {
+//                status = 1;
+//            }
 
-            safe_exit = false;
-            if(i == 12)
-            {
-                safe_exit = true;
-            }
-
-            i++;
-            Task_yield();
+            Task_sleep(500);
+            // Task_yield();
         }
 
         // Send vehicle to queue
         scheduler->get_vehicle_queue()->push_back(current_vehicle);
-        printf("[Classifier]: Vehicle stopped and added to queue.\n");
+        printf("[Classifier %d]: Vehicle stopped and added to queue.\n", direction);
+
+        status = 1;
+
+        // PRODUCTION ONLY
+        while (status == 1)
+        {
+            status = classifier->track();
+            Task_sleep(500);
+            // Task_yield();
+        }
+
+        Task_sleep(500);
+        // Task_yield();
     }
 
-    printf("[Classifier]: Exiting classifier thread...\n");
+    printf("[Classifier %d]: Exiting classifier thread...\n", direction);
 
     pthread_exit(NULL);
 }

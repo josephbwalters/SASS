@@ -130,6 +130,59 @@ int main()
         while (1) {}
     }
 
+    Directions north = Directions::NORTH;
+    Directions east = Directions::EAST;
+
+    pthread_t           classf_n_handle;
+    pthread_attr_t      classf_n_attrs;
+    struct sched_param  classf_n_priParam;
+
+    /* Initialize the attributes structure with default values */
+    pthread_attr_init(&classf_n_attrs);
+
+    /* Set priority, detach state, and stack size attributes */
+    classf_n_priParam.sched_priority = 1;
+    retc = pthread_attr_setschedparam(&classf_n_attrs, &classf_n_priParam);
+    retc |= pthread_attr_setdetachstate(&classf_n_attrs, PTHREAD_CREATE_DETACHED);
+    retc |= pthread_attr_setstacksize(&classf_n_attrs, STACK_SIZE_LARGE);
+    if (retc) {
+        /* failed to set attributes */
+        // TODO: Throw exception
+        while (1) {}
+    }
+
+    retc = pthread_create(&classf_n_handle, &classf_n_attrs, Classifier::classifier_thread, (void *)north);
+    if (retc) {
+        /* pthread_create() failed */
+        // TODO: Throw exception
+        while (1) {}
+    }
+
+    pthread_t           classf_e_handle;
+    pthread_attr_t      classf_e_attrs;
+    struct sched_param  classf_e_priParam;
+
+    /* Initialize the attributes structure with default values */
+    pthread_attr_init(&classf_e_attrs);
+
+    /* Set priority, detach state, and stack size attributes */
+    classf_e_priParam.sched_priority = 1;
+    retc = pthread_attr_setschedparam(&classf_e_attrs, &classf_e_priParam);
+    retc |= pthread_attr_setdetachstate(&classf_e_attrs, PTHREAD_CREATE_DETACHED);
+    retc |= pthread_attr_setstacksize(&classf_e_attrs, STACK_SIZE_LARGE);
+    if (retc) {
+        /* failed to set attributes */
+        // TODO: Throw exception
+        while (1) {}
+    }
+
+    retc = pthread_create(&classf_e_handle, &classf_e_attrs, Classifier::classifier_thread, (void *)east);
+    if (retc) {
+        /* pthread_create() failed */
+        // TODO: Throw exception
+        while (1) {}
+    }
+
 //    pthread_t           mosfet_handle;
 //    pthread_attr_t      mosfet_attrs;
 //    struct sched_param  mosfet_priParam;
@@ -148,7 +201,7 @@ int main()
 //        while (1) {}
 //    }
 //
-//    retc = pthread_create(&mosfet_handle, &mosfet_attrs, Lights::mosfet_toggle_thread, NULL);
+//    retc = pthread_create(&mosfet_handle, &mosfet_attrs, Lidar::lidarDemoThread, NULL);
 //    if (retc) {
 //        /* pthread_create() failed */
 //        // TODO: Throw exception

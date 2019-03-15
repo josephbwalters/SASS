@@ -26,6 +26,9 @@ class Classifier
 public:
     static Classifier* get_instance(Directions direction);
 
+    uint8_t track();
+
+    // Thread-able method(s)/callback functions
     static void *classifier_thread(void* args);
     static void *watchman(void *args);
     static void callback_hwi(uint_least8_t index);
@@ -37,8 +40,6 @@ private:
     Directions m_direction;
     Lidar* m_lidar;
     Radar* m_radar;
-
-    uint8_t track();
 
     static Classifier* classifier_north;
     static Classifier* classifier_east;

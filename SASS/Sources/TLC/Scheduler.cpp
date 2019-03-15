@@ -74,11 +74,11 @@ void *Scheduler::scheduler_thread(void *args)
     timer_params.timerMode  = Timer_ONESHOT_BLOCKING;
     timer_params.timerCallback = NULL;
 
-    timer_handle = Timer_open(Board_TIMER0, &timer_params);
-    if (timer_handle == NULL) {
-        // Timer_open() failed
-        // TODO: Throw exception
-    }
+//    timer_handle = Timer_open(Board_TIMER0, &timer_params);
+//    if (timer_handle == NULL) {
+//        // Timer_open() failed
+//        // TODO: Throw exception
+//    }
 
     while (1)
     {
@@ -86,23 +86,53 @@ void *Scheduler::scheduler_thread(void *args)
         // TODO: Implement with directions input into the queue, not numbers!
         while (!scheduler->get_vehicle_queue()->empty())
         {
-            printf("[Scheduler]: Processing vehicle...\n");
             Vehicle vehicle = scheduler->get_vehicle_queue()->front();
             Directions direction = vehicle.get_direction();
+            printf("[Scheduler]: Processing vehicle %d...\n", direction);
 
-            scheduler->get_lights()->schedule(direction);
-            scheduler->get_lights()->set_all_red();
-
-            printf("[Scheduler]: Starting 3-second timer...\n");
+            timer_params.period = 2000000;
+            timer_handle = Timer_open(Board_TIMER0, &timer_params);
+            printf("[Scheduler]: Starting 2-second timer...\n");
             int status = Timer_start(timer_handle);
+            Timer_close(timer_handle);
 
             if (status == Timer_STATUS_ERROR) {
                 //Timer_start() failed
                 // TODO: Throw exception
             }
 
-            Timer_stop(timer_handle);
-            printf("[Scheduler]: Timer expired.\n");
+            printf("[Scheduler]: 2-second timer expired.\n");
+
+            scheduler->get_lights()->schedule(direction);
+
+            timer_params.period = 3000000;
+            timer_handle = Timer_open(Board_TIMER0, &timer_params);
+            printf("[Scheduler]: Starting 3-second timer...\n");
+            status = Timer_start(timer_handle);
+            Timer_close(timer_handle);
+
+            if (status == Timer_STATUS_ERROR) {
+                //Timer_start() failed
+                // TODO: Throw exception
+            }
+
+            printf("[Scheduler]: 3-second timer expired.\n");
+
+            scheduler->get_lights()->set_all_red();
+
+            timer_params.period = 3000000;
+            timer_handle = Timer_open(Board_TIMER0, &timer_params);
+            printf("[Scheduler]: Starting 3-second timer...\n");
+            status = Timer_start(timer_handle);
+            Timer_close(timer_handle);
+
+            if (status == Timer_STATUS_ERROR) {
+                //Timer_start() failed
+                // TODO: Throw exception
+            }
+
+            // Timer_stop(timer_handle);
+            printf("[Scheduler]: 3-second timer expired.\n");
 
             scheduler->get_vehicle_queue()->pop_front();
             printf("[Scheduler]: Vehicle exited and removed from queue.\n");
@@ -113,6 +143,4 @@ void *Scheduler::scheduler_thread(void *args)
 
         Task_yield();
     }
-
-    Timer_close(timer_handle);
 }

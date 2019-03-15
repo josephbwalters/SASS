@@ -86,6 +86,7 @@ Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
         if (lidar_north == nullptr)
         {
             lidar_north = new Lidar(lidar_type);
+            // printf("Lidar memory address: %d\n", lidar_north);
         }
         return lidar_north;
     

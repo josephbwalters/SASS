@@ -138,7 +138,7 @@ void *Classifier::classifier_thread(void *args)
     Directions direction;
     direction = static_cast<Directions>((int)args);
 
-    printf("[Classifier %d]: Created classifier thread.\n", direction);
+    printf("[Classifier %d] Created classifier thread.\n", direction);
 
     Classifier* classifier = Classifier::get_instance(direction);
     Scheduler* scheduler = Scheduler::get_instance();
@@ -146,12 +146,12 @@ void *Classifier::classifier_thread(void *args)
     while (1)
     {
         Vehicle current_vehicle(direction);
-        printf("[Classifier %d]: Vehicle detected.\n", direction);
+        printf("[Classifier %d] Vehicle detected.\n", direction);
         uint8_t status = 0;
 
         while (status == 0)
         {
-            printf("[Classifier %d]: Tracking vehicle...\n", direction);
+            printf("[Classifier %d] Tracking vehicle...\n", direction);
 
             status = classifier->track();
 
@@ -167,7 +167,7 @@ void *Classifier::classifier_thread(void *args)
 
         // Send vehicle to queue
         scheduler->get_vehicle_queue()->push_back(current_vehicle);
-        printf("[Classifier %d]: Vehicle stopped and added to queue.\n", direction);
+        printf("[Classifier %d] Vehicle stopped and added to queue.\n", direction);
 
         status = 1;
 
@@ -183,7 +183,7 @@ void *Classifier::classifier_thread(void *args)
         // Task_yield();
     }
 
-    printf("[Classifier %d]: Exiting classifier thread...\n", direction);
+    printf("[Classifier %d] Exiting classifier thread...\n", direction);
 
     pthread_exit(NULL);
 }

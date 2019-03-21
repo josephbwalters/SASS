@@ -1044,6 +1044,8 @@
 #include "mss_mmw.h"
 #include "ti/demo/xwr16xx/mmw/common/mmw_messages.h"
 
+/* Extra Include Files */
+#include <ti/demo/io_interface/detected_obj.h>
 
 /**************************************************************************
  *************************** Local Definitions ****************************
@@ -1343,6 +1345,89 @@ int32_t MmwDemo_mboxWrite(MmwDemo_message     * message)
     return retVal;
 }
 
+void send_over_spi(uint16_t range, uint16_t velocity)
+{
+    bool transferOK = false;
+
+    SPI_Handle      handle;
+    SPI_Params      params;
+    SPI_Transaction spiTransaction;
+
+    SPI_Params_init(&params);
+    params.mode = SPI_SLAVE;
+    params.frameFormat = SPI_POL0_PHA0;
+    params.pinMode = SPI_PINMODE_4PIN_CS;
+    params.shiftFormat = SPI_MSB_FIRST;
+    params.dmaEnable = 0;
+    //params.txDummyValue = 12U;
+    //params.transferMode = SPI_MODE_BLOCKING;
+    //params.dmaHandle = gDmaHandle;
+    params.dataSize = 8U;
+    params.u.slaveParams.chipSelect = 1U;
+    // params.u.slaveParams.dmaCfg.txDmaChanNum =1U;
+    // params.u.slaveParams.dmaCfg.rxDmaChanNum =0U;
+
+    handle = SPI_open(0, &params);
+    if (!handle) {
+      System_printf("SPI did not open");
+    }
+
+    uint8_t txBuffer[4];
+    uint8_t rxBuffer[1];
+
+    txBuffer[0] = (uint8_t)((range >> 8) && 0x00FF);
+    txBuffer[1] = (uint8_t)(range && 0x00FF);
+    txBuffer[2] = (uint8_t)velocity; // should be small enough to be within 1Byte
+
+    rxBuffer[0] = 0;
+
+    spiTransaction.count = 4;
+    spiTransaction.txBuf = txBuffer;
+    spiTransaction.rxBuf = rxBuffer;
+
+    transferOK = SPI_transfer(handle, &spiTransaction);
+    if (!transferOK) {
+      System_printf("Unsuccessful SPI transfer");
+    }
+
+    SPI_close(handle);
+}
+
+bool is_in_range(float min, float max, float value) {
+    return value > min && value < max;
+}
+
+bool valid_object(float range, float velocity) {
+    float min_valid_range = 0.01;
+    float max_valid_range = 100.0;
+
+    float min_valid_velocity = -100.0;
+    float max_valid_velocity = 100.0;
+
+    return is_in_range(min_valid_range, max_valid_range, range) && is_in_range(min_valid_velocity, max_valid_velocity, velocity);
+}
+
+void process_objects(float *ranges, float *velocities, int number_of_objects) {
+    float min_range = 1000000.0;
+    float velocity = 0.0;
+
+    int idx;
+    for (idx = 0; idx < number_of_objects; idx++) {
+        if (valid_object(ranges[idx], velocities[idx]) && (ranges[idx] < min_range)) {
+            min_range = ranges[idx];
+            velocity = velocities[idx];
+        }
+    }
+
+    CLI_write("RANGE: %.2f\n", min_range);
+    CLI_write("VELOCITY: %.2f\n\n", velocity);
+
+    // send_over_spi((uint16_t)round(min_range), (uint16_t)round(velocity));
+    // send_over_spi((uint16_t)47U, (uint16_t)21U);
+
+}
+
+
 /**
  *  @b Description
  *  @n
@@ -1359,113 +1444,182 @@ int32_t MmwDemo_mboxWrite(MmwDemo_message     * message)
  */
 static void MmwDemo_mboxReadTask(UArg arg0, UArg arg1)
 {
-    MmwDemo_message      message;
-    int32_t              retVal = 0;
+    MmwDemo_message message;
+    int32_t transferOK = 0;
     uint32_t totalPacketLen;
     uint32_t numPaddingBytes;
     uint32_t itemIdx;
+    uint32_t detObjIdx;
+    uint32_t numDetObjs;
+
+    MmwDemo_output_message_dataObjDescr *detObjPtrDescr;
+    MmwDemo_detectedObj *detObjArray;
+    MmwDemo_detectedObj detObj;
+
+    float *ranges = NULL;
+    float range;
+    float *velocities = NULL;
+    float velocity;
+
+    float speed_of_light = 3e8;
+
+    // NOTE: These are based off of configuration from mmwave demo.
+
+    //profilecfg
+    // id, start_freq, idleTime, adc_start_time, ramp_end_time, txOutPower, txPhaseShifter, freqSlopeConst, txStartTime, numAdcSamples, digOutSampleRate, hpfCornerFreq1, hpfCornerFreq2, rxGain
+    //  0     77         429        7               57.14          0            0                70             1            256               5209           0                  0           30
+
+    // framecfg
+    // chirp_start_idx, chirp_end_idx, number_of_loops, number_of_frames, frame_periodocity, trigger_select, frame_trigger_delay
+    //       0               1                16              0                250                 1                 0
+
+    //chirpcfg
+    // chirp_start_idx, chirp_end_idx, profile, start_Freq, freq_slope, idle_time, adc_start_time, tx_antenna_mask
+    // 0                      0           0        0            0           0           0                  1
+    // 1                      1           0        0            0           0           0                  2
+
+
+    uint32_t dig_out_sample_rate = 5209;
+    uint32_t freq_slope_const = 70;
+    uint16_t num_range_bins = 256; // Needs to be pwr of 2 (round up from numADCSamps)
+    float range_bias = gMmwMssMCB.cliCommonCfg.compRxChanCfg.rangeBias;
+
+    // speed of light times F_samp (samplng freq), S (chirp slope Hz/sec), N_FFT is 1D FFT Size
+    float range_calculation = (speed_of_light * dig_out_sample_rate * 1e3) / (2 * (freq_slope_const * ((1e6)/(1e-6)) * num_range_bins));
+
+    uint32_t start_freq = 77;
+    uint32_t idle_time = 429;
+    uint32_t ramp_end_time = 57.14;
+    uint32_t chirp_start_idx = 0;
+    uint32_t chirp_end_idx = 1;
+    uint32_t num_loops = 16;
+    uint32_t num_chirps_per_frame = (chirp_end_idx - chirp_start_idx + 1) * num_loops;
+
+    float velocity_calculation = (speed_of_light / (2 * (start_freq * 1e9) * ((idle_time + ramp_end_time) * 1e-6) * num_chirps_per_frame) );
 
     /* wait for new message and process all the messages received from the peer */
-    while(1)
-    {
+    while(1) {
         Semaphore_pend(gMmwMssMCB.mboxSemHandle, BIOS_WAIT_FOREVER);
-        
-        /* Read the message from the peer mailbox: We are not trying to protect the read
-         * from the peer mailbox because this is only being invoked from a single thread */
-        retVal = Mailbox_read(gMmwMssMCB.peerMailbox, (uint8_t*)&message, sizeof(MmwDemo_message));
-        if (retVal < 0)
-        {
-            /* Error: Unable to read the message. Setup the error code and return values */
-            System_printf ("Error: Mailbox read failed [Error code %d]\n", retVal);
-        }
-        else if (retVal == 0)
-        {
-            /* We are done: There are no messages available from the peer execution domain. */
+        transferOK = Mailbox_read(gMmwMssMCB.peerMailbox, (uint8_t*)&message, sizeof(MmwDemo_message));
+
+        if (transferOK == 0) {
             continue;
-        }
-        else
-        {
-            /* Flush out the contents of the mailbox to indicate that we are done with the message. This will
-             * allow us to receive another message in the mailbox while we process the received message. */
+        } else if (transferOK < 0) {
+            System_printf("Error: Mailbox read failed [Error code %d]\n", transferOK);
+            continue;
+        } else {
+            /* Flush mailbox, so we can recieve more messages */
             Mailbox_readFlush (gMmwMssMCB.peerMailbox);
 
             /* Process the received message: */
-            switch (message.type)
-            {
-                case MMWDEMO_DSS2MSS_DETOBJ_READY:
-                    /* Got detetced objectes , shipped out through UART */
+            switch (message.type) {
+                /* Got detected objects , shipped out through UART */
+                case MMWDEMO_DSS2MSS_DETOBJ_READY: {
                     /* Send header */
                     totalPacketLen = sizeof(MmwDemo_output_message_header);
-                    UART_writePolling (gMmwMssMCB.loggingUartHandle,
-                                       (uint8_t*)&message.body.detObj.header,
-                                       sizeof(MmwDemo_output_message_header));
+                    UART_writePolling(gMmwMssMCB.loggingUartHandle, (uint8_t*)&message.body.detObj.header, sizeof(MmwDemo_output_message_header));
 
                     /* Send TLVs */
-                    for (itemIdx = 0;  itemIdx < message.body.detObj.header.numTLVs; itemIdx++)
-                    {
-                        UART_writePolling (gMmwMssMCB.loggingUartHandle,
-                                           (uint8_t*)&message.body.detObj.tlv[itemIdx],
-                                           sizeof(MmwDemo_output_message_tl));
-                        UART_writePolling (gMmwMssMCB.loggingUartHandle,
-                                           (uint8_t*)SOC_translateAddress(message.body.detObj.tlv[itemIdx].address,
-                                                                          SOC_TranslateAddr_Dir_FROM_OTHER_CPU,NULL),
-                                           message.body.detObj.tlv[itemIdx].length);
-                        totalPacketLen += sizeof(MmwDemo_output_message_tl) + message.body.detObj.tlv[itemIdx].length;
+                    for (itemIdx = 0;  itemIdx < message.body.detObj.header.numTLVs; itemIdx++) {
+
+                        // This is our custom code
+                        if(message.body.detObj.tlv[itemIdx].type == MMWDEMO_OUTPUT_MSG_DETECTED_POINTS) {
+                            detObjPtrDescr = (MmwDemo_output_message_dataObjDescr*)SOC_translateAddress(message.body.detObj.tlv[itemIdx].address, SOC_TranslateAddr_Dir_FROM_OTHER_CPU, NULL);
+                            numDetObjs = detObjPtrDescr->numDetetedObj;
+                            detObjArray = (MmwDemo_detectedObj*)(detObjPtrDescr + sizeof(detObjPtrDescr));
+
+                            CLI_write("NUMBER OF OBJECTS# : %d\n", numDetObjs);
+
+                            if (ranges == NULL) {
+                                ranges = (float*)calloc(numDetObjs, sizeof(float));
+                                velocities = (float*)calloc(numDetObjs, sizeof(float));
+                            }
+
+                            for (detObjIdx = 0; detObjIdx < numDetObjs; detObjIdx++) {
+                                detObj = detObjArray[detObjIdx];
+                                range_bias = gMmwMssMCB.cliCommonCfg.compRxChanCfg.rangeBias;
+                                if (detObj.rangeIdx > 5000) continue;
+
+                                range = detObj.rangeIdx * range_calculation - range_bias;
+                                velocity = detObj.dopplerIdx * velocity_calculation;
+
+                                ranges[detObjIdx] = range;
+                                velocities[detObjIdx] = velocity;
+
+                                CLI_write("%d Range: %0.5f m\n", detObjIdx+1, range);
+                                CLI_write("%d Velocity: %0.5f m/s\n",detObjIdx+1 , velocity);
+                            }
+                        }
+
+                        /* TLV HEADER AND DATA*/
+                        UART_writePolling(gMmwMssMCB.loggingUartHandle, (uint8_t*)&message.body.detObj.tlv[itemIdx], sizeof(MmwDemo_output_message_tl));
+                        UART_writePolling(gMmwMssMCB.loggingUartHandle, (uint8_t*)SOC_translateAddress(message.body.detObj.tlv[itemIdx].address, SOC_TranslateAddr_Dir_FROM_OTHER_CPU, NULL), message.body.detObj.tlv[itemIdx].length);
+                        totalPacketLen += message.body.detObj.tlv[itemIdx].length + sizeof(MmwDemo_output_message_tl);
                     }
+
+                    CLI_write("------------------------------\n");
 
                     /* Send padding to make total packet length multiple of MMWDEMO_OUTPUT_MSG_SEGMENT_LEN */
                     numPaddingBytes = MMWDEMO_OUTPUT_MSG_SEGMENT_LEN - (totalPacketLen & (MMWDEMO_OUTPUT_MSG_SEGMENT_LEN-1));
-                    if (numPaddingBytes<MMWDEMO_OUTPUT_MSG_SEGMENT_LEN)
-                    {
+                    if (numPaddingBytes < MMWDEMO_OUTPUT_MSG_SEGMENT_LEN) {
                         uint8_t padding[MMWDEMO_OUTPUT_MSG_SEGMENT_LEN];
                         /*DEBUG:*/ memset(&padding, 0xf, MMWDEMO_OUTPUT_MSG_SEGMENT_LEN);
-                        UART_writePolling (gMmwMssMCB.loggingUartHandle,
-                                            padding,
-                                            numPaddingBytes);
+                        UART_writePolling(gMmwMssMCB.loggingUartHandle, padding, numPaddingBytes);
                     }
 
                     /* Send a message to MSS to log the output data */
                     memset((void *)&message, 0, sizeof(MmwDemo_message));
-
                     message.type = MMWDEMO_MSS2DSS_DETOBJ_SHIPPED;
-
-                    if (MmwDemo_mboxWrite(&message) != 0)
-                    {
+                    if (MmwDemo_mboxWrite(&message) != 0) {
                         System_printf ("Error: Mailbox send message id=%d failed \n", message.type);
                     }
 
+                    if (ranges != NULL && velocities != NULL) {
+                        process_objects(ranges, velocities, numDetObjs);
+                        free(ranges);
+                        free(velocities);
+                    }
+
+                    ranges = NULL;
+                    velocities = NULL;
                     break;
-                case MMWDEMO_DSS2MSS_STOPDONE:
-                    /* Post event that stop is done */
+                }
+
+                /* Post event that stop is done */
+                case MMWDEMO_DSS2MSS_STOPDONE: {
                     gMmwMssMCB.stats.dssSensorStop++;
                     Event_post(gMmwMssMCB.eventHandleNotify, MMWDEMO_DSS_STOP_COMPLETED_EVT);
-                break;
-                case MMWDEMO_DSS2MSS_ASSERT_INFO:
-                    /* Send the received DSS assert info through CLI */
-                    CLI_write ("DSS Exception: %s, line %d.\n", message.body.assertInfo.file,
-                        message.body.assertInfo.line);
-                break;
-                case MMWDEMO_DSS2MSS_ISR_INFO_ADDRESS:
-                    gMmwMssMCB.dss2mssIsrInfoAddress = 
-                        SOC_translateAddress(message.body.dss2mssISRinfoAddress,
-                                             SOC_TranslateAddr_Dir_FROM_OTHER_CPU, NULL);
+                    break;
+                }
+
+                /* Send the received DSS assert info through CLI */
+                case MMWDEMO_DSS2MSS_ASSERT_INFO: {
+                    CLI_write ("DSS Exception: %s, line %d.\n", message.body.assertInfo.file, message.body.assertInfo.line);
+                    break;
+                }
+
+                case MMWDEMO_DSS2MSS_ISR_INFO_ADDRESS: {
+                    gMmwMssMCB.dss2mssIsrInfoAddress = SOC_translateAddress(message.body.dss2mssISRinfoAddress, SOC_TranslateAddr_Dir_FROM_OTHER_CPU, NULL);
                     MmwDemo_installDss2MssExceptionSignallingISR();
-                break;
-                case MMWDEMO_DSS2MSS_MEASUREMENT_INFO:
-                    /* Send the received DSS calibration info through CLI */
+                    break;
+                }
+
+                /* Send the received DSS calibration info through CLI */
+                case MMWDEMO_DSS2MSS_MEASUREMENT_INFO: {
                     CLI_write ("compRangeBiasAndRxChanPhase");
                     CLI_write (" %.7f", message.body.compRxChanCfg.rangeBias);
+
                     int32_t i;
-                    for (i = 0; i < SYS_COMMON_NUM_TX_ANTENNAS*SYS_COMMON_NUM_RX_CHANNEL; i++)
-                    {
+                    for (i = 0; i < SYS_COMMON_NUM_TX_ANTENNAS * SYS_COMMON_NUM_RX_CHANNEL; i++) {
                         CLI_write (" %.5f", (float) message.body.compRxChanCfg.rxChPhaseComp[i].real/32768.);
                         CLI_write (" %.5f", (float) message.body.compRxChanCfg.rxChPhaseComp[i].imag/32768.);
                     }
                     CLI_write ("\n");
-                break;
-                default:
-                {
-                    /* Message not support */
+                    break;
+                }
+
+                /* Message not supported */
+                default: {
                     System_printf ("Error: unsupport Mailbox message id=%d\n", message.type);
                     break;
                 }
@@ -1838,7 +1992,7 @@ void MmwDemo_mmWaveCtrlTask(UArg arg0, UArg arg1)
  */
 void MmwDemo_notifySensorStart(bool doReconfig)
 {
-    gMmwMssMCB.stats.cliSensorStartEvt ++;
+    gMmwMssMCB.stats.cliSensorStartEvt++;
 
     if (doReconfig) {
         /* Post sensorStart event to start reconfig and then start the sensor */
@@ -2237,6 +2391,7 @@ void MmwDemo_mssInitTask(UArg arg0, UArg arg1)
     int32_t             errCode;
     MMWave_InitCfg      initCfg;
     UART_Params         uartParams;
+//    SPI_Params          spiParams;
     Task_Params         taskParams;
     Semaphore_Params    semParams;
     Mailbox_Config      mboxCfg;
@@ -2264,15 +2419,15 @@ void MmwDemo_mssInitTask(UArg arg0, UArg arg1)
     Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINP8_PADBM, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
     Pinmux_Set_FuncSel(SOC_XWR16XX_PINP8_PADBM, SOC_XWR16XX_PINP8_PADBM_DSS_UART_TX);
 
-    /* SPI Pinmux */ 
-    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PIND13_PADAD, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
-    Pinmux_Set_FuncSel(SOC_XWR16XX_PIND13_PADAD, SOC_XWR16XX_PIND13_PADAD_SPIA_MOSI);
-    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINE14_PADAE, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
-    Pinmux_Set_FuncSel(SOC_XWR16XX_PINE14_PADAE, SOC_XWR16XX_PINE14_PADAE_SPIA_MISO);
-    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINE13_PADAF, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
-    Pinmux_Set_FuncSel(SOC_XWR16XX_PINE13_PADAF, SOC_XWR16XX_PINE13_PADAF_SPIA_CLK);
-    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINC13_PADAG, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
-    Pinmux_Set_FuncSel(SOC_XWR16XX_PINC13_PADAG, SOC_XWR16XX_PINC13_PADAG_SPIA_CSN);
+//    /* Setup the PINMUX to bring out SPI */
+//    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PIND13_PADAD, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+//    Pinmux_Set_FuncSel(SOC_XWR16XX_PIND13_PADAD, SOC_XWR16XX_PIND13_PADAD_SPIA_MOSI);
+//    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINE14_PADAE, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+//    Pinmux_Set_FuncSel(SOC_XWR16XX_PINE14_PADAE, SOC_XWR16XX_PINE14_PADAE_SPIA_MISO);
+//    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINE13_PADAF, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+//    Pinmux_Set_FuncSel(SOC_XWR16XX_PINE13_PADAF, SOC_XWR16XX_PINE13_PADAF_SPIA_CLK);
+//    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINC13_PADAG, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+//    Pinmux_Set_FuncSel(SOC_XWR16XX_PINC13_PADAG, SOC_XWR16XX_PINC13_PADAG_SPIA_CSN);
 
     /* Initialize the UART */
     UART_init();
@@ -2281,13 +2436,13 @@ void MmwDemo_mssInitTask(UArg arg0, UArg arg1)
     GPIO_init();
 
     /* Initialize the SPI */
-    SPI_init();
+//    SPI_init();
 
     /* Initialize the Mailbox */
     Mailbox_init(MAILBOX_TYPE_MSS);
 
     /*****************************************************************************
-     * Open & configure the drivers:
+     * Open & configure the UART drivers:
      *****************************************************************************/
 
     /* Setup the default UART Parameters */
@@ -2357,6 +2512,14 @@ void MmwDemo_mssInitTask(UArg arg0, UArg arg1)
     Task_Params_init(&taskParams);
     taskParams.stackSize = 16*1024;
     Task_create(MmwDemo_mboxReadTask, &taskParams, NULL);
+
+    /*****************************************************************************
+     * Open & configure the SPI drivers:
+     *****************************************************************************/
+    // Uncomment later
+//    SPI_Params_init(&spiParams);
+//    spiParams.mode = SPI_SLAVE;
+//    spiParams.dataSize = 8;
 
     /*****************************************************************************
      * Create Event to handle mmwave callback and system datapath events 
@@ -2503,53 +2666,6 @@ void _MmwDemo_mssAssert(int32_t expression, const char *file, int32_t line)
     }
 }
 
-void send_over_spi()
-{
-    bool transferOK = false;
-
-    SPI_Handle      handle;
-    SPI_Params      params;
-    SPI_Transaction spiTransaction;
-
-    SPI_Params_init(&params);
-    params.mode = SPI_SLAVE;
-    params.frameFormat = SPI_POL0_PHA0;
-    params.pinMode = SPI_PINMODE_4PIN_CS;
-    params.shiftFormat = SPI_MSB_FIRST;
-    params.dmaEnable = 0;
-    //params.txDummyValue = 12U;
-    //params.transferMode = SPI_MODE_BLOCKING;
-    //params.dmaHandle = gDmaHandle;
-    params.dataSize = 8U;
-    params.u.slaveParams.chipSelect = 1U;
-    // params.u.slaveParams.dmaCfg.txDmaChanNum =1U;
-    // params.u.slaveParams.dmaCfg.rxDmaChanNum =0U;
-
-    handle = SPI_open(0, &params);
-    if (!handle)
-    {
-      System_printf("SPI did not open");
-    }
-
-    uint8_t txBuffer[1];
-    uint8_t rxBuffer[1];
-
-    txBuffer[0] = 17U;
-    rxBuffer[0] = 0;
-
-    spiTransaction.count = 1;
-    spiTransaction.txBuf = txBuffer;
-    spiTransaction.rxBuf = rxBuffer;
-
-    transferOK = SPI_transfer(handle, &spiTransaction);
-    if (!transferOK)
-    {
-      System_printf("Unsuccessful SPI transfer");
-    }
-
-    SPI_close(handle);
-}
-
 /**
  *  @b Description
  *  @n
@@ -2594,7 +2710,7 @@ int main (void)
     if (SOC_isSecureDevice(gMmwMssMCB.socHandle, &errCode))
     {
         /* Disable firewall for JTAG and LOGGER (UART) which is needed by the demo */
-        SOC_controlSecureFirewall(gMmwMssMCB.socHandle, 
+        SOC_controlSecureFirewall(gMmwMssMCB.socHandle,
                                   (uint32_t)(SOC_SECURE_FIREWALL_JTAG | SOC_SECURE_FIREWALL_LOGGER),
                                   SOC_SECURE_FIREWALL_DISABLE,
                                   &errCode);
@@ -2610,6 +2726,17 @@ int main (void)
     taskParams.priority = 3;
     taskParams.stackSize = 2*1024;
     Task_create(MmwDemo_mssInitTask, &taskParams, NULL);
+
+    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PIND13_PADAD, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+    Pinmux_Set_FuncSel(SOC_XWR16XX_PIND13_PADAD, SOC_XWR16XX_PIND13_PADAD_SPIA_MOSI);
+    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINE14_PADAE, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+    Pinmux_Set_FuncSel(SOC_XWR16XX_PINE14_PADAE, SOC_XWR16XX_PINE14_PADAE_SPIA_MISO);
+    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINE13_PADAF, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+    Pinmux_Set_FuncSel(SOC_XWR16XX_PINE13_PADAF, SOC_XWR16XX_PINE13_PADAF_SPIA_CLK);
+    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINC13_PADAG, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+    Pinmux_Set_FuncSel(SOC_XWR16XX_PINC13_PADAG, SOC_XWR16XX_PINC13_PADAG_SPIA_CSN);
+
+    SPI_init();
 
     /* Start BIOS */
     BIOS_start();

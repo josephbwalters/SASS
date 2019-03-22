@@ -1422,9 +1422,22 @@ void process_objects(float *ranges, float *velocities, int number_of_objects) {
     CLI_write("RANGE: %.2f\n", min_range);
     CLI_write("VELOCITY: %.2f\n\n", velocity);
 
+    // IWR1642 / IWR1642BOOST pin mapping:
+    // SOC_XWR16XX_GPIO_0 -> AR_GPIO_0 (J6 pin 15)
+    // SOC_XWR16XX_GPIO_0 -> AR_GPIO_1 (J5 pin 8)
+    // SOC_XWR16XX_GPIO_0 -> AR_GPIO_2 (J5 pin 18)
+
+    if (min_range > 1.0 && min_range < 5.0)
+    {
+        GPIO_write(SOC_XWR16XX_GPIO_0, 1);
+    }
+    else
+    {
+        GPIO_write(SOC_XWR16XX_GPIO_0, 0);
+    }
+
     // send_over_spi((uint16_t)round(min_range), (uint16_t)round(velocity));
     // send_over_spi((uint16_t)47U, (uint16_t)21U);
-
 }
 
 

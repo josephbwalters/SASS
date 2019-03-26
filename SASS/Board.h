@@ -72,11 +72,15 @@ extern "C" {
 
 #define Board_GPIO_BUTTON0          MSP_EXP432P401R_GPIO_S1
 #define Board_GPIO_BUTTON1          MSP_EXP432P401R_GPIO_S2
+#define Board_GPIO_MMW1             MSP_EXP432P401R_GPIO_MMW1
+#define Board_GPIO_MMW2             MSP_EXP432P401R_GPIO_MMW2
 
 #define Board_GPIO_TMP116_EN        MSP_EXP432P401R_GPIO_TMP116_EN
 
 #define Board_I2C0                  MSP_EXP432P401R_I2CB0
+/* SASS-specific configuration - LV3HP 2 */
 #define Board_I2C1                  MSP_EXP432P401R_I2CB1
+/* SASS-specific configuration - LV3HP 1 */
 #define Board_I2C2                  MSP_EXP432P401R_I2CB2
 
 #define Board_I2CSLAVE0             MSP_EXP432P401R_I2CSLAVEB0
@@ -94,7 +98,9 @@ extern "C" {
 #define Board_SPI1                  MSP_EXP432P401R_SPIB2
 #define Board_SPI2                  MSP_EXP432P401R_SPIB3
 #define Board_SPI3                  MSP_EXP432P401R_SPIB4
+/* SASS-specific configuration - MMW 1 */
 #define Board_SPI4                  MSP_EXP432P401R_SPIB5
+/* SASS-specific configuration - MMW 2 */
 #define Board_SPI5                  MSP_EXP432P401R_SPIB6
 #define Board_SPI_CS1               MSP_EXP432P401R_SPI_CS1
 #define Board_SPI_CS2               MSP_EXP432P401R_SPI_CS2

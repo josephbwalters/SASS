@@ -1,26 +1,36 @@
+/*
+ * Vehicle.cpp
+ * Created by: Joseph Walters, Trent Sellers 
+ */
+
+/* SASS-specific headers */
 #include <Sources/OC/Vehicle.h>
 
 using namespace sources::oc;
 
-Vehicle::Vehicle(Directions dir, float s)
+Vehicle::Vehicle(Directions direction) : m_direction(direction)
 {
-   direction = dir;
-   speed = s;
+
 }
 
-void Vehicle::set_speed(float s)
+Vehicle::~Vehicle()
 {
-     speed = s;
+    // TODO: Clean up (if necessary)
+}
+
+void Vehicle::set_speed(uint16_t speed)
+{
+     m_speed = speed;
 }
 
 Directions Vehicle::get_direction()
 {
-    return direction;
+    return m_direction;
 }
 
-float Vehicle::get_speed()
+uint16_t Vehicle::get_speed()
 {
-    return speed;
+    return m_speed;
 }
 
 

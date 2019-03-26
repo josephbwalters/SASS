@@ -15,90 +15,90 @@ XDCCFGDIR = package/cfg/
 # in the event that some included BOM script changes.
 #
 ifneq (clean,$(MAKECMDGOALS))
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/utils.js:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/utils.js
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/xdc.tci:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/xdc.tci
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/template.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/template.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/om2.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/om2.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/xmlgen.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/xmlgen.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/xmlgen2.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/xmlgen2.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/Warnings.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/Warnings.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/IPackage.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/IPackage.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/package.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/package.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/global/Clock.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/global/Clock.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/global/Trace.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/global/Trace.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/bld.js:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/bld.js
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/BuildEnvironment.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/BuildEnvironment.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/PackageContents.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/PackageContents.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/_gen.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/_gen.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Library.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Library.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Executable.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Executable.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Repository.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Repository.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Configuration.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Configuration.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Script.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Script.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Manifest.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Manifest.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Utils.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Utils.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITarget.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITarget.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITarget2.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITarget2.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITarget3.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITarget3.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITargetFilter.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITargetFilter.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/package.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/bld/package.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/utils.js:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/utils.js
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/xdc.tci:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/xdc.tci
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/template.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/template.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/om2.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/om2.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/xmlgen.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/xmlgen.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/xmlgen2.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/xmlgen2.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/Warnings.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/Warnings.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/IPackage.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/IPackage.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/package.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/package.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/services/global/Clock.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/services/global/Clock.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/services/global/Trace.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/services/global/Trace.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/bld.js:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/bld.js
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/BuildEnvironment.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/BuildEnvironment.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/PackageContents.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/PackageContents.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/_gen.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/_gen.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Library.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Library.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Executable.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Executable.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Repository.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Repository.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Configuration.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Configuration.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Script.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Script.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Manifest.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Manifest.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Utils.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/Utils.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITarget.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITarget.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITarget2.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITarget2.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITarget3.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITarget3.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITargetFilter.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/ITargetFilter.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/package.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/bld/package.xs
 package.mak: config.bld
-/Users/jwalters/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/ITarget.xs:
-package.mak: /Users/jwalters/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/ITarget.xs
-/Users/jwalters/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/C28_large.xs:
-package.mak: /Users/jwalters/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/C28_large.xs
-/Users/jwalters/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/C28_float.xs:
-package.mak: /Users/jwalters/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/C28_float.xs
-/Users/jwalters/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/package.xs:
-package.mak: /Users/jwalters/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/package.xs
-/Users/jwalters/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/arm/elf/IArm.xs:
-package.mak: /Users/jwalters/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/arm/elf/IArm.xs
-/Users/jwalters/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/arm/elf/package.xs:
-package.mak: /Users/jwalters/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/arm/elf/package.xs
+/Users/trent/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/ITarget.xs:
+package.mak: /Users/trent/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/ITarget.xs
+/Users/trent/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/C28_large.xs:
+package.mak: /Users/trent/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/C28_large.xs
+/Users/trent/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/C28_float.xs:
+package.mak: /Users/trent/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/C28_float.xs
+/Users/trent/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/package.xs:
+package.mak: /Users/trent/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/package.xs
+/Users/trent/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/arm/elf/IArm.xs:
+package.mak: /Users/trent/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/arm/elf/IArm.xs
+/Users/trent/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/arm/elf/package.xs:
+package.mak: /Users/trent/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/arm/elf/package.xs
 package.mak: package.bld
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/compiler.opt.xdt:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/compiler.opt.xdt
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/io/File.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/io/File.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/io/package.xs:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/services/io/package.xs
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/compiler.defs.xdt:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/compiler.defs.xdt
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/custom.mak.exe.xdt:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/custom.mak.exe.xdt
-/Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/package.xs.xdt:
-package.mak: /Users/jwalters/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/package.xs.xdt
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/compiler.opt.xdt:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/compiler.opt.xdt
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/services/io/File.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/services/io/File.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/services/io/package.xs:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/services/io/package.xs
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/compiler.defs.xdt:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/compiler.defs.xdt
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/custom.mak.exe.xdt:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/custom.mak.exe.xdt
+/Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/package.xs.xdt:
+package.mak: /Users/trent/ti/xdctools_3_51_01_18_core/packages/xdc/tools/configuro/template/package.xs.xdt
 endif
 
 ti.targets.arm.elf.M4F.rootDir ?= /Applications/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.5.LTS
-ti.targets.arm.elf.packageBase ?= /Users/jwalters/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/arm/elf/
+ti.targets.arm.elf.packageBase ?= /Users/trent/ti/simplelink_msp432p4_sdk_2_40_00_10/kernel/tirtos/packages/ti/targets/arm/elf/
 .PRECIOUS: $(XDCCFGDIR)/%.oem4f
 .PHONY: all,em4f .dlls,em4f .executables,em4f test,em4f
 all,em4f: .executables,em4f

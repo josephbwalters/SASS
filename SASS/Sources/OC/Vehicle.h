@@ -1,9 +1,16 @@
+/*
+ * Vehicle.h
+ * Created by: Joseph Walters, Trent Sellers 
+ */
+
 #ifndef VEHICLE_H_
 #define VEHICLE_H_
 
-// Custom Headers
-#include <Sources/Directions.h>
+/* Standard headers */
+#include <stdint.h>
 
+/* SASS-specific headers */
+#include <Sources/Directions.h>
 #include <Sources/OC/DetectedObject.h>
 
 using namespace sources;
@@ -16,24 +23,20 @@ namespace oc
 
 class Vehicle : public DetectedObject
 {
-private:
-    Directions direction;
-    float speed;
-
-protected:
-
 public:
-    Vehicle(Directions dir, float s);
-    void set_speed(float s);
+    Vehicle(Directions direction);
+    ~Vehicle();
+
+    void set_speed(uint16_t speed);
+    uint16_t get_speed();
     Directions get_direction();
-    float get_speed();
+
+private:
+    Directions m_direction;
+    uint16_t m_speed;
 };
 
 
 }} // sources::oc
-
-
-
-
 
 #endif // VEHICLE_H_

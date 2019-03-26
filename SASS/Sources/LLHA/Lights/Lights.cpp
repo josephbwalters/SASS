@@ -1,20 +1,28 @@
+/*
+ * Lights.cpp
+ * Created by: Joseph Walters, Trent Sellers
+ */
+
 #define __MSP432P401R__
 
+/* System headers */ 
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
+#include <ti/sysbios/knl/Task.h>
 
+/* SASS-specific headers */
 #include <Sources/LLHA/Lights/Lights.h>
 
 using namespace sources;
 using namespace sources::llha::lights;
 
-Lights::Lights()
+Lights::Lights() : m_panic_flag(false), m_waiting(true)
 {
-    bool panic_flag = false;
-    bool waiting = true;
+
 }
 
 void Lights::init()
 {
+    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN3);
     GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN4);
     GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN5);
     GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN6);
@@ -27,23 +35,21 @@ void Lights::set_red(Directions direction)
     {
     case Directions::NORTH:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
         break;
     case Directions::EAST:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
         break;
+    case Directions::SOUTH:
+        // Future: Add functionality for south direction
+        break;
+    case Directions::WEST:
+        // Future: Add functionality for west direction
+        break;
+    default:
+        // TODO: Throw exception
     }
-}
-
-void Lights::set_all_red()
-{
-    set_red(Directions::NORTH);
-    set_red(Directions::EAST);
-}
-
-void Lights::panic()
-{
-    m_panic_flag = true;
-    set_all_red();
 }
 
 void Lights::set_yellow(Directions direction)
@@ -52,11 +58,60 @@ void Lights::set_yellow(Directions direction)
     {
     case Directions::NORTH:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
         break;
     case Directions::EAST:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
         break;
+    case Directions::SOUTH:
+        // Future: Add functionality for south direction
+        break;
+    case Directions::WEST:
+        // Future: Add functionality for west direction
+        break;
+    default:
+        // TODO: Throw exception
     }
+}
+
+void Lights::schedule(Directions direction)
+{
+    switch (direction)
+    {
+    case Directions::NORTH:
+        set_yellow(Directions::NORTH);
+        set_red(Directions::EAST);
+        set_red(Directions::SOUTH);
+        set_red(Directions::WEST);
+        break;
+    case Directions::EAST:
+        set_yellow(Directions::EAST);
+        set_red(Directions::SOUTH);
+        set_red(Directions::WEST);
+        set_red(Directions::NORTH);
+        break;
+    case Directions::SOUTH:
+        set_yellow(Directions::SOUTH);
+        set_red(Directions::WEST);
+        set_red(Directions::NORTH);
+        set_red(Directions::EAST);
+        break;
+    case Directions::WEST:
+        set_yellow(Directions::WEST);
+        set_red(Directions::NORTH);
+        set_red(Directions::EAST);
+        set_red(Directions::SOUTH);
+        break;
+    default:
+        // TODO: Throw exception
+    };
+}
+
+void Lights::set_all_red()
+{
+    set_red(Directions::NORTH);
+    set_red(Directions::EAST);
 }
 
 void Lights::wait()
@@ -69,37 +124,62 @@ void Lights::wait()
     for (int i = 500000; i > 0; i--);
 }
 
-void Lights::safe()
+void Lights::panic()
 {
-    m_panic_flag = false;
+    // TODO: Determine how to implement panic flag in static method
+    // m_panic_flag = true;
+    set_all_red();
 }
 
-void Lights::light_thread(void)
+void Lights::safe()
+{
+    // TODO: Determine how to implement panic flag in static method
+    // m_panic_flag = false;
+}
+
+void *Lights::light_thread(void *args)
 {
     if (m_panic_flag)
     {
         set_all_red();
     }
-
-    switch (m_command)
-    {
-    case Commands::PANIC:
-        panic();
-        break;
-    case Commands::SAFE:
-        safe();
-        break;
-    case Commands::PROCEED:
-        set_yellow(m_direction);
-        break;
-    case Commands::STOP:
-        set_red(m_direction);
-        break;
-    case Commands::WAIT:
-        wait();
-        break;
-    default:
-        ; // Catch/Throw an error
-    }
 }
 
+/**
+    Thread to toggle all of our mosfets
+*/
+void *Lights::mosfet_toggle_thread(void *args)
+{
+    // GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
+
+    bool is_on = 0;
+
+    while(1)
+    {
+        for(int i = 0; i < 1000000; i++)
+        {
+            // Delay
+        }
+
+        if(is_on == 0)
+        {
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
+            is_on = 1;
+        }
+        else
+        {
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
+            is_on = 0;
+        }
+
+        Task_yield();
+    }
+}

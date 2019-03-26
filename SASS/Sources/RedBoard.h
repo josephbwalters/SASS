@@ -1,10 +1,16 @@
+/*
+ * RedBoard.h
+ * Created by: Joseph Walters, Trent Sellers 
+ */
+
 #ifndef REDBOARD_H_
 #define REDBOARD_H_
 
+/* Device drivers for GPIO */
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
 
-#include "Board.h"
-
+/* Board-specific headers */
+#include <Board.h>
 
 // Slave select lines
 #define RADAR_N_SLAVE_SELECT_PORT GPIO_PORT_P1
@@ -93,10 +99,5 @@
 #define YELLOW_E_PIN GPIO_PIN2
 #define YELLOW_S_PIN
 #define YELLOW_W_PIN
-
-
-
-
-
 
 #endif // REDBOARD_H_

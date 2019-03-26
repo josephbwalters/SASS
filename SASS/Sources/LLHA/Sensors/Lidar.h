@@ -1,12 +1,20 @@
+/*
+ * Lidar.h
+ * Created by: Joseph Walters, Trent Sellers
+ */
+
 #ifndef LIDAR_H_
 #define LIDAR_H_
 
+/* Standard headers */
 #include <stdint.h>
+
+/* System headers */
 #include <ti/drivers/I2C.h>
 
 #define SLAVE_ADDR 0x62
 
-// Registers on the LiDAR-Lite v3 HP device
+// Registers on the LiDAR-Lite v3HP device
 #define DEVICE_COMMAND_REG 0x00
 #define SYSTEM_STATUS_REG 0x01
 #define DISTANCE_REG 0x8f
@@ -39,6 +47,9 @@ public:
 
     uint16_t get_distance();
     uint16_t get_velocity();
+
+    // Thread-able method(s)
+    static void *lidarDemoThread(void *args);
 
 private:
     Lidar(LidarInstanceType lidar_type);

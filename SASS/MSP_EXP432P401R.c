@@ -407,6 +407,11 @@ GPIO_PinConfig gpioPinConfigs[] = {
     GPIOMSP432_P4_3 | GPIO_DO_NOT_CONFIG, /* SPI chip select */
     GPIOMSP432_P4_1 | GPIO_DO_NOT_CONFIG, /* LCD power control */
     GPIOMSP432_P6_0 | GPIO_DO_NOT_CONFIG, /*LCD enable */
+
+    /* SASS-specific configuration - MMW 1 */
+    GPIOMSP432_P5_0 | GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_FALLING,
+    /* SASS-specific configuration - MMW 2 */
+    GPIOMSP432_P5_1 | GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_FALLING,
 };
 
 /*
@@ -424,6 +429,19 @@ GPIO_CallbackFxn gpioCallbackFunctions[] = {
     /* MSP_EXP432P401R_SPI_MASTER_READY */
     NULL,
     /* MSP_EXP432P401R_SPI_SLAVE_READY */
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    /* SASS-specific configuration - MMW 1 */
+    NULL,
+    /* SASS-specific configuration - MMW 2 */
     NULL
 };
 
@@ -452,6 +470,7 @@ const I2CMSP432_HWAttrsV1 i2cMSP432HWAttrs[MSP_EXP432P401R_I2CCOUNT] = {
         .dataPin = I2CMSP432_P1_6_UCB0SDA,
         .clkPin = I2CMSP432_P1_7_UCB0SCL
     },
+    /* SASS-specific configuration - LV3HP2 2 */
     {
         .baseAddr = EUSCI_B1_BASE,
         .intNum = INT_EUSCIB1,
@@ -460,6 +479,7 @@ const I2CMSP432_HWAttrsV1 i2cMSP432HWAttrs[MSP_EXP432P401R_I2CCOUNT] = {
         .dataPin = I2CMSP432_P6_4_UCB1SDA,
         .clkPin = I2CMSP432_P6_5_UCB1SCL
     },
+    /* SASS-specific configuration - LV3HP2 1 */
     {
         .baseAddr = EUSCI_B0_BASE,
         .intNum = INT_EUSCIB0,
@@ -476,11 +496,13 @@ const I2C_Config I2C_config[MSP_EXP432P401R_I2CCOUNT] = {
         .object = &i2cMSP432Objects[MSP_EXP432P401R_I2CB0],
         .hwAttrs = &i2cMSP432HWAttrs[MSP_EXP432P401R_I2CB0]
     },
+    /* SASS-specific configuration - LV3HP2 2 */
     {
         .fxnTablePtr = &I2CMSP432_fxnTable,
         .object = &i2cMSP432Objects[MSP_EXP432P401R_I2CB1],
         .hwAttrs = &i2cMSP432HWAttrs[MSP_EXP432P401R_I2CB1]
     },
+    /* SASS-specific configuration - LV3HP2 1 */
     {
         .fxnTablePtr = &I2CMSP432_fxnTable,
         .object = &i2cMSP432Objects[MSP_EXP432P401R_I2CB2],
@@ -761,7 +783,8 @@ const SPIMSP432DMA_HWAttrsV1 spiMSP432DMAHWAttrs[MSP_EXP432P401R_SPICOUNT] = {
         .pinMode  = EUSCI_SPI_4PIN_UCxSTE_ACTIVE_LOW,
         .minDmaTransferSize = 10
     },
-    { // BEGIN ADDITIONS
+    /* SASS-specific configuration - MMW 1 */
+    {
         .baseAddr = EUSCI_A0_BASE,
         .bitOrder = EUSCI_A_SPI_MSB_FIRST,
         .clockSource = EUSCI_A_SPI_CLOCKSOURCE_SMCLK,
@@ -777,6 +800,7 @@ const SPIMSP432DMA_HWAttrsV1 spiMSP432DMAHWAttrs[MSP_EXP432P401R_SPICOUNT] = {
         .pinMode  = EUSCI_SPI_4PIN_UCxSTE_ACTIVE_LOW,
         .minDmaTransferSize = 10
     },
+    /* SASS-specific configuration - MMW 2 */
     {
         .baseAddr = EUSCI_A1_BASE,
         .bitOrder = EUSCI_A_SPI_MSB_FIRST,
@@ -816,11 +840,13 @@ const SPI_Config SPI_config[MSP_EXP432P401R_SPICOUNT] = {
         .object = &spiMSP432DMAObjects[MSP_EXP432P401R_SPIB4],
         .hwAttrs = &spiMSP432DMAHWAttrs[MSP_EXP432P401R_SPIB4]
     },
+    /* SASS-specific configuration - MMW 1 */
     {
         .fxnTablePtr = &SPIMSP432DMA_fxnTable,
         .object = &spiMSP432DMAObjects[MSP_EXP432P401R_SPIB5],
         .hwAttrs = &spiMSP432DMAHWAttrs[MSP_EXP432P401R_SPIB5]
     },
+    /* SASS-specific configuration - MMW 2 */
     {
         .fxnTablePtr = &SPIMSP432DMA_fxnTable,
         .object = &spiMSP432DMAObjects[MSP_EXP432P401R_SPIB6],

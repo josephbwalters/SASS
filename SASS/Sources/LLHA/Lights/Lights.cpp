@@ -7,6 +7,7 @@
 
 /* System headers */ 
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
+#include <ti/sysbios/knl/Task.h>
 
 /* SASS-specific headers */
 #include <Sources/LLHA/Lights/Lights.h>
@@ -21,6 +22,7 @@ Lights::Lights() : m_panic_flag(false), m_waiting(true)
 
 void Lights::init()
 {
+    GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN3);
     GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN4);
     GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN5);
     GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN6);
@@ -33,9 +35,11 @@ void Lights::set_red(Directions direction)
     {
     case Directions::NORTH:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
         break;
     case Directions::EAST:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
         break;
     case Directions::SOUTH:
         // Future: Add functionality for south direction
@@ -54,9 +58,11 @@ void Lights::set_yellow(Directions direction)
     {
     case Directions::NORTH:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
         break;
     case Directions::EAST:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
         break;
     case Directions::SOUTH:
         // Future: Add functionality for south direction
@@ -71,7 +77,35 @@ void Lights::set_yellow(Directions direction)
 
 void Lights::schedule(Directions direction)
 {
-
+    switch (direction)
+    {
+    case Directions::NORTH:
+        set_yellow(Directions::NORTH);
+        set_red(Directions::EAST);
+        set_red(Directions::SOUTH);
+        set_red(Directions::WEST);
+        break;
+    case Directions::EAST:
+        set_yellow(Directions::EAST);
+        set_red(Directions::SOUTH);
+        set_red(Directions::WEST);
+        set_red(Directions::NORTH);
+        break;
+    case Directions::SOUTH:
+        set_yellow(Directions::SOUTH);
+        set_red(Directions::WEST);
+        set_red(Directions::NORTH);
+        set_red(Directions::EAST);
+        break;
+    case Directions::WEST:
+        set_yellow(Directions::WEST);
+        set_red(Directions::NORTH);
+        set_red(Directions::EAST);
+        set_red(Directions::SOUTH);
+        break;
+    default:
+        // TODO: Throw exception
+    };
 }
 
 void Lights::set_all_red()
@@ -114,7 +148,7 @@ void *Lights::light_thread(void *args)
 /**
     Thread to toggle all of our mosfets
 */
-void *Lights::mosfetToggleThread(void *args)
+void *Lights::mosfet_toggle_thread(void *args)
 {
     // GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
 
@@ -145,5 +179,7 @@ void *Lights::mosfetToggleThread(void *args)
             GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
             is_on = 0;
         }
+
+        Task_yield();
     }
 }

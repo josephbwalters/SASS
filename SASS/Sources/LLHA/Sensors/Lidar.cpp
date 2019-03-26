@@ -8,6 +8,8 @@
 #define __MSP432P401R__
 // #define DEBUG
 
+#include <stdio.h>
+
 /* System headers */
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
 
@@ -84,6 +86,7 @@ Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
         if (lidar_north == nullptr)
         {
             lidar_north = new Lidar(lidar_type);
+            // printf("Lidar memory address: %d\n", lidar_north);
         }
         return lidar_north;
     
@@ -311,7 +314,7 @@ uint16_t Lidar::read_dist()
 */
 uint16_t Lidar::get_distance()
 {
-    uint16_t dist = 0;
+    uint16_t dist = -1; // this?
 
     i2c = I2C_open(m_hardware_module, &i2cParams);
 

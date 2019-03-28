@@ -54,21 +54,18 @@ void *test_print_thread(void *args)
     while(1)
     {
         printf("Print thread running.\n");
-        Task_yield();
+        Task_sleep(500);
     }
 }
 
-/**
-    Initial control loop for device
-    Starts threads and gives control of the overall device to those threads.
-*/
-int main()
+void *sass_init(void *args)
 {
-    Board_initGeneral();
-
-    GPIO_init();
-
-    Lights::init();
+//    printf("Setting reference distance north.\n");
+//    Classifier::set_reference_distance(Directions::NORTH);
+//    printf("Set reference distance north.\n");
+//    printf("Setting reference distance east.\n");
+//    Classifier::set_reference_distance(Directions::EAST);
+//    printf("Set reference distance east.\n");
 
     GPIO_setCallback(Board_GPIO_BUTTON0, Classifier::callback_hwi);
     GPIO_enableInt(Board_GPIO_BUTTON0);
@@ -183,30 +180,45 @@ int main()
         while (1) {}
     }
 
-//    pthread_t           mosfet_handle;
-//    pthread_attr_t      mosfet_attrs;
-//    struct sched_param  mosfet_priParam;
-//
-//    /* Initialize the attributes structure with default values */
-//    pthread_attr_init(&mosfet_attrs);
-//
-//    /* Set priority, detach state, and stack size attributes */
-//    mosfet_priParam.sched_priority = 1;
-//    retc = pthread_attr_setschedparam(&mosfet_attrs, &mosfet_priParam);
-//    retc |= pthread_attr_setdetachstate(&mosfet_attrs, PTHREAD_CREATE_DETACHED);
-//    retc |= pthread_attr_setstacksize(&mosfet_attrs, STACK_SIZE_LARGE);
-//    if (retc) {
-//        /* failed to set attributes */
-//        // TODO: Throw exception
-//        while (1) {}
-//    }
-//
-//    retc = pthread_create(&mosfet_handle, &mosfet_attrs, Lidar::lidarDemoThread, NULL);
-//    if (retc) {
-//        /* pthread_create() failed */
-//        // TODO: Throw exception
-//        while (1) {}
-//    }
+    pthread_exit(NULL);
+}
+
+/**
+    Initial control loop for device
+    Starts threads and gives control of the overall device to those threads.
+*/
+int main()
+{
+    Board_initGeneral();
+
+    GPIO_init();
+    Lights::init();
+
+    pthread_t           init_thr_handle;
+    pthread_attr_t      init_thr_attrs;
+    struct sched_param  init_thr_priParam;
+    int                 retc;
+
+    /* Initialize the attributes structure with default values */
+    pthread_attr_init(&init_thr_attrs);
+
+    /* Set priority, detach state, and stack size attributes */
+    init_thr_priParam.sched_priority = 1;
+    retc = pthread_attr_setschedparam(&init_thr_attrs, &init_thr_priParam);
+    retc |= pthread_attr_setdetachstate(&init_thr_attrs, PTHREAD_CREATE_DETACHED);
+    retc |= pthread_attr_setstacksize(&init_thr_attrs, STACK_SIZE_LARGE);
+    if (retc) {
+        /* failed to set attributes */
+        // TODO: Throw exception
+        while (1) {}
+    }
+
+    retc = pthread_create(&init_thr_handle, &init_thr_attrs, sass_init, NULL);
+    if (retc) {
+        /* pthread_create() failed */
+        // TODO: Throw exception
+        while (1) {}
+    }
 
     BIOS_start();    /* does not return */
     return(0);

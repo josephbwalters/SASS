@@ -1,5 +1,5 @@
 /*
- * RADAR.cpp
+ * Radar.cpp
  * Created by: Joseph Walters, Trent Sellers 
  */
 
@@ -36,20 +36,20 @@ sources::llha::sensors::Radar* sources::llha::sensors::Radar::radar_west = nullp
 
     @param radar_type (representing the direction/ports of the sensor).
 */
-Radar::Radar(RadarInstanceType radar_type) : m_radar_type(radar_type)
+Radar::Radar(Directions direction) : m_direction(direction)
 {
-    switch(radar_type)
+    switch(direction)
     {
-    case RADAR_NORTH:
+    case Directions::NORTH:
         m_hardware_module = RADAR_N;
         break;
-    case RADAR_EAST:
+    case Directions::EAST:
         m_hardware_module = RADAR_E;
         break;
-    case RADAR_SOUTH:
+    case Directions::SOUTH:
         m_hardware_module = RADAR_S;
         break;
-    case RADAR_WEST:
+    case Directions::WEST:
         m_hardware_module = RADAR_W;
         break;
     default:
@@ -71,35 +71,35 @@ Radar::~Radar()
     
     @param radar_type (representing the direction/ports of the sensor).
 */
-Radar* Radar::get_instance(RadarInstanceType radar_type)
+Radar* Radar::get_instance(Directions direction)
 {
-    switch(radar_type)
+    switch(direction)
     {
-    case RADAR_NORTH:
+    case Directions::NORTH:
         if (radar_north == nullptr)
         {
-            radar_north = new Radar(radar_type);
+            radar_north = new Radar(direction);
         }
         return radar_north;
 
-    case RADAR_EAST:
+    case Directions::EAST:
         if (radar_east == nullptr)
         {
-            radar_east = new Radar(radar_type);
+            radar_east = new Radar(direction);
         }
         return radar_east;
 
-    case RADAR_SOUTH:
+    case Directions::SOUTH:
         if (radar_south == nullptr)
         {
-            radar_south = new Radar(radar_type);
+            radar_south = new Radar(direction);
         }
         return radar_south;
 
-    case RADAR_WEST:
+    case Directions::WEST:
         if (radar_west == nullptr)
         {
-            radar_west = new Radar(radar_type);
+            radar_west = new Radar(direction);
         }
         return radar_west;
         
@@ -211,9 +211,9 @@ tuple<uint16_t, uint16_t> Radar::get_data()
 void *Radar::radarTestThread(void *args)
 {
     // Instantiating RADAR_EAST due to availability of pins on red board.
-    Radar* radar_north = Radar::get_instance(RadarInstanceType::RADAR_EAST);
+    Radar* radar_north = Radar::get_instance(Directions::EAST);
 
-    while(1)
+    while (true)
     {
         printf("Getting distance...\n");
         uint16_t dist = radar_north->get_distance();

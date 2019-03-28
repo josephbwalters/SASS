@@ -1,5 +1,5 @@
 /*
- * RADAR.h
+ * Radar.h
  * Created by: Joseph Walters, Trent Sellers 
  */
 
@@ -13,13 +13,8 @@
 /* System headers */
 #include <ti/drivers/SPI.h>
 
-enum RadarInstanceType
-{
-    RADAR_NORTH,
-    RADAR_EAST,
-    RADAR_SOUTH,
-    RADAR_WEST
-};
+/* SASS-specific headers */
+#include <Sources/Directions.h>
 
 using namespace std;
 
@@ -34,7 +29,7 @@ namespace sensors
 class Radar
 {
 public:
-    static Radar* get_instance(RadarInstanceType radar_type);
+    static Radar* get_instance(Directions direction);
     void init();
 
     uint16_t get_distance();
@@ -45,10 +40,10 @@ public:
     static void *radarTestThread(void *args);
 
 private:
-    Radar(RadarInstanceType radar_type);
+    Radar(Directions direction);
     virtual ~Radar();
 
-    RadarInstanceType m_radar_type;
+    Directions m_direction;
     uint_least8_t m_hardware_module;
 
     // SPI-related variables

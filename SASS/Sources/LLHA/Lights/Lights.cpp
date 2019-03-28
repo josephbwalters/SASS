@@ -160,7 +160,7 @@ void *Lights::mosfet_toggle_thread(void *args)
 
     bool is_on = 0;
 
-    while(1)
+    while (true)
     {
         for(int i = 0; i < 1000000; i++)
         {

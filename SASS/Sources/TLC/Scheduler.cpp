@@ -18,11 +18,11 @@
 
 /* SASS-specific headers */
 #include <Sources/TLC/Scheduler.h>
-#include <Sources/OC/Classifier.h>
-#include <Sources/LLHA/Lights/Lights.h>
 #include <Sources/Directions.h>
+#include <Sources/LLHA/Lights/Lights.h>
+#include <Sources/OC/Classifier.h>
 
-// Pass requirement for verification of vehicle presence
+// Pass requirement for verification of vehicle absence
 #define PASS 2
 
 using namespace std;
@@ -54,29 +54,8 @@ Scheduler* Scheduler::get_instance()
 
 bool Scheduler::is_clear(Directions direction) // Dont need dir?
 {
-    LidarInstanceType lidar_direction;
     uint16_t ref_dist = Classifier::get_reference_distance(direction);
-
-    switch (direction)
-    {
-    case Directions::NORTH:
-        lidar_direction = LIDAR_NORTH;
-        break;
-    case Directions::EAST:
-        lidar_direction = LIDAR_EAST;
-        break;
-    case Directions::SOUTH:
-        lidar_direction = LIDAR_SOUTH;
-        break;
-    case Directions::WEST:
-        lidar_direction = LIDAR_WEST;
-        break;
-    default:
-        // TODO: Throw exception
-        break;
-    };
-
-    Lidar* lidar = Lidar::get_instance(lidar_direction);
+    Lidar* lidar = Lidar::get_instance(direction);
 
     uint16_t dist = lidar->get_distance();
 
@@ -119,7 +98,7 @@ void *Scheduler::scheduler_thread(void *args)
 //        // TODO: Throw exception
 //    }
 
-    while (1)
+    while (true)
     {
         // TODO: Implement Panic feature
         // TODO: Implement with directions input into the queue, not numbers!
@@ -150,35 +129,19 @@ void *Scheduler::scheduler_thread(void *args)
             // Confirm vehicle is absent
             while (score < PASS)
             {
-                if(scheduler->is_clear(direction))
+                for (int i = 0; i < PASS; i++)
                 {
-                    score++;
-                }
-                else if (score > 0)
-                {
-                    score--;
-                }
-                else
-                {
-                    score = 0;
-                }
+                    if(scheduler->is_clear(direction))
+                    {
+                        score++;
+                    }
+                    else
+                    {
+                        score = 0;
+                    }
 
-                Task_sleep(200);
-
-                if(scheduler->is_clear(direction))
-                {
-                    score++;
+                    Task_sleep(200);
                 }
-                else if (score > 0)
-                {
-                    score--;
-                }
-                else
-                {
-                    score = 0;
-                }
-
-                Task_sleep(200);
 
                 GPIO_toggleOutputOnPin(GPIO_PORT_P7, GPIO_PIN3);
             }
@@ -195,8 +158,8 @@ void *Scheduler::scheduler_thread(void *args)
 //                //Timer_start() failed
 //                // TODO: Throw exception
 //            }
-
-            printf("[Scheduler] 1-second timer expired.\n");
+//
+//            printf("[Scheduler] 1-second timer expired.\n");
 
             scheduler->get_lights()->set_all_red();
 

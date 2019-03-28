@@ -12,12 +12,12 @@
 #include <pthread.h>
 
 /* System headers */
+#include <ti/devices/msp432p4xx/driverlib/gpio.h>
+#include <ti/drivers/Timer.h>
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Idle.h>
 #include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/knl/Task.h>
-#include <ti/drivers/Timer.h>
-#include <ti/devices/msp432p4xx/driverlib/gpio.h>
 
 /* Board-specific headers */
 #include <Board.h>
@@ -28,6 +28,9 @@
 
 // Pass requirement for verification of vehicle presence
 #define PASS 2
+
+// Check requirement for verification of intersection safety
+#define CHECKS_NEEDED 2
 
 // Stack sizes for new tasks
 #define STACK_SIZE_SMALL 512
@@ -59,22 +62,22 @@ Classifier::Classifier(Directions direction) : m_direction(direction)
     switch (m_direction)
     {
     case Directions::NORTH:
-        m_lidar = Lidar::get_instance(LidarInstanceType::LIDAR_NORTH);
-        m_radar = Radar::get_instance(RadarInstanceType::RADAR_NORTH);
+        m_lidar = Lidar::get_instance(Directions::NORTH);
+        m_radar = Radar::get_instance(Directions::NORTH);
         printf("Initialized classifier north with sensors.\n");
         break;
     case Directions::EAST:
-        m_lidar = Lidar::get_instance(LidarInstanceType::LIDAR_EAST);
-        m_radar = Radar::get_instance(RadarInstanceType::RADAR_EAST);
+        m_lidar = Lidar::get_instance(Directions::EAST);
+        m_radar = Radar::get_instance(Directions::EAST);
         printf("Initialized classifier east with sensors.\n");
         break;
     case Directions::SOUTH:
-        m_lidar = Lidar::get_instance(LidarInstanceType::LIDAR_SOUTH);
-        m_radar = Radar::get_instance(RadarInstanceType::RADAR_SOUTH);
+        m_lidar = Lidar::get_instance(Directions::SOUTH);
+        m_radar = Radar::get_instance(Directions::SOUTH);
         break;
     case Directions::WEST:
-        m_lidar = Lidar::get_instance(LidarInstanceType::LIDAR_WEST);
-        m_radar = Radar::get_instance(RadarInstanceType::RADAR_WEST);
+        m_lidar = Lidar::get_instance(Directions::WEST);
+        m_radar = Radar::get_instance(Directions::WEST);
         break;
     default:
         // TODO: Throw exception
@@ -223,7 +226,7 @@ void *Classifier::classifier_thread(void *args)
     Classifier* classifier = Classifier::get_instance(direction);
     Scheduler* scheduler = Scheduler::get_instance();
 
-    while (1)
+    while (true)
     {
         uint8_t score = 0;
 
@@ -232,27 +235,19 @@ void *Classifier::classifier_thread(void *args)
         {
             printf("[Classifier %d] Tracking vehicle...\n", direction);
 
-            if (classifier->track() == 1)
+            for (int i = 0; i < PASS; i++)
             {
-                score++;
-            }
-            else
-            {
-                score = 0;
-            }
+                if (classifier->track() == 1)
+                {
+                    score++;
+                }
+                else
+                {
+                    score = 0;
+                }
 
-            Task_sleep(200);
-
-            if (classifier->track() == 1)
-            {
-                score++;
+                Task_sleep(200);
             }
-            else
-            {
-                score = 0;
-            }
-
-            Task_sleep(200);
         }
 
         Vehicle current_vehicle(direction);
@@ -289,32 +284,29 @@ void *Classifier::classifier_thread(void *args)
     pthread_exit(NULL);
 }
 
-void *Classifier::watchman(void *args)
+void *Classifier::watchman_thread(void *args)
 {
-    pthread_t           classf_north_thread;
-    pthread_t           classf_east_thread;
-    pthread_attr_t      classf_attrs;
-    struct sched_param  classf_priParam;
-    int                 retc;
+    pthread_t           classifier_n_thread;
+    pthread_t           classifier_e_thread;
+    pthread_attr_t      classifier_attrs;
+    struct sched_param  classifier_priParam;
+    int                 thread_error;
 
     /* Initialize the attributes structure with default values */
-    pthread_attr_init(&classf_attrs);
+    pthread_attr_init(&classifier_attrs);
 
     /* Set priority, detach state, and stack size attributes */
-    classf_priParam.sched_priority = 1;
-    retc = pthread_attr_setschedparam(&classf_attrs, &classf_priParam);
-    retc |= pthread_attr_setdetachstate(&classf_attrs, PTHREAD_CREATE_DETACHED);
-    retc |= pthread_attr_setstacksize(&classf_attrs, STACK_SIZE_LARGE);
-    if (retc) {
+    classifier_priParam.sched_priority = 1;
+    thread_error = pthread_attr_setschedparam(&classifier_attrs, &classifier_priParam);
+    thread_error |= pthread_attr_setdetachstate(&classifier_attrs, PTHREAD_CREATE_DETACHED);
+    thread_error |= pthread_attr_setstacksize(&classifier_attrs, STACK_SIZE_LARGE);
+    if (thread_error) {
         /* failed to set attributes */
         // TODO: Throw exception
-        while (1) {}
+        while (true) {}
     }
 
-    Directions north = Directions::NORTH;
-    Directions east = Directions::EAST;
-
-    while(1)
+    while (true)
     {
         bool sw1_status = Semaphore_pend(sw1_sem, BIOS_NO_WAIT);
         bool sw2_status = Semaphore_pend(sw2_sem, BIOS_NO_WAIT);
@@ -326,11 +318,12 @@ void *Classifier::watchman(void *args)
             // Create classifier thread
             // printf("Creating Classifier north thread...\n");
 
-            retc = pthread_create(&classf_north_thread, &classf_attrs, Classifier::classifier_thread, (void *)north);
-            if (retc) {
+            thread_error = pthread_create(&classifier_n_thread, &classifier_attrs, Classifier::classifier_thread,
+                                  (void *)Directions::NORTH);
+            if (thread_error) {
                 /* pthread_create() failed */
                 // TODO: Throw exception
-                while (1) {}
+                while (true) {}
             }
         }
 
@@ -339,11 +332,12 @@ void *Classifier::watchman(void *args)
             // Create classifier thread
             // printf("Creating Classifier east thread...\n");
 
-            retc = pthread_create(&classf_east_thread, &classf_attrs, Classifier::classifier_thread, (void *)east);
-            if (retc) {
+            thread_error = pthread_create(&classifier_e_thread, &classifier_attrs, Classifier::classifier_thread,
+                                  (void *)Directions::EAST);
+            if (thread_error) {
                 /* pthread_create() failed */
                 // TODO: Throw exception
-                while (1) {}
+                while (true) {}
             }
         }
 
@@ -352,11 +346,12 @@ void *Classifier::watchman(void *args)
             // Create classifier thread
             printf("Creating Classifier north thread...\n");
 
-            retc = pthread_create(&classf_north_thread, &classf_attrs, Classifier::classifier_thread, (void *)north);
-            if (retc) {
+            thread_error = pthread_create(&classifier_n_thread, &classifier_attrs, Classifier::classifier_thread,
+                                  (void *)Directions::NORTH);
+            if (thread_error) {
                 /* pthread_create() failed */
                 // TODO: Throw exception
-                while (1) {}
+                while (true) {}
             }
         }
 
@@ -365,11 +360,12 @@ void *Classifier::watchman(void *args)
             // Create classifier thread
             printf("Creating Classifier east thread...\n");
 
-            retc = pthread_create(&classf_east_thread, &classf_attrs, Classifier::classifier_thread, (void *)east);
-            if (retc) {
+            thread_error = pthread_create(&classifier_e_thread, &classifier_attrs, Classifier::classifier_thread,
+                                  (void *)Directions::EAST);
+            if (thread_error) {
                 /* pthread_create() failed */
                 // TODO: Throw exception
-                while (1) {}
+                while (true) {}
             }
         }
 
@@ -378,7 +374,7 @@ void *Classifier::watchman(void *args)
     }
 }
 
-void Classifier::callback_hwi(uint_least8_t index)
+void Classifier::classifier_hwi_callback(uint_least8_t index)
 {
     switch (index)
     {

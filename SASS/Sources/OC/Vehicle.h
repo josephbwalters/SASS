@@ -27,13 +27,13 @@ public:
     Vehicle(Directions direction);
     ~Vehicle();
 
-    void set_speed(uint16_t speed);
-    uint16_t get_speed();
+    void set_velocity(uint16_t velocity);
+    uint16_t get_velocity();
     Directions get_direction();
 
 private:
     Directions m_direction;
-    uint16_t m_speed;
+    uint16_t m_velocity;
 };
 
 

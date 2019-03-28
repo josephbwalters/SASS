@@ -26,6 +26,9 @@
 #include <Sources/OC/Classifier.h>
 #include <Sources/OC/Vehicle.h>
 
+// Pass requirement for verification of vehicle presence
+#define PASS 2
+
 // Stack sizes for new tasks
 #define STACK_SIZE_SMALL 512
 #define STACK_SIZE_MEDIUM 1024
@@ -35,6 +38,12 @@ ti_sysbios_knl_Semaphore_Handle sw1_sem = Semaphore_create(0, NULL, NULL);
 ti_sysbios_knl_Semaphore_Handle sw2_sem = Semaphore_create(0, NULL, NULL);
 ti_sysbios_knl_Semaphore_Handle mmw1_sem = Semaphore_create(0, NULL, NULL);
 ti_sysbios_knl_Semaphore_Handle mmw2_sem = Semaphore_create(0, NULL, NULL);
+
+// Initialize reference distances
+uint16_t sources::oc::Classifier::ref_dist_north = 0;
+uint16_t sources::oc::Classifier::ref_dist_east = 0;
+uint16_t sources::oc::Classifier::ref_dist_south = 0;
+uint16_t sources::oc::Classifier::ref_dist_west = 0;
 
 // Initialize LiDAR instances to null for multiton pattern
 sources::oc::Classifier* sources::oc::Classifier::classifier_north = nullptr;
@@ -71,11 +80,18 @@ Classifier::Classifier(Directions direction) : m_direction(direction)
         // TODO: Throw exception
         printf("Did not initialize sensors in classifier.\n");
     };
+
+    init();
 }
 
 Classifier::~Classifier()
 {
 
+}
+
+void Classifier::init()
+{
+    set_reference_distance();
 }
 
 Classifier* Classifier::get_instance(Directions direction)
@@ -120,12 +136,76 @@ Classifier* Classifier::get_instance(Directions direction)
     };
 }
 
+void Classifier::set_reference_distance()
+{
+    uint16_t ref_dist;
+    uint16_t reading_1 = 0;
+    uint16_t reading_2 = 0;
+    uint16_t reading_3 = 0;
+
+    Task_sleep(200);
+    printf("Reading 1...\n");
+    reading_1 = m_lidar->get_distance();
+    Task_sleep(200);
+    printf("Reading 2...\n");
+    reading_2 = m_lidar->get_distance();
+    Task_sleep(200);
+    printf("Reading 3...\n");
+    reading_3 = m_lidar->get_distance();
+    Task_sleep(200);
+    ref_dist = (reading_1 + reading_2 + reading_3) / 3;
+
+    switch(m_direction)
+    {
+    case Directions::NORTH:
+        sources::oc::Classifier::ref_dist_north = ref_dist;
+    case Directions::EAST:
+        sources::oc::Classifier::ref_dist_east = ref_dist;
+    case Directions::SOUTH:
+        sources::oc::Classifier::ref_dist_south = ref_dist;
+    case Directions::WEST:
+        sources::oc::Classifier::ref_dist_west = ref_dist;
+    default:
+        // TODO: Throw exception
+    };
+}
+
+uint16_t Classifier::get_reference_distance(Directions direction)
+{
+    switch(direction)
+    {
+    case Directions::NORTH:
+        return Classifier::ref_dist_north;
+    case Directions::EAST:
+        return Classifier::ref_dist_east;
+    case Directions::SOUTH:
+        return Classifier::ref_dist_south;
+    case Directions::WEST:
+        return Classifier::ref_dist_west;
+    default:
+        // TODO: Throw exception
+        return 0;
+    };
+}
+
 uint8_t Classifier::track()
 {
     uint16_t dist = m_lidar->get_distance();
-    // uint16_t dist = 60; // 100
 
-    if (dist < 50)
+//    if (dist < 50)
+//    {
+//        return 1;
+//    }
+
+    uint16_t ref_dist = get_reference_distance(m_direction);
+
+    if (ref_dist == 0 )
+    {
+        GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
+        GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
+    }
+
+    if (dist < ref_dist - 20)
     {
         return 1;
     }
@@ -145,42 +225,63 @@ void *Classifier::classifier_thread(void *args)
 
     while (1)
     {
-        Vehicle current_vehicle(direction);
-        printf("[Classifier %d] Vehicle detected.\n", direction);
-        uint8_t status = 0;
+        uint8_t score = 0;
 
-        while (status == 0)
+        // Confirm vehicle is present
+        while (score < PASS)
         {
             printf("[Classifier %d] Tracking vehicle...\n", direction);
 
-            status = classifier->track();
+            if (classifier->track() == 1)
+            {
+                score++;
+            }
+            else
+            {
+                score = 0;
+            }
 
-            // DEBUGGING ONLY
-//            if(scheduler->get_vehicle_queue()->empty())
-//            {
-//                status = 1;
-//            }
+            Task_sleep(200);
 
-            Task_sleep(500);
-            // Task_yield();
+            if (classifier->track() == 1)
+            {
+                score++;
+            }
+            else
+            {
+                score = 0;
+            }
+
+            Task_sleep(200);
         }
+
+        Vehicle current_vehicle(direction);
+        printf("[Classifier %d] Vehicle detected.\n", direction);
+        deque<Vehicle>* queue = scheduler->get_vehicle_queue();
 
         // Send vehicle to queue
-        scheduler->get_vehicle_queue()->push_back(current_vehicle);
+        queue->push_back(current_vehicle);
         printf("[Classifier %d] Vehicle stopped and added to queue.\n", direction);
 
-        status = 1;
+        bool vehicle_present = true;
+        deque<Vehicle>::iterator it;
 
-        // PRODUCTION ONLY
-        while (status == 1)
+        while (vehicle_present == true)
         {
-            status = classifier->track();
-            Task_sleep(500);
-            // Task_yield();
+            vehicle_present = false;
+
+            for (it = queue->begin(); it != queue->end(); it++)
+            {
+                if (it->get_direction() == direction)
+                {
+                    vehicle_present = true;
+                }
+            }
+
+            Task_sleep(200);
         }
 
-        Task_sleep(500);
-        // Task_yield();
+        Task_sleep(200);
     }
 
     printf("[Classifier %d] Exiting classifier thread...\n", direction);
@@ -262,7 +363,7 @@ void *Classifier::watchman(void *args)
         if (mmw2_status == true)
         {
             // Create classifier thread
-            printf("Creating Classifier north thread...\n");
+            printf("Creating Classifier east thread...\n");
 
             retc = pthread_create(&classf_east_thread, &classf_attrs, Classifier::classifier_thread, (void *)east);
             if (retc) {
@@ -273,7 +374,7 @@ void *Classifier::watchman(void *args)
         }
 
         Idle_run();
-        Task_yield();
+        Task_sleep(200);
     }
 }
 

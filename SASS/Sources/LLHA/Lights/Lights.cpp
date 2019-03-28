@@ -27,6 +27,12 @@ void Lights::init()
     GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN5);
     GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN6);
     GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN7);
+
+    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
+    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
+    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
+    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
+    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
 }
 
 void Lights::set_red(Directions direction)

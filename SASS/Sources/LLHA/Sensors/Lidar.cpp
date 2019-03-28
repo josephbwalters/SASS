@@ -42,20 +42,20 @@ uint8_t sources::llha::sensors::Lidar::default_addr = SLAVE_ADDR;
 
     @param lidar_type (representing the direction/ports of the sensor).
 */
-Lidar::Lidar(LidarInstanceType lidar_type) : m_current_addr(default_addr), m_lidar_type(lidar_type)
+Lidar::Lidar(Directions direction) : m_current_addr(default_addr), m_direction(direction)
 {
-    switch(lidar_type)
+    switch(direction)
     {
-    case LIDAR_NORTH:
+    case Directions::NORTH:
         m_hardware_module = LIDAR_N;
         break;
-    case LIDAR_EAST:
+    case Directions::EAST:
         m_hardware_module = LIDAR_E;
         break;
-    case LIDAR_SOUTH:
+    case Directions::SOUTH:
         m_hardware_module = LIDAR_S;
         break;
-    case LIDAR_WEST:
+    case Directions::WEST:
         m_hardware_module = LIDAR_W;
         break;
     default:
@@ -77,37 +77,37 @@ Lidar::~Lidar()
     
     @param lidar_type (representing the direction/ports of the sensor).
 */
-Lidar* Lidar::get_instance(LidarInstanceType lidar_type)
+Lidar* Lidar::get_instance(Directions direction)
 {
-    switch(lidar_type)
+    switch(direction)
     {
 
-    case LIDAR_NORTH:
+    case Directions::NORTH:
         if (lidar_north == nullptr)
         {
-            lidar_north = new Lidar(lidar_type);
+            lidar_north = new Lidar(direction);
             // printf("Lidar memory address: %d\n", lidar_north);
         }
         return lidar_north;
     
-    case LIDAR_EAST:
+    case Directions::EAST:
         if (lidar_east == nullptr)
         {
-            lidar_east = new Lidar(lidar_type);
+            lidar_east = new Lidar(direction);
         }
         return lidar_east;
     
-    case LIDAR_SOUTH:
+    case Directions::SOUTH:
         if (lidar_south == nullptr)
         {
-            lidar_south = new Lidar(lidar_type);
+            lidar_south = new Lidar(direction);
         }
         return lidar_south;
     
-    case LIDAR_WEST:
+    case Directions::WEST:
         if (lidar_west == nullptr)
         {
-            lidar_west = new Lidar(lidar_type);
+            lidar_west = new Lidar(direction);
         }
         return lidar_west;
     
@@ -159,7 +159,7 @@ void Lidar::config_1()
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
-    } while(!transferOK);
+    } while (!transferOK);
 }
 
 /**
@@ -181,7 +181,7 @@ void Lidar::config_2()
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
-    } while(!transferOK);
+    } while (!transferOK);
 }
 
 /**
@@ -203,7 +203,7 @@ void Lidar::config_3()
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
-    } while(!transferOK);
+    } while (!transferOK);
 }
 
 /**
@@ -226,7 +226,7 @@ void Lidar::config_4()
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
-    } while(!transferOK);
+    } while (!transferOK);
 }
 
 /**
@@ -249,7 +249,7 @@ void Lidar::start_reading()
     /* Re-try reading from slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
-    } while(!transferOK);
+    } while (!transferOK);
 }
 
 /**
@@ -263,7 +263,7 @@ void Lidar::wait_until_ready()
     txBuffer[0] = SYSTEM_STATUS_REG;
     rxBuffer[0] = 0xFF;
 
-    while((rxBuffer[0] & 0x01) != 0x00)
+    while ((rxBuffer[0] & 0x01) != 0x00)
     {
         i2cTransaction.slaveAddress = SLAVE_ADDR;
         i2cTransaction.writeBuf = txBuffer;
@@ -273,7 +273,7 @@ void Lidar::wait_until_ready()
 
         do {
             transferOK = I2C_transfer(i2c, &i2cTransaction);
-        } while(!transferOK);
+        } while (!transferOK);
     }
 }
 
@@ -300,7 +300,7 @@ uint16_t Lidar::read_dist()
     /* Re-try reading from slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
-    } while(!transferOK);
+    } while (!transferOK);
 
     uint16_t dist = (rxBuffer[0] << 8) | rxBuffer[1];
 
@@ -354,9 +354,9 @@ uint16_t Lidar::get_velocity()
 void *Lidar::lidarDemoThread(void *args)
 {
     Lights lights;
-    Lidar* lidar_north = Lidar::get_instance(LidarInstanceType::LIDAR_NORTH);
+    Lidar* lidar_north = Lidar::get_instance(Directions::NORTH);
 
-    while(1)
+    while (true)
     {
         uint16_t dist = lidar_north->get_distance();
 

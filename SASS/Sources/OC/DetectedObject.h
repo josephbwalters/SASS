@@ -24,8 +24,8 @@ public:
     DetectedObject(Directions direction);
     ~DetectedObject();
 
-    virtual void set_speed(uint16_t speed) = 0;
-    virtual uint16_t get_speed() = 0;
+    virtual void set_velocity(uint16_t velocity) = 0;
+    virtual uint16_t get_velocity() = 0;
     virtual Directions get_direction() = 0;
 
 protected:
@@ -33,7 +33,7 @@ protected:
 
 private:
     Directions m_direction;
-    uint16_t m_speed;
+    uint16_t m_velocity;
 };
 
 }} // sources::oc

@@ -13,10 +13,10 @@
 #include <pthread.h>
 
 /* SASS-specific headers */
+#include <Sources/Directions.h>
 #include <Sources/LLHA/Lights/Lights.h>
 #include <Sources/LLHA/Sensors/Lidar.h>
 #include <Sources/OC/Vehicle.h>
-#include <Sources/Directions.h>
 
 using namespace std;
 using namespace sources::llha::lights;

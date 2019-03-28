@@ -12,6 +12,9 @@
 /* System headers */
 #include <ti/drivers/I2C.h>
 
+/* SASS-specific headers */
+#include <Sources/Directions.h>
+
 #define SLAVE_ADDR 0x62
 
 // Registers on the LiDAR-Lite v3HP device
@@ -24,14 +27,6 @@
 #define ACQUISITION_CONFIG_REG 0x04
 #define MAX_ACQUISITION_COUNT_REG 0x02
 
-enum LidarInstanceType
-{
-    LIDAR_NORTH,
-    LIDAR_EAST,
-    LIDAR_SOUTH,
-    LIDAR_WEST
-};
-
 namespace sources
 {
 namespace llha
@@ -43,7 +38,7 @@ namespace sensors
 class Lidar
 {
 public:
-    static Lidar* get_instance(LidarInstanceType lidar_type);
+    static Lidar* get_instance(Directions direction);
 
     uint16_t get_distance();
     uint16_t get_velocity();
@@ -52,13 +47,13 @@ public:
     static void *lidarDemoThread(void *args);
 
 private:
-    Lidar(LidarInstanceType lidar_type);
+    Lidar(Directions direction);
     virtual ~Lidar();
 
     static uint8_t default_addr;
     uint8_t m_current_addr;
 
-    LidarInstanceType m_lidar_type;
+    Directions m_direction;
     uint_least8_t m_hardware_module;
 
     // I2C-related variables

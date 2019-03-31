@@ -13,6 +13,7 @@
 
 /* System headers */
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
+#include <ti/drivers/GPIO.h>
 #include <ti/drivers/Timer.h>
 #include <ti/sysbios/BIOS.h>
 #include <ti/sysbios/knl/Idle.h>
@@ -393,4 +394,53 @@ void Classifier::classifier_hwi_callback(uint_least8_t index)
     default:
         // TODO: Throw exception
     };
+}
+
+void Classifier::emergency_hwi_callback(uint_least8_t index)
+{
+    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
+    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
+    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
+    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
+    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
+
+    uint8_t score = 0;
+    uint8_t gpio_map[CHECKS_NEEDED] = {Board_GPIO_MMW1, Board_GPIO_MMW2};
+
+    for (int i = 0; i < CHECKS_NEEDED; i++)
+    {
+        GPIO_disableInt(gpio_map[i]);
+    }
+
+    // Confirm vehicle is present
+    while (score < CHECKS_NEEDED)
+    {
+        GPIO_toggleOutputOnPin(GPIO_PORT_P7, GPIO_PIN4);
+        GPIO_toggleOutputOnPin(GPIO_PORT_P7, GPIO_PIN5);
+
+        for (int i = 0; i < CHECKS_NEEDED; i++)
+        {
+            bool clear = GPIO_read(gpio_map[i]);
+
+            if (clear)
+            {
+                score++;
+            }
+            else
+            {
+                score = 0;
+            }
+        }
+
+        if (score >= CHECKS_NEEDED)
+        {
+            for (int i = 0; i < CHECKS_NEEDED; i++)
+            {
+                GPIO_clearInt(gpio_map[i]);
+                GPIO_enableInt(gpio_map[i]);
+            }
+        }
+    }
+
+    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
 }

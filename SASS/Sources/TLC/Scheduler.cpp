@@ -62,11 +62,6 @@ bool Scheduler::is_clear(Directions direction) // Dont need dir?
     return !(dist < ref_dist - 20);
 }
 
-Lights* Scheduler::get_lights()
-{
-    return &lights;
-}
-
 deque<Vehicle>* Scheduler::get_vehicle_queue()
 {
     return &vehicle_queue;
@@ -122,7 +117,7 @@ void *Scheduler::scheduler_thread(void *args)
 
             printf("[Scheduler] 2-second timer expired.\n");
 
-            scheduler->get_lights()->schedule(direction);
+            Lights::schedule(direction);
 
             uint8_t score = 0;
 
@@ -143,6 +138,7 @@ void *Scheduler::scheduler_thread(void *args)
                     Task_sleep(200);
                 }
 
+                Lights::toggle_yellow(direction);
                 GPIO_toggleOutputOnPin(GPIO_PORT_P7, GPIO_PIN3);
             }
 
@@ -161,7 +157,7 @@ void *Scheduler::scheduler_thread(void *args)
 //
 //            printf("[Scheduler] 1-second timer expired.\n");
 
-            scheduler->get_lights()->set_all_red();
+            Lights::set_all_red();
 
             timer_params.period = 2000000;
             timer_handle = Timer_open(Board_TIMER0, &timer_params);
@@ -183,7 +179,7 @@ void *Scheduler::scheduler_thread(void *args)
             Task_sleep(200);
         }
 
-        scheduler->get_lights()->set_all_red();
+        Lights::set_all_red();
         printf("[Scheduler] All lights set red.\n");
 
         Task_sleep(200);

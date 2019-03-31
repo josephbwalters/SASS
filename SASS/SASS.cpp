@@ -60,13 +60,13 @@ void *test_print_thread(void *args)
 
 void *sass_init_thread(void *args)
 {
-    GPIO_setCallback(Board_GPIO_BUTTON0, Classifier::classifier_hwi_callback);
+    GPIO_setCallback(Board_GPIO_BUTTON0, Classifier::emergency_hwi_callback);
     GPIO_enableInt(Board_GPIO_BUTTON0);
-    GPIO_setCallback(Board_GPIO_BUTTON1, Classifier::classifier_hwi_callback);
+    GPIO_setCallback(Board_GPIO_BUTTON1, Classifier::emergency_hwi_callback);
     GPIO_enableInt(Board_GPIO_BUTTON1);
-    GPIO_setCallback(Board_GPIO_MMW1, Classifier::classifier_hwi_callback);
+    GPIO_setCallback(Board_GPIO_MMW1, Classifier::emergency_hwi_callback);
     GPIO_enableInt(Board_GPIO_MMW1);
-    GPIO_setCallback(Board_GPIO_MMW2, Classifier::classifier_hwi_callback);
+    GPIO_setCallback(Board_GPIO_MMW2, Classifier::emergency_hwi_callback);
     GPIO_enableInt(Board_GPIO_MMW2);
 
     pthread_t           scheduler_handle;

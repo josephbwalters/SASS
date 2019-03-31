@@ -23,6 +23,7 @@
 
 /* SASS-specific headers */
 #include <Sources/LLHA/Sensors/Lidar.h>
+#include <Sources/Control.h>
 #include <Sources/LLHA/Lights/Lights.h>
 
 using namespace sources::llha::sensors;
@@ -159,6 +160,11 @@ void Lidar::config_1()
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
+        if (!transferOK)
+        {
+            Control* control = Control::get_instance();
+            control->fail_system();
+        }
     } while (!transferOK);
 }
 
@@ -181,6 +187,11 @@ void Lidar::config_2()
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
+        if (!transferOK)
+        {
+            Control* control = Control::get_instance();
+            control->fail_system();
+        }
     } while (!transferOK);
 }
 
@@ -203,6 +214,11 @@ void Lidar::config_3()
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
+        if (!transferOK)
+        {
+            Control* control = Control::get_instance();
+            control->fail_system();
+        }
     } while (!transferOK);
 }
 
@@ -226,6 +242,11 @@ void Lidar::config_4()
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
+        if (!transferOK)
+        {
+            Control* control = Control::get_instance();
+            control->fail_system();
+        }
     } while (!transferOK);
 }
 
@@ -249,6 +270,11 @@ void Lidar::start_reading()
     /* Re-try reading from slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
+        if (!transferOK)
+        {
+            Control* control = Control::get_instance();
+            control->fail_system();
+        }
     } while (!transferOK);
 }
 
@@ -273,6 +299,11 @@ void Lidar::wait_until_ready()
 
         do {
             transferOK = I2C_transfer(i2c, &i2cTransaction);
+            if (!transferOK)
+            {
+                Control* control = Control::get_instance();
+                control->fail_system();
+            }
         } while (!transferOK);
     }
 }
@@ -300,6 +331,11 @@ uint16_t Lidar::read_dist()
     /* Re-try reading from slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
+        if (!transferOK)
+        {
+            Control* control = Control::get_instance();
+            control->fail_system();
+        }
     } while (!transferOK);
 
     uint16_t dist = (rxBuffer[0] << 8) | rxBuffer[1];

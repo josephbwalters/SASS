@@ -15,11 +15,6 @@
 using namespace sources;
 using namespace sources::llha::lights;
 
-Lights::Lights() : m_panic_flag(false), m_waiting(true)
-{
-
-}
-
 void Lights::init()
 {
     GPIO_setAsOutputPin(GPIO_PORT_P7, GPIO_PIN3);
@@ -55,7 +50,7 @@ void Lights::set_red(Directions direction)
         break;
     default:
         // TODO: Throw exception
-    }
+    };
 }
 
 void Lights::set_yellow(Directions direction)
@@ -78,7 +73,7 @@ void Lights::set_yellow(Directions direction)
         break;
     default:
         // TODO: Throw exception
-    }
+    };
 }
 
 void Lights::schedule(Directions direction)
@@ -114,41 +109,74 @@ void Lights::schedule(Directions direction)
     };
 }
 
+void Lights::toggle_yellow(Directions direction)
+{
+    switch (direction)
+    {
+    case Directions::NORTH:
+        if (GPIO_getInputPinValue(GPIO_PORT_P7, GPIO_PIN6))
+        {
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
+        }
+        else
+        {
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
+        }
+        break;
+    case Directions::EAST:
+        if (GPIO_getInputPinValue(GPIO_PORT_P7, GPIO_PIN7))
+        {
+            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
+        }
+        else
+        {
+            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
+        }
+        break;
+    case Directions::SOUTH:
+        // Future: Add functionality for south direction
+        break;
+    case Directions::WEST:
+        // Future: Add functionality for west direction
+        break;
+    default:
+        // TODO: Throw exception
+    };
+}
+
 void Lights::set_all_red()
 {
     set_red(Directions::NORTH);
     set_red(Directions::EAST);
 }
 
-void Lights::wait()
+void Lights::turn_off()
 {
-    // Toggle red lights
-    GPIO_toggleOutputOnPin(GPIO_PORT_P7, GPIO_PIN4);
-    GPIO_toggleOutputOnPin(GPIO_PORT_P7, GPIO_PIN5);
-
-    // TODO: Timer based delay. (Use 1 second)
-    for (int i = 500000; i > 0; i--);
+    turn_off(Directions::NORTH);
+    turn_off(Directions::EAST);
 }
 
-void Lights::panic()
+void Lights::turn_off(Directions direction)
 {
-    // TODO: Determine how to implement panic flag in static method
-    // m_panic_flag = true;
-    set_all_red();
-}
-
-void Lights::safe()
-{
-    // TODO: Determine how to implement panic flag in static method
-    // m_panic_flag = false;
-}
-
-void *Lights::light_thread(void *args)
-{
-    if (m_panic_flag)
+    switch (direction)
     {
-        set_all_red();
-    }
+    case Directions::NORTH:
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
+        break;
+    case Directions::EAST:
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
+        break;
+    case Directions::SOUTH:
+        // Future: Add functionality for south direction
+        break;
+    case Directions::WEST:
+        // Future: Add functionality for west direction
+        break;
+    default:
+        // TODO: Throw exception
+    };
 }
 
 /**

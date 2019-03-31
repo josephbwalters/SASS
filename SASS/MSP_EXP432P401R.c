@@ -409,9 +409,9 @@ GPIO_PinConfig gpioPinConfigs[] = {
     GPIOMSP432_P6_0 | GPIO_DO_NOT_CONFIG, /*LCD enable */
 
     /* SASS-specific configuration - MMW 1 */
-    GPIOMSP432_P5_0 | GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_FALLING,
+    GPIOMSP432_P5_0 | GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_RISING,
     /* SASS-specific configuration - MMW 2 */
-    GPIOMSP432_P5_1 | GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_FALLING,
+    GPIOMSP432_P5_1 | GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_RISING,
 };
 
 /*

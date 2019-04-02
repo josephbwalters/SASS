@@ -31,6 +31,7 @@ public:
     static void set_all_red();
     static void turn_off();
     static void turn_off(Directions direction);
+    static void set_all();
 
     // Thread-able method(s)
     static void *mosfet_toggle_thread(void *args);

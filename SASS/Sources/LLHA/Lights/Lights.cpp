@@ -3,7 +3,9 @@
  * Created by: Joseph Walters, Trent Sellers
  */
 
+#ifndef __MSP432P401R__
 #define __MSP432P401R__
+#endif
 
 /* System headers */ 
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
@@ -177,6 +179,14 @@ void Lights::turn_off(Directions direction)
     default:
         // TODO: Throw exception
     };
+}
+
+void Lights::set_all()
+{
+    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
+    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
+    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
+    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
 }
 
 /**

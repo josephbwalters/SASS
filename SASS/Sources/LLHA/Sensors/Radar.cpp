@@ -3,8 +3,9 @@
  * Created by: Joseph Walters, Trent Sellers 
  */
 
+#ifndef __MSP432P401R__
 #define __MSP432P401R__
-// #define DEBUG
+#endif
 
 /* Standard headers */
 #include <stdio.h>

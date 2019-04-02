@@ -5,8 +5,9 @@
  * Last modified: March 6, 2019
  */
 
+#ifndef __MSP432P401R__
 #define __MSP432P401R__
-// #define DEBUG
+#endif
 
 #include <stdio.h>
 
@@ -356,6 +357,8 @@ uint16_t Lidar::get_distance()
 
     if (i2c == NULL) {
         // TODO: Throw exception
+        Control* control = Control::get_instance();
+        control->fail_system();
     }
 
     // TODO: Check if we need to do the config every time we want a distance or not

@@ -3,8 +3,9 @@
  * Created by: Joseph Walters, Trent Sellers 
  */
 
+#ifndef __MSP432P401R__
 #define __MSP432P401R__
-// #define DEBUG
+#endif
 
 /* Standard headers */
 #include <stdio.h>
@@ -30,6 +31,7 @@
 #include <Board.h>
 
 /* SASS-specific headers */
+#include <Sources/Control.h>
 #include <Sources/Directions.h>
 #include <Sources/LLHA/Lights/Lights.h>
 #include <Sources/LLHA/Sensors/Lidar.h>
@@ -85,14 +87,12 @@ void *sass_init_thread(void *args)
     if (thread_error) {
         /* failed to set attributes */
         // TODO: Throw exception
-        while (true) {}
     }
 
     thread_error = pthread_create(&scheduler_handle, &scheduler_attrs, Scheduler::scheduler_thread, NULL);
     if (thread_error) {
         /* pthread_create() failed */
         // TODO: Throw exception
-        while (true) {}
     }
 
     // NOTE: May not need watchman thread
@@ -136,7 +136,6 @@ void *sass_init_thread(void *args)
     if (thread_error) {
         /* failed to set attributes */
         // TODO: Throw exception
-        while (true) {}
     }
 
     thread_error = pthread_create(&classifier_n_handle, &classifier_n_attrs, Classifier::classifier_thread,
@@ -144,7 +143,6 @@ void *sass_init_thread(void *args)
     if (thread_error) {
         /* pthread_create() failed */
         // TODO: Throw exception
-        while (true) {}
     }
 
     pthread_t           classifier_e_handle;
@@ -162,7 +160,6 @@ void *sass_init_thread(void *args)
     if (thread_error) {
         /* failed to set attributes */
         // TODO: Throw exception
-        while (true) {}
     }
 
     thread_error = pthread_create(&classifier_e_handle, &classifier_e_attrs, Classifier::classifier_thread,
@@ -170,7 +167,6 @@ void *sass_init_thread(void *args)
     if (thread_error) {
         /* pthread_create() failed */
         // TODO: Throw exception
-        while (true) {}
     }
 
     pthread_exit(NULL);
@@ -203,14 +199,12 @@ int main()
     if (thread_error) {
         /* failed to set attributes */
         // TODO: Throw exception
-        while (true) {}
     }
 
     thread_error = pthread_create(&sass_init_handle, &sass_init_attrs, sass_init_thread, NULL);
     if (thread_error) {
         /* pthread_create() failed */
         // TODO: Throw exception
-        while (true) {}
     }
 
     BIOS_start();    /* does not return */

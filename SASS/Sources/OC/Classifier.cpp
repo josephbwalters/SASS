@@ -3,7 +3,9 @@
  * Created by: Joseph Walters, Trent Sellers 
  */
 
+#ifndef __MSP432P401R__
 #define __MSP432P401R__
+#endif
 
 /* Standard headers */
 #include <stdio.h>
@@ -13,6 +15,7 @@
 
 /* System headers */
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
+#include <ti/devices/msp432p4xx/driverlib/timer32.h>
 #include <ti/drivers/GPIO.h>
 #include <ti/drivers/Timer.h>
 #include <ti/sysbios/BIOS.h>
@@ -24,6 +27,7 @@
 #include <Board.h>
 
 /* SASS-specific headers */
+#include <Sources/Control.h>
 #include <Sources/OC/Classifier.h>
 #include <Sources/OC/Vehicle.h>
 
@@ -304,7 +308,6 @@ void *Classifier::watchman_thread(void *args)
     if (thread_error) {
         /* failed to set attributes */
         // TODO: Throw exception
-        while (true) {}
     }
 
     while (true)
@@ -324,7 +327,6 @@ void *Classifier::watchman_thread(void *args)
             if (thread_error) {
                 /* pthread_create() failed */
                 // TODO: Throw exception
-                while (true) {}
             }
         }
 
@@ -338,7 +340,6 @@ void *Classifier::watchman_thread(void *args)
             if (thread_error) {
                 /* pthread_create() failed */
                 // TODO: Throw exception
-                while (true) {}
             }
         }
 
@@ -352,7 +353,6 @@ void *Classifier::watchman_thread(void *args)
             if (thread_error) {
                 /* pthread_create() failed */
                 // TODO: Throw exception
-                while (true) {}
             }
         }
 
@@ -366,7 +366,6 @@ void *Classifier::watchman_thread(void *args)
             if (thread_error) {
                 /* pthread_create() failed */
                 // TODO: Throw exception
-                while (true) {}
             }
         }
 
@@ -412,15 +411,32 @@ void Classifier::emergency_hwi_callback(uint_least8_t index)
         GPIO_disableInt(gpio_map[i]);
     }
 
-    // Confirm vehicle is present
+    // Artificial delay
+//    for (int i = 0; i < 9437184; i++)
+//    {
+//
+//    }
+
+    int us_delay = 3000000;
+    Timer32_haltTimer(TIMER32_0_BASE);
+    Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1, TIMER32_32BIT, TIMER32_PERIODIC_MODE);
+    Timer32_setCount(TIMER32_0_BASE, 48 * us_delay);
+    Timer32_startTimer(TIMER32_0_BASE, true);
+
+    while (Timer32_getValue(TIMER32_0_BASE) > 0)
+    {
+
+    }
+
+    // Confirm threat no longer exists
     while (score < CHECKS_NEEDED)
     {
-        GPIO_toggleOutputOnPin(GPIO_PORT_P7, GPIO_PIN4);
-        GPIO_toggleOutputOnPin(GPIO_PORT_P7, GPIO_PIN5);
+        GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
+        GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
 
         for (int i = 0; i < CHECKS_NEEDED; i++)
         {
-            bool clear = GPIO_read(gpio_map[i]);
+            bool clear = !GPIO_read(gpio_map[i]);
 
             if (clear)
             {
@@ -443,4 +459,6 @@ void Classifier::emergency_hwi_callback(uint_least8_t index)
     }
 
     GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
+    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
+    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
 }

@@ -3,7 +3,12 @@
  * Created by: Joseph Walters, Trent Sellers
  */
 
-/* BIOS module headers */
+#ifndef __MSP432P401R__
+#define __MSP432P401R__
+#endif
+
+/* System headers */
+#include <ti/devices/msp432p4xx/driverlib/timer32.h>
 #include <ti/sysbios/knl/Task.h>
 
 /* SASS-specific headers */
@@ -59,8 +64,29 @@ void Control::default_failure_callback()
     while (true)
     {
         Lights::set_all_red();
-        Task_sleep(1000);
+
+        int us_delay = 550000;
+        Timer32_haltTimer(TIMER32_0_BASE);
+        Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1, TIMER32_32BIT, TIMER32_PERIODIC_MODE);
+        Timer32_setCount(TIMER32_0_BASE, 48 * us_delay);
+        Timer32_startTimer(TIMER32_0_BASE, true);
+
+        while (Timer32_getValue(TIMER32_0_BASE) > 0)
+        {
+
+        }
+
         Lights::turn_off();
-        Task_sleep(1000);
+
+        us_delay = 550000;
+        Timer32_haltTimer(TIMER32_0_BASE);
+        Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1, TIMER32_32BIT, TIMER32_PERIODIC_MODE);
+        Timer32_setCount(TIMER32_0_BASE, 48 * us_delay);
+        Timer32_startTimer(TIMER32_0_BASE, true);
+
+        while (Timer32_getValue(TIMER32_0_BASE) > 0)
+        {
+
+        }
     }
 }

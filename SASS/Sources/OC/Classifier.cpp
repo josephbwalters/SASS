@@ -397,6 +397,8 @@ void Classifier::classifier_hwi_callback(uint_least8_t index)
 
 void Classifier::emergency_hwi_callback(uint_least8_t index)
 {
+    bool unsafe = true;
+
     GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
     GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
     GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
@@ -404,28 +406,27 @@ void Classifier::emergency_hwi_callback(uint_least8_t index)
     GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
 
     uint8_t gpio_map[CHECKS_NEEDED] = {Board_GPIO_MMW1, Board_GPIO_MMW2};
-
     for (int i = 0; i < CHECKS_NEEDED; i++)
     {
         GPIO_disableInt(gpio_map[i]);
     }
 
-    // Artificial delay
-    for (int i = 0; i < 9437184; i++)
-    {
-
-    }
-
-//    int us_delay = 3000000;
-//    Timer32_haltTimer(TIMER32_0_BASE);
-//    Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1, TIMER32_32BIT, TIMER32_PERIODIC_MODE);
-//    Timer32_setCount(TIMER32_0_BASE, 48 * us_delay);
-//    Timer32_startTimer(TIMER32_0_BASE, true);
-//
-//    while (Timer32_getValue(TIMER32_0_BASE) > 0)
+//    // Artificial delay
+//    for (int i = 0; i < 9437184; i++)
 //    {
 //
 //    }
+
+    int us_delay = 3000000;
+    Timer32_haltTimer(TIMER32_0_BASE);
+    Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1, TIMER32_32BIT, TIMER32_PERIODIC_MODE);
+    Timer32_setCount(TIMER32_0_BASE, 48 * us_delay);
+    Timer32_startTimer(TIMER32_0_BASE, true);
+
+    while (Timer32_getValue(TIMER32_0_BASE) > 0)
+    {
+
+    }
 
     uint8_t score = 0;
     // Confirm threat no longer exists
@@ -436,7 +437,7 @@ void Classifier::emergency_hwi_callback(uint_least8_t index)
 
         for (int i = 0; i < CHECKS_NEEDED; i++)
         {
-            bool unsafe = GPIO_read(gpio_map[i]) == 1;
+            unsafe = GPIO_read(gpio_map[i]) == 1;
 
             if (unsafe)
             {

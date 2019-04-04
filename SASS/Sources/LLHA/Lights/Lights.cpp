@@ -116,6 +116,8 @@ void Lights::toggle_yellow(Directions direction)
     switch (direction)
     {
     case Directions::NORTH:
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
+
         if (GPIO_getInputPinValue(GPIO_PORT_P7, GPIO_PIN6))
         {
             GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
@@ -126,6 +128,8 @@ void Lights::toggle_yellow(Directions direction)
         }
         break;
     case Directions::EAST:
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
+
         if (GPIO_getInputPinValue(GPIO_PORT_P7, GPIO_PIN7))
         {
             GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);

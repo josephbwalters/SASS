@@ -411,12 +411,6 @@ void Classifier::emergency_hwi_callback(uint_least8_t index)
         GPIO_disableInt(gpio_map[i]);
     }
 
-//    // Artificial delay
-//    for (int i = 0; i < 9437184; i++)
-//    {
-//
-//    }
-
     int us_delay = 3000000;
     Timer32_haltTimer(TIMER32_0_BASE);
     Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1, TIMER32_32BIT, TIMER32_PERIODIC_MODE);
@@ -458,7 +452,7 @@ void Classifier::emergency_hwi_callback(uint_least8_t index)
         }
     }
 
-    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
-    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
-    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
+//    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
+//    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
+//    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
 }

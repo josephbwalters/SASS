@@ -403,7 +403,6 @@ void Classifier::emergency_hwi_callback(uint_least8_t index)
     GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
     GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
 
-    uint8_t score = 0;
     uint8_t gpio_map[CHECKS_NEEDED] = {Board_GPIO_MMW1, Board_GPIO_MMW2};
 
     for (int i = 0; i < CHECKS_NEEDED; i++)
@@ -412,22 +411,23 @@ void Classifier::emergency_hwi_callback(uint_least8_t index)
     }
 
     // Artificial delay
-//    for (int i = 0; i < 9437184; i++)
-//    {
-//
-//    }
-
-    int us_delay = 3000000;
-    Timer32_haltTimer(TIMER32_0_BASE);
-    Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1, TIMER32_32BIT, TIMER32_PERIODIC_MODE);
-    Timer32_setCount(TIMER32_0_BASE, 48 * us_delay);
-    Timer32_startTimer(TIMER32_0_BASE, true);
-
-    while (Timer32_getValue(TIMER32_0_BASE) > 0)
+    for (int i = 0; i < 9437184; i++)
     {
 
     }
 
+//    int us_delay = 3000000;
+//    Timer32_haltTimer(TIMER32_0_BASE);
+//    Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1, TIMER32_32BIT, TIMER32_PERIODIC_MODE);
+//    Timer32_setCount(TIMER32_0_BASE, 48 * us_delay);
+//    Timer32_startTimer(TIMER32_0_BASE, true);
+//
+//    while (Timer32_getValue(TIMER32_0_BASE) > 0)
+//    {
+//
+//    }
+
+    uint8_t score = 0;
     // Confirm threat no longer exists
     while (score < CHECKS_NEEDED)
     {
@@ -436,15 +436,15 @@ void Classifier::emergency_hwi_callback(uint_least8_t index)
 
         for (int i = 0; i < CHECKS_NEEDED; i++)
         {
-            bool clear = !GPIO_read(gpio_map[i]);
+            bool unsafe = GPIO_read(gpio_map[i]) == 1;
 
-            if (clear)
+            if (unsafe)
             {
-                score++;
+                score = 0;
             }
             else
             {
-                score = 0;
+                score++;
             }
         }
 
@@ -452,7 +452,6 @@ void Classifier::emergency_hwi_callback(uint_least8_t index)
         {
             for (int i = 0; i < CHECKS_NEEDED; i++)
             {
-                GPIO_clearInt(gpio_map[i]);
                 GPIO_enableInt(gpio_map[i]);
             }
         }

@@ -24,14 +24,21 @@ class Lights
 public:
     static void init();
 
-    static void set_red(Directions direction);
-    static void set_yellow(Directions direction);
-    static void schedule(Directions direction);
+    static void turn_on_red();
+    static void turn_on_red(Directions direction);
+    static void turn_on_yellow();
+    static void turn_on_yellow(Directions direction);
+    static void turn_off_red();
+    static void turn_off_red(Directions direction);
+    static void turn_off_yellow();
+    static void turn_off_yellow(Directions direction);
     static void toggle_yellow(Directions direction);
-    static void set_all_red();
+    static void turn_on();
+    static void turn_on(Directions direction);
     static void turn_off();
     static void turn_off(Directions direction);
-    static void set_all();
+    static void set_all_red();
+    static void schedule(Directions direction);
 
     // Thread-able method(s)
     static void *mosfet_toggle_thread(void *args);

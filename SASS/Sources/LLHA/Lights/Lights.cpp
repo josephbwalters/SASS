@@ -32,17 +32,21 @@ void Lights::init()
     GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
 }
 
-void Lights::set_red(Directions direction)
+void Lights::turn_on_red()
+{
+    turn_on_red(Directions::NORTH);
+    turn_on_red(Directions::EAST);
+}
+
+void Lights::turn_on_red(Directions direction)
 {
     switch (direction)
     {
     case Directions::NORTH:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
-        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
         break;
     case Directions::EAST:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
-        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
         break;
     case Directions::SOUTH:
         // Future: Add functionality for south direction
@@ -55,16 +59,47 @@ void Lights::set_red(Directions direction)
     };
 }
 
-void Lights::set_yellow(Directions direction)
+void Lights::turn_on_yellow()
+{
+    turn_on_yellow(Directions::NORTH);
+    turn_on_yellow(Directions::EAST);
+}
+
+void Lights::turn_on_yellow(Directions direction)
 {
     switch (direction)
     {
     case Directions::NORTH:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
-        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
         break;
     case Directions::EAST:
         GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
+        break;
+    case Directions::SOUTH:
+        // Future: Add functionality for south direction
+        break;
+    case Directions::WEST:
+        // Future: Add functionality for west direction
+        break;
+    default:
+        // TODO: Throw exception
+    };
+}
+
+void Lights::turn_off_red()
+{
+    turn_off_red(Directions::NORTH);
+    turn_off_red(Directions::EAST);
+}
+
+void Lights::turn_off_red(Directions direction)
+{
+    switch (direction)
+    {
+    case Directions::NORTH:
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
+        break;
+    case Directions::EAST:
         GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
         break;
     case Directions::SOUTH:
@@ -78,33 +113,27 @@ void Lights::set_yellow(Directions direction)
     };
 }
 
-void Lights::schedule(Directions direction)
+void Lights::turn_off_yellow()
+{
+    turn_off_yellow(Directions::NORTH);
+    turn_off_yellow(Directions::EAST);
+}
+
+void Lights::turn_off_yellow(Directions direction)
 {
     switch (direction)
     {
     case Directions::NORTH:
-        set_yellow(Directions::NORTH);
-        set_red(Directions::EAST);
-        set_red(Directions::SOUTH);
-        set_red(Directions::WEST);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
         break;
     case Directions::EAST:
-        set_yellow(Directions::EAST);
-        set_red(Directions::SOUTH);
-        set_red(Directions::WEST);
-        set_red(Directions::NORTH);
+        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
         break;
     case Directions::SOUTH:
-        set_yellow(Directions::SOUTH);
-        set_red(Directions::WEST);
-        set_red(Directions::NORTH);
-        set_red(Directions::EAST);
+        // Future: Add functionality for south direction
         break;
     case Directions::WEST:
-        set_yellow(Directions::WEST);
-        set_red(Directions::NORTH);
-        set_red(Directions::EAST);
-        set_red(Directions::SOUTH);
+        // Future: Add functionality for west direction
         break;
     default:
         // TODO: Throw exception
@@ -116,27 +145,27 @@ void Lights::toggle_yellow(Directions direction)
     switch (direction)
     {
     case Directions::NORTH:
-        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
+        turn_off_red(Directions::NORTH);
 
         if (GPIO_getInputPinValue(GPIO_PORT_P7, GPIO_PIN6))
         {
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
+            turn_off_yellow(Directions::NORTH);
         }
         else
         {
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
+            turn_on_yellow(Directions::NORTH);
         }
         break;
     case Directions::EAST:
-        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
+        turn_off_red(Directions::EAST);
 
         if (GPIO_getInputPinValue(GPIO_PORT_P7, GPIO_PIN7))
         {
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
+            turn_off_yellow(Directions::EAST);
         }
         else
         {
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
+            turn_on_yellow(Directions::EAST);
         }
         break;
     case Directions::SOUTH:
@@ -150,10 +179,16 @@ void Lights::toggle_yellow(Directions direction)
     };
 }
 
-void Lights::set_all_red()
+void Lights::turn_on()
 {
-    set_red(Directions::NORTH);
-    set_red(Directions::EAST);
+    turn_on(Directions::NORTH);
+    turn_on(Directions::EAST);
+}
+
+void Lights::turn_on(Directions direction)
+{
+    turn_on_red(direction);
+    turn_on_yellow(direction);
 }
 
 void Lights::turn_off()
@@ -164,33 +199,65 @@ void Lights::turn_off()
 
 void Lights::turn_off(Directions direction)
 {
+    turn_off_red(direction);
+    turn_off_yellow(direction);
+}
+
+void Lights::set_all_red()
+{
+    turn_on_red(Directions::NORTH);
+    turn_off_yellow(Directions::NORTH);
+    turn_on_red(Directions::EAST);
+    turn_off_yellow(Directions::EAST);
+}
+
+void Lights::schedule(Directions direction)
+{
     switch (direction)
     {
     case Directions::NORTH:
-        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
-        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
+        turn_on_yellow(Directions::NORTH);
+        turn_off_red(Directions::NORTH);
+        turn_on_red(Directions::EAST);
+        turn_off_yellow(Directions::EAST);
+        turn_on_red(Directions::SOUTH);
+        turn_off_yellow(Directions::SOUTH);
+        turn_on_red(Directions::WEST);
+        turn_off_yellow(Directions::WEST);
         break;
     case Directions::EAST:
-        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
-        GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
+        turn_on_yellow(Directions::EAST);
+        turn_off_red(Directions::EAST);
+        turn_on_red(Directions::SOUTH);
+        turn_off_yellow(Directions::SOUTH);
+        turn_on_red(Directions::WEST);
+        turn_off_yellow(Directions::WEST);
+        turn_on_red(Directions::NORTH);
+        turn_off_yellow(Directions::NORTH);
         break;
     case Directions::SOUTH:
-        // Future: Add functionality for south direction
+        turn_on_yellow(Directions::SOUTH);
+        turn_off_red(Directions::SOUTH);
+        turn_on_red(Directions::WEST);
+        turn_off_yellow(Directions::WEST);
+        turn_on_red(Directions::NORTH);
+        turn_off_yellow(Directions::NORTH);
+        turn_on_red(Directions::EAST);
+        turn_off_yellow(Directions::EAST);
         break;
     case Directions::WEST:
-        // Future: Add functionality for west direction
+        turn_on_yellow(Directions::WEST);
+        turn_off_red(Directions::WEST);
+        turn_on_red(Directions::NORTH);
+        turn_off_yellow(Directions::NORTH);
+        turn_on_red(Directions::EAST);
+        turn_off_yellow(Directions::EAST);
+        turn_on_red(Directions::SOUTH);
+        turn_off_yellow(Directions::SOUTH);
         break;
     default:
         // TODO: Throw exception
     };
-}
-
-void Lights::set_all()
-{
-    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
-    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
-    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
-    GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
 }
 
 /**

@@ -26,7 +26,7 @@ class Classifier
 public:
     static Classifier* get_instance(Directions direction);
 
-    static uint16_t get_reference_distance(Directions direction);
+    uint16_t get_reference_distance();
     uint8_t track();
 
     // Thread-able method(s)/callback functions

@@ -57,12 +57,9 @@ Scheduler* Scheduler::get_instance()
 
 bool Scheduler::is_clear(Directions direction) // Dont need dir?
 {
-    uint16_t ref_dist = Classifier::get_reference_distance(direction);
-    Lidar* lidar = Lidar::get_instance(direction);
-
-    uint16_t dist = lidar->get_distance();
-
-    return !(dist < ref_dist - 20);
+    uint16_t dist = Lidar::get_instance(direction)->get_distance();
+    uint16_t ref_dist = Classifier::get_instance(direction)->get_reference_distance();
+    return !( dist < ref_dist - 20);
 }
 
 deque<Vehicle>* Scheduler::get_vehicle_queue()
@@ -108,8 +105,7 @@ void *Scheduler::scheduler_thread(void *args)
             Timer_close(timer_handle);
 
             if (status == Timer_STATUS_ERROR) {
-                //Timer_start() failed
-                // TODO: Throw exception
+                Control::get_instance()->fail_system();
             }
 
             printf("[Scheduler] 2-second timer expired.\n");
@@ -151,7 +147,7 @@ void *Scheduler::scheduler_thread(void *args)
 
             if (status == Timer_STATUS_ERROR) {
                 //Timer_start() failed
-                // TODO: Throw exception
+                Control::get_instance()->fail_system();
             }
 
             // Timer_stop(timer_handle);

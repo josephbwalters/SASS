@@ -39,9 +39,6 @@ public:
     static void turn_off(Directions direction);
     static void set_all_red();
     static void schedule(Directions direction);
-
-    // Thread-able method(s)
-    static void *mosfet_toggle_thread(void *args);
 };
 
 

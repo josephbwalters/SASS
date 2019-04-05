@@ -12,6 +12,7 @@
 #include <ti/sysbios/knl/Task.h>
 
 /* SASS-specific headers */
+#include <Sources/Control.h>
 #include <Sources/LLHA/Lights/Lights.h>
 
 using namespace sources;
@@ -55,7 +56,8 @@ void Lights::turn_on_red(Directions direction)
         // Future: Add functionality for west direction
         break;
     default:
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
+        break;
     };
 }
 
@@ -82,7 +84,8 @@ void Lights::turn_on_yellow(Directions direction)
         // Future: Add functionality for west direction
         break;
     default:
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
+        break;
     };
 }
 
@@ -109,7 +112,8 @@ void Lights::turn_off_red(Directions direction)
         // Future: Add functionality for west direction
         break;
     default:
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
+        break;
     };
 }
 
@@ -136,7 +140,8 @@ void Lights::turn_off_yellow(Directions direction)
         // Future: Add functionality for west direction
         break;
     default:
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
+        break;
     };
 }
 
@@ -175,7 +180,8 @@ void Lights::toggle_yellow(Directions direction)
         // Future: Add functionality for west direction
         break;
     default:
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
+        break;
     };
 }
 
@@ -256,45 +262,7 @@ void Lights::schedule(Directions direction)
         turn_off_yellow(Directions::SOUTH);
         break;
     default:
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
+        break;
     };
-}
-
-/**
-    Thread to toggle all of our mosfets
-*/
-void *Lights::mosfet_toggle_thread(void *args)
-{
-    // GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
-
-    bool is_on = 0;
-
-    while (true)
-    {
-        for(int i = 0; i < 1000000; i++)
-        {
-            // Delay
-        }
-
-        if(is_on == 0)
-        {
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
-            is_on = 1;
-        }
-        else
-        {
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
-            is_on = 0;
-        }
-
-        Task_yield();
-    }
 }

@@ -1047,9 +1047,34 @@
 /* Extra Include Files */
 #include <ti/demo/io_interface/detected_obj.h>
 
+struct Object {
+    float range;
+    float velocity;
+} Object;
+
 /**************************************************************************
  *************************** Local Definitions ****************************
  **************************************************************************/
+
+#define RANGE 0
+#define VELOCITY 1
+
+#define MIN_VALID_RANGE 0.25
+#define MAX_VALID_RANGE 25.0
+
+#define MIN_VALID_VELOCITY  -30.0
+#define MAX_VALID_VELOCITY  0.00
+
+#define PLACEHOLDER_RANGE 100000.00
+#define PLACEHOLDER_VELOCITY 0.0
+
+#define UNSAFE_VELOCITY_THRESHOLD -3.00
+#define UNSAFE_RANGE_THRESHOLD 0.50
+
+#define FILTER_SPEED -.25
+
+
+#define NUMBER_OF_OBJECTS_TO_AVG 10
 
 /**************************************************************************
  *************************** Global Definitions ***************************
@@ -1345,7 +1370,7 @@ int32_t MmwDemo_mboxWrite(MmwDemo_message     * message)
     return retVal;
 }
 
-void send_over_spi(uint16_t range, uint16_t velocity)
+void send_over_spi(uint16_t range, uint8_t velocity)
 {
     bool transferOK = false;
 
@@ -1397,47 +1422,51 @@ bool is_in_range(float min, float max, float value) {
     return value > min && value < max;
 }
 
-bool valid_object(float range, float velocity) {
-    float min_valid_range = 0.01;
-    float max_valid_range = 100.0;
-
-    float min_valid_velocity = -100.0;
-    float max_valid_velocity = 100.0;
-
-    return is_in_range(min_valid_range, max_valid_range, range) && is_in_range(min_valid_velocity, max_valid_velocity, velocity);
+bool valid_object(struct Object object) {
+    return is_in_range(MIN_VALID_RANGE, MAX_VALID_RANGE, object.range) && is_in_range(MIN_VALID_VELOCITY, MAX_VALID_VELOCITY, object.velocity);
 }
 
-void process_objects(float *ranges, float *velocities, int number_of_objects) {
-    float min_range = 1000000.0;
-    float velocity = 0.0;
+bool unsafe_object(struct Object object) {
+    if (object.velocity < UNSAFE_VELOCITY_THRESHOLD) {
+        return true;
+    }
 
+    if (object.range < UNSAFE_RANGE_THRESHOLD) {
+        return true;
+    }
+
+    return false;
+}
+
+void get_valid_object(struct Object *object, struct Object *objects, int number_of_objects) {
     int idx;
+
     for (idx = 0; idx < number_of_objects; idx++) {
-        if (valid_object(ranges[idx], velocities[idx]) && (ranges[idx] < min_range)) {
-            min_range = ranges[idx];
-            velocity = velocities[idx];
+        if (!valid_object(objects[idx])) {
+            continue;
+        }
+
+        // objects[idx].range < object->range &&
+
+        if (objects[idx].velocity < object->velocity) {
+            object->range = objects[idx].range;
+            object->velocity = objects[idx].velocity;
         }
     }
+}
 
-    CLI_write("RANGE: %.2f\n", min_range);
-    CLI_write("VELOCITY: %.2f\n\n", velocity);
+void take_average(struct Object *avg_object, struct Object *objects) {
+    int i;
+    avg_object->range = 0;
+    avg_object->velocity = 0;
 
-    // IWR1642 / IWR1642BOOST pin mapping:
-    // SOC_XWR16XX_GPIO_0 -> AR_GPIO_0 (J6 pin 15)
-    // SOC_XWR16XX_GPIO_0 -> AR_GPIO_1 (J5 pin 8)
-    // SOC_XWR16XX_GPIO_0 -> AR_GPIO_2 (J5 pin 18)
-
-    if (min_range > 1.0 && min_range < 5.0)
-    {
-        GPIO_write(SOC_XWR16XX_GPIO_0, 1);
-    }
-    else
-    {
-        GPIO_write(SOC_XWR16XX_GPIO_0, 0);
+    for (i = 0; i < NUMBER_OF_OBJECTS_TO_AVG; i++) {
+        avg_object->range = avg_object->range + objects[i].range;
+        avg_object->velocity = avg_object->velocity + objects[i].velocity;
     }
 
-    // send_over_spi((uint16_t)round(min_range), (uint16_t)round(velocity));
-    // send_over_spi((uint16_t)47U, (uint16_t)21U);
+    avg_object->range = avg_object->range / NUMBER_OF_OBJECTS_TO_AVG;
+    avg_object->velocity = avg_object->velocity / NUMBER_OF_OBJECTS_TO_AVG;
 }
 
 
@@ -1457,6 +1486,13 @@ void process_objects(float *ranges, float *velocities, int number_of_objects) {
  */
 static void MmwDemo_mboxReadTask(UArg arg0, UArg arg1)
 {
+    struct Object avg_object;
+    struct Object object = {PLACEHOLDER_RANGE, PLACEHOLDER_VELOCITY};
+    uint8_t reset_counter =  0;
+    bool ready = false;
+    uint8_t count;
+    struct Object objects_to_average[10];
+
     MmwDemo_message message;
     int32_t transferOK = 0;
     uint32_t totalPacketLen;
@@ -1469,9 +1505,8 @@ static void MmwDemo_mboxReadTask(UArg arg0, UArg arg1)
     MmwDemo_detectedObj *detObjArray;
     MmwDemo_detectedObj detObj;
 
-    float *ranges = NULL;
     float range;
-    float *velocities = NULL;
+    struct Object *objects = NULL;
     float velocity;
 
     float speed_of_light = 3e8;
@@ -1492,21 +1527,21 @@ static void MmwDemo_mboxReadTask(UArg arg0, UArg arg1)
     // 1                      1           0        0            0           0           0                  2
 
 
-    uint32_t dig_out_sample_rate = 5209;
-    uint32_t freq_slope_const = 70;
-    uint16_t num_range_bins = 256; // Needs to be pwr of 2 (round up from numADCSamps)
-    float range_bias = gMmwMssMCB.cliCommonCfg.compRxChanCfg.rangeBias;
+    float dig_out_sample_rate = 5053.0;
+    float freq_slope_const = 30.0;
+    float num_range_bins = 128.0; // Needs to be pwr of 2 (round up from numADCSamps)
+    float range_bias = (float)gMmwMssMCB.cliCommonCfg.compRxChanCfg.rangeBias;
 
     // speed of light times F_samp (samplng freq), S (chirp slope Hz/sec), N_FFT is 1D FFT Size
     float range_calculation = (speed_of_light * dig_out_sample_rate * 1e3) / (2 * (freq_slope_const * ((1e6)/(1e-6)) * num_range_bins));
 
-    uint32_t start_freq = 77;
-    uint32_t idle_time = 429;
-    uint32_t ramp_end_time = 57.14;
-    uint32_t chirp_start_idx = 0;
-    uint32_t chirp_end_idx = 1;
-    uint32_t num_loops = 16;
-    uint32_t num_chirps_per_frame = (chirp_end_idx - chirp_start_idx + 1) * num_loops;
+    float start_freq = 76;
+    float idle_time = 7;
+    float ramp_end_time = 33.33;
+    float chirp_start_idx = 0;
+    float chirp_end_idx = 1;
+    float num_loops = 128;
+    float num_chirps_per_frame = (chirp_end_idx - chirp_start_idx + 1) * num_loops;
 
     float velocity_calculation = (speed_of_light / (2 * (start_freq * 1e9) * ((idle_time + ramp_end_time) * 1e-6) * num_chirps_per_frame) );
 
@@ -1543,9 +1578,8 @@ static void MmwDemo_mboxReadTask(UArg arg0, UArg arg1)
 
                             CLI_write("NUMBER OF OBJECTS# : %d\n", numDetObjs);
 
-                            if (ranges == NULL) {
-                                ranges = (float*)calloc(numDetObjs, sizeof(float));
-                                velocities = (float*)calloc(numDetObjs, sizeof(float));
+                            if (objects == NULL) {
+                                objects = (struct Object*)calloc(numDetObjs, sizeof(struct Object));
                             }
 
                             for (detObjIdx = 0; detObjIdx < numDetObjs; detObjIdx++) {
@@ -1556,11 +1590,11 @@ static void MmwDemo_mboxReadTask(UArg arg0, UArg arg1)
                                 range = detObj.rangeIdx * range_calculation - range_bias;
                                 velocity = detObj.dopplerIdx * velocity_calculation;
 
-                                ranges[detObjIdx] = range;
-                                velocities[detObjIdx] = velocity;
+                                objects[detObjIdx].range = range;
+                                objects[detObjIdx].velocity = velocity;
 
-                                CLI_write("%d Range: %0.5f m\n", detObjIdx+1, range);
-                                CLI_write("%d Velocity: %0.5f m/s\n",detObjIdx+1 , velocity);
+                                CLI_write("%d Range: %0.5f m\n", detObjIdx+1, objects[detObjIdx].range);
+                                CLI_write("%d Velocity: %0.5f m/s\n",detObjIdx+1 , objects[detObjIdx].velocity);
                             }
                         }
 
@@ -1587,14 +1621,71 @@ static void MmwDemo_mboxReadTask(UArg arg0, UArg arg1)
                         System_printf ("Error: Mailbox send message id=%d failed \n", message.type);
                     }
 
-                    if (ranges != NULL && velocities != NULL) {
-                        process_objects(ranges, velocities, numDetObjs);
-                        free(ranges);
-                        free(velocities);
+                    if (objects != NULL) {
+                        get_valid_object(&object, objects, numDetObjs);
+                        free(objects);
+                        objects = NULL;
                     }
 
-                    ranges = NULL;
-                    velocities = NULL;
+                    if (!ready) {
+                        // GPIO 0
+                        Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINH13_PADAB, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+                        Pinmux_Set_FuncSel(SOC_XWR16XX_PINH13_PADAB, SOC_XWR16XX_PINH13_PADAB_GPIO_0);
+                        GPIO_setConfig (SOC_XWR16XX_GPIO_0, GPIO_CFG_OUTPUT);
+                        GPIO_write(SOC_XWR16XX_GPIO_0, 0U);
+                    }
+
+                    if (object.range != PLACEHOLDER_RANGE  && object.velocity != PLACEHOLDER_VELOCITY){
+                        objects_to_average[count].range = object.range;
+                        objects_to_average[count].velocity = object.velocity;
+
+                        CLI_write("---Range: %.2f---\n", object.range);
+                        CLI_write("---Velocity: %.2f---\n\n", object.velocity);
+
+                        if (count == 9) {
+                            ready = true;
+                            count = 0;
+                        } else {
+                            count++;
+                        }
+
+                        if (ready) {
+                            take_average(&avg_object, objects_to_average);
+
+                            CLI_write("---AVG Range: %.2f---\n", avg_object.range);
+                            CLI_write("---AVG Velocity: %.2f---\n\n", avg_object.velocity);
+                        } else {
+                            // GPIO 0
+                            Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINH13_PADAB, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+                            Pinmux_Set_FuncSel(SOC_XWR16XX_PINH13_PADAB, SOC_XWR16XX_PINH13_PADAB_GPIO_0);
+                            GPIO_setConfig (SOC_XWR16XX_GPIO_0, GPIO_CFG_OUTPUT);
+                            GPIO_write(SOC_XWR16XX_GPIO_0, 0U);
+                        }
+
+                        // GPIO 0
+                        Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINH13_PADAB, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+                        Pinmux_Set_FuncSel(SOC_XWR16XX_PINH13_PADAB, SOC_XWR16XX_PINH13_PADAB_GPIO_0);
+                        GPIO_setConfig (SOC_XWR16XX_GPIO_0, GPIO_CFG_OUTPUT);
+
+                        if (unsafe_object(avg_object)) {
+                            CLI_write("----Unsafe\n");
+                            GPIO_write(SOC_XWR16XX_GPIO_0, 1U);
+                        } else {
+                            CLI_write("----Safe\n");
+                            GPIO_write(SOC_XWR16XX_GPIO_0, 0U);
+                        }
+                    } else {
+                        reset_counter += 1;
+
+                        if (reset_counter >= 5) {
+                            ready = false;
+                            count = 0;
+                            reset_counter = 0;
+                        }
+                    }
+
+                    object.range = PLACEHOLDER_RANGE;
+                    object.velocity = PLACEHOLDER_VELOCITY;
                     break;
                 }
 
@@ -2170,6 +2261,7 @@ void MmwDemo_mssCtrlPathTask(UArg arg0, UArg arg1)
      * - This is used as an input
      * - Enable interrupt to be notified on a switch press
      **********************************************************************/
+// LOOK HERE!!!
     GPIO_setConfig (SOC_XWR16XX_GPIO_1, GPIO_CFG_INPUT | GPIO_CFG_IN_INT_RISING | GPIO_CFG_IN_INT_LOW);
     GPIO_setCallback (SOC_XWR16XX_GPIO_1, MmwDemo_switchPressFxn);
     GPIO_enableInt (SOC_XWR16XX_GPIO_1);
@@ -2693,6 +2785,18 @@ int main (void)
     int32_t         errCode;
     SOC_Cfg         socCfg;
 
+    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PIND13_PADAD, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+    Pinmux_Set_FuncSel(SOC_XWR16XX_PIND13_PADAD, SOC_XWR16XX_PIND13_PADAD_SPIA_MOSI);
+    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINE14_PADAE, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+    Pinmux_Set_FuncSel(SOC_XWR16XX_PINE14_PADAE, SOC_XWR16XX_PINE14_PADAE_SPIA_MISO);
+    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINE13_PADAF, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+    Pinmux_Set_FuncSel(SOC_XWR16XX_PINE13_PADAF, SOC_XWR16XX_PINE13_PADAF_SPIA_CLK);
+    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINC13_PADAG, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
+    Pinmux_Set_FuncSel(SOC_XWR16XX_PINC13_PADAG, SOC_XWR16XX_PINC13_PADAG_SPIA_CSN);
+
+    SPI_init();
+
+
     /* Initialize the ESM: */
     ESM_init(0U); //dont clear errors as TI RTOS does it
 
@@ -2739,17 +2843,6 @@ int main (void)
     taskParams.priority = 3;
     taskParams.stackSize = 2*1024;
     Task_create(MmwDemo_mssInitTask, &taskParams, NULL);
-
-    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PIND13_PADAD, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
-    Pinmux_Set_FuncSel(SOC_XWR16XX_PIND13_PADAD, SOC_XWR16XX_PIND13_PADAD_SPIA_MOSI);
-    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINE14_PADAE, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
-    Pinmux_Set_FuncSel(SOC_XWR16XX_PINE14_PADAE, SOC_XWR16XX_PINE14_PADAE_SPIA_MISO);
-    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINE13_PADAF, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
-    Pinmux_Set_FuncSel(SOC_XWR16XX_PINE13_PADAF, SOC_XWR16XX_PINE13_PADAF_SPIA_CLK);
-    Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINC13_PADAG, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
-    Pinmux_Set_FuncSel(SOC_XWR16XX_PINC13_PADAG, SOC_XWR16XX_PINC13_PADAG_SPIA_CSN);
-
-    SPI_init();
 
     /* Start BIOS */
     BIOS_start();

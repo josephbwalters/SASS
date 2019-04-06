@@ -26,13 +26,14 @@ class Classifier
 public:
     static Classifier* get_instance(Directions direction);
 
-    static uint16_t get_reference_distance(Directions direction);
+    uint16_t get_reference_distance();
     uint8_t track();
 
     // Thread-able method(s)/callback functions
     static void *classifier_thread(void* args);
     static void *watchman_thread(void *args);
     static void classifier_hwi_callback(uint_least8_t index);
+    static void emergency_hwi_callback(uint_least8_t index);
 
 private:
     Classifier(Directions direction);

@@ -3,8 +3,9 @@
  * Created by: Joseph Walters, Trent Sellers 
  */
 
+#ifndef __MSP432P401R__
 #define __MSP432P401R__
-// #define DEBUG
+#endif
 
 /* Standard headers */
 #include <stdio.h>
@@ -18,6 +19,7 @@
 
 /* Board-specific headers */
 #include <Board.h>
+#include <Sources/Control.h>
 #include <Sources/GreenBoard.h>
 
 /* SASS-specific headers */
@@ -53,7 +55,7 @@ Radar::Radar(Directions direction) : m_direction(direction)
         m_hardware_module = RADAR_W;
         break;
     default:
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
         break;
     };
 
@@ -104,7 +106,7 @@ Radar* Radar::get_instance(Directions direction)
         return radar_west;
         
     default:
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
         return nullptr; 
     };
 }
@@ -159,7 +161,7 @@ tuple<uint16_t, uint16_t> Radar::get_data()
     spi = SPI_open(m_hardware_module, &spiParams);
     if (spi == NULL)
     {
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
     }
 
     printf("SPI opened.\n");
@@ -174,7 +176,7 @@ tuple<uint16_t, uint16_t> Radar::get_data()
     transferOK = SPI_transfer(spi, &spiTransaction);
     if (!transferOK)
     {
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
     }
 
     rxBuffer[0] = 0x00;
@@ -188,7 +190,7 @@ tuple<uint16_t, uint16_t> Radar::get_data()
     transferOK = SPI_transfer(spi, &spiTransaction);
     if (!transferOK)
     {
-        // Throw exception
+        Control::get_instance()->fail_system();
     }
 
     SPI_close(spi);

@@ -35,7 +35,6 @@ public:
     static Scheduler* get_instance();
 
     bool is_clear(Directions direction);
-    Lights* get_lights();
     deque<Vehicle>* get_vehicle_queue();
     pthread_mutex_t* get_queue_mutex();
 
@@ -46,9 +45,6 @@ private:
     Scheduler();
     virtual ~Scheduler();
 
-    Lidar* m_lidar;
-
-    Lights lights;
     deque<Vehicle> vehicle_queue;
     pthread_mutex_t queue_mutex;
 

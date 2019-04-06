@@ -5,8 +5,9 @@
  * Last modified: March 6, 2019
  */
 
+#ifndef __MSP432P401R__
 #define __MSP432P401R__
-// #define DEBUG
+#endif
 
 #include <stdio.h>
 
@@ -23,6 +24,7 @@
 
 /* SASS-specific headers */
 #include <Sources/LLHA/Sensors/Lidar.h>
+#include <Sources/Control.h>
 #include <Sources/LLHA/Lights/Lights.h>
 
 using namespace sources::llha::sensors;
@@ -59,7 +61,7 @@ Lidar::Lidar(Directions direction) : m_current_addr(default_addr), m_direction(d
         m_hardware_module = LIDAR_W;
         break;
     default:
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
         break;
     };
 
@@ -112,7 +114,7 @@ Lidar* Lidar::get_instance(Directions direction)
         return lidar_west;
     
     default:
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
         return nullptr; 
     };
 }
@@ -159,6 +161,10 @@ void Lidar::config_1()
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
+        if (!transferOK)
+        {
+            Control::get_instance()->fail_system();
+        }
     } while (!transferOK);
 }
 
@@ -181,6 +187,10 @@ void Lidar::config_2()
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
+        if (!transferOK)
+        {
+            Control::get_instance()->fail_system();
+        }
     } while (!transferOK);
 }
 
@@ -203,6 +213,10 @@ void Lidar::config_3()
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
+        if (!transferOK)
+        {
+            Control::get_instance()->fail_system();
+        }
     } while (!transferOK);
 }
 
@@ -226,6 +240,10 @@ void Lidar::config_4()
     /* Re-try writing to slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
+        if (!transferOK)
+        {
+            Control::get_instance()->fail_system();
+        }
     } while (!transferOK);
 }
 
@@ -249,6 +267,10 @@ void Lidar::start_reading()
     /* Re-try reading from slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
+        if (!transferOK)
+        {
+            Control::get_instance()->fail_system();
+        }
     } while (!transferOK);
 }
 
@@ -273,6 +295,10 @@ void Lidar::wait_until_ready()
 
         do {
             transferOK = I2C_transfer(i2c, &i2cTransaction);
+            if (!transferOK)
+            {
+                Control::get_instance()->fail_system();
+            }
         } while (!transferOK);
     }
 }
@@ -300,6 +326,10 @@ uint16_t Lidar::read_dist()
     /* Re-try reading from slave till I2C_transfer returns true */
     do {
         transferOK = I2C_transfer(i2c, &i2cTransaction);
+        if (!transferOK)
+        {
+            Control::get_instance()->fail_system();
+        }
     } while (!transferOK);
 
     uint16_t dist = (rxBuffer[0] << 8) | rxBuffer[1];
@@ -319,7 +349,7 @@ uint16_t Lidar::get_distance()
     i2c = I2C_open(m_hardware_module, &i2cParams);
 
     if (i2c == NULL) {
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
     }
 
     // TODO: Check if we need to do the config every time we want a distance or not

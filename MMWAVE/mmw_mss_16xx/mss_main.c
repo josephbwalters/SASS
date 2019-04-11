@@ -1068,13 +1068,19 @@ struct Object {
 #define PLACEHOLDER_RANGE 100000.00
 #define PLACEHOLDER_VELOCITY 0.0
 
-#define UNSAFE_VELOCITY_THRESHOLD -3.00
+#define UNSAFE_VELOCITY_THRESHOLD -11.18
 #define UNSAFE_RANGE_THRESHOLD 0.50
+
+#define UNSAFE_OFFSET 1.83
 
 #define FILTER_SPEED -.25
 
+#define FRICTION 0.70
+#define GRAVITY 9.81
 
-#define NUMBER_OF_OBJECTS_TO_AVG 10
+
+
+#define NUMBER_OF_OBJECTS_TO_AVG 5
 
 /**************************************************************************
  *************************** Global Definitions ***************************
@@ -1427,11 +1433,13 @@ bool valid_object(struct Object object) {
 }
 
 bool unsafe_object(struct Object object) {
+    float unsafe_velocity = (float)sqrt(2*object.range*GRAVITY*FRICTION) * -1;
+
     if (object.velocity < UNSAFE_VELOCITY_THRESHOLD) {
         return true;
     }
 
-    if (object.range < UNSAFE_RANGE_THRESHOLD) {
+    if (object.velocity < unsafe_velocity + UNSAFE_OFFSET) {
         return true;
     }
 
@@ -1491,7 +1499,7 @@ static void MmwDemo_mboxReadTask(UArg arg0, UArg arg1)
     uint8_t reset_counter =  0;
     bool ready = false;
     uint8_t count;
-    struct Object objects_to_average[10];
+    struct Object objects_to_average[NUMBER_OF_OBJECTS_TO_AVG];
 
     MmwDemo_message message;
     int32_t transferOK = 0;
@@ -1642,7 +1650,7 @@ static void MmwDemo_mboxReadTask(UArg arg0, UArg arg1)
                         CLI_write("---Range: %.2f---\n", object.range);
                         CLI_write("---Velocity: %.2f---\n\n", object.velocity);
 
-                        if (count == 9) {
+                        if (count == NUMBER_OF_OBJECTS_TO_AVG - 1) {
                             ready = true;
                             count = 0;
                         } else {

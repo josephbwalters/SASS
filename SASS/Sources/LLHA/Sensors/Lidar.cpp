@@ -1,8 +1,6 @@
 /*
  * Lidar.cpp
  * Created by: Joseph Walters, Trent Sellers 
- * Date: March 6, 2019
- * Last modified: March 6, 2019
  */
 
 #ifndef __MSP432P401R__
@@ -30,13 +28,13 @@
 using namespace sources::llha::sensors;
 using namespace sources::llha::lights;
 
-// Initialize LiDAR instances to null for multiton pattern
+/* Initialize LiDAR instances to null for multiton pattern */
 sources::llha::sensors::Lidar* sources::llha::sensors::Lidar::lidar_north = nullptr;
 sources::llha::sensors::Lidar* sources::llha::sensors::Lidar::lidar_east = nullptr;
 sources::llha::sensors::Lidar* sources::llha::sensors::Lidar::lidar_south = nullptr;
 sources::llha::sensors::Lidar* sources::llha::sensors::Lidar::lidar_west = nullptr;
 
-// Set default address for LiDAR-Lite
+/* Set default address for LiDAR-Lite */
 uint8_t sources::llha::sensors::Lidar::default_addr = SLAVE_ADDR;
 
 /**
@@ -88,7 +86,6 @@ Lidar* Lidar::get_instance(Directions direction)
         if (lidar_north == nullptr)
         {
             lidar_north = new Lidar(direction);
-            // printf("Lidar memory address: %d\n", lidar_north);
         }
         return lidar_north;
     
@@ -344,7 +341,7 @@ uint16_t Lidar::read_dist()
 */
 uint16_t Lidar::get_distance()
 {
-    uint16_t dist = -1; // this?
+    uint16_t dist = 1;
 
     i2c = I2C_open(m_hardware_module, &i2cParams);
 
@@ -376,42 +373,4 @@ uint16_t Lidar::get_distance()
 uint16_t Lidar::get_velocity()
 {
     return 0;
-}
-
-/**
-    Thread to toggle MOSFETs based on LiDAR input.
-*/
-void *Lidar::lidarDemoThread(void *args)
-{
-    Lights lights;
-    Lidar* lidar_north = Lidar::get_instance(Directions::NORTH);
-
-    while (true)
-    {
-        uint16_t dist = lidar_north->get_distance();
-
-        // RED: P7.4
-        // YELLOW: P7.6
-
-        if(dist < 200)
-        {
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
-
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN5);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN6);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
-            //lights.set_yellow(Directions::NORTH);
-        }
-        else
-        {
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN3);
-
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN4);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
-            GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
-            GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN7);
-            //lights.set_red(Directions::NORTH);
-        }
-    }
 }

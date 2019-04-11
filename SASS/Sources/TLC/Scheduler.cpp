@@ -28,6 +28,9 @@
 // Pass requirement for verification of vehicle absence
 #define PASS 2
 
+#define TWO_SECONDS 2000000
+#define OFFSET 20
+
 using namespace std;
 using namespace sources;
 using namespace sources::oc;
@@ -55,11 +58,11 @@ Scheduler* Scheduler::get_instance()
     return scheduler;
 }
 
-bool Scheduler::is_clear(Directions direction) // Dont need dir?
+bool Scheduler::is_clear(Directions direction)
 {
     uint16_t dist = Lidar::get_instance(direction)->get_distance();
     uint16_t ref_dist = Classifier::get_instance(direction)->get_reference_distance();
-    return !( dist < ref_dist - 20);
+    return !( dist < ref_dist - OFFSET);
 }
 
 deque<Vehicle>* Scheduler::get_vehicle_queue()
@@ -89,8 +92,6 @@ void *Scheduler::scheduler_thread(void *args)
 
     while (true)
     {
-        // TODO: Implement Panic feature
-        // TODO: Implement with directions input into the queue, not numbers!
         while (!scheduler->get_vehicle_queue()->empty())
         {
             Vehicle vehicle = scheduler->get_vehicle_queue()->front();
@@ -98,7 +99,7 @@ void *Scheduler::scheduler_thread(void *args)
 
             printf("[Scheduler] Processing vehicle %d...\n", direction);
 
-            timer_params.period = 2000000;
+            timer_params.period = TWO_SECONDS;
             timer_handle = Timer_open(Board_TIMER0, &timer_params);
             printf("[Scheduler] Starting 2-second timer...\n");
             int status = Timer_start(timer_handle);
@@ -139,7 +140,7 @@ void *Scheduler::scheduler_thread(void *args)
 
             Lights::set_all_red();
 
-            timer_params.period = 2000000;
+            timer_params.period = TWO_SECONDS;
             timer_handle = Timer_open(Board_TIMER0, &timer_params);
             printf("[Scheduler] Starting 2-second timer...\n");
             status = Timer_start(timer_handle);

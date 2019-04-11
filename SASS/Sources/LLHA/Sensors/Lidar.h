@@ -43,9 +43,6 @@ public:
     uint16_t get_distance();
     uint16_t get_velocity();
 
-    // Thread-able method(s)
-    static void *lidarDemoThread(void *args);
-
 private:
     Lidar(Directions direction);
     virtual ~Lidar();

@@ -42,6 +42,8 @@
 #define STACK_SIZE_MEDIUM 1024
 #define STACK_SIZE_LARGE 2048
 
+#define OFFSET 20
+
 ti_sysbios_knl_Semaphore_Handle sw1_sem = Semaphore_create(0, NULL, NULL);
 ti_sysbios_knl_Semaphore_Handle sw2_sem = Semaphore_create(0, NULL, NULL);
 ti_sysbios_knl_Semaphore_Handle mmw1_sem = Semaphore_create(0, NULL, NULL);
@@ -203,7 +205,7 @@ uint16_t Classifier::get_reference_distance()
 
 uint8_t Classifier::track()
 {
-    if (m_lidar->get_distance() < get_reference_distance() - 20)
+    if (m_lidar->get_distance() < get_reference_distance() - OFFSET)
     {
         return 1;
     }
@@ -287,16 +289,14 @@ void *Classifier::watchman_thread(void *args)
     struct sched_param  classifier_priParam;
     int                 thread_error;
 
-    /* Initialize the attributes structure with default values */
     pthread_attr_init(&classifier_attrs);
 
-    /* Set priority, detach state, and stack size attributes */
     classifier_priParam.sched_priority = 1;
     thread_error = pthread_attr_setschedparam(&classifier_attrs, &classifier_priParam);
     thread_error |= pthread_attr_setdetachstate(&classifier_attrs, PTHREAD_CREATE_DETACHED);
     thread_error |= pthread_attr_setstacksize(&classifier_attrs, STACK_SIZE_LARGE);
-    if (thread_error) {
-        /* failed to set attributes */
+    if (thread_error)
+    {
         Control::get_instance()->fail_system();
     }
 
@@ -309,12 +309,12 @@ void *Classifier::watchman_thread(void *args)
 
         if (sw1_status == true)
         {
-            // Create classifier thread
             // printf("Creating Classifier north thread...\n");
 
             thread_error = pthread_create(&classifier_n_thread, &classifier_attrs, Classifier::classifier_thread,
                                   (void *)Directions::NORTH);
-            if (thread_error) {
+            if (thread_error)
+            {
                 /* pthread_create() failed */
                 Control::get_instance()->fail_system();
             }
@@ -322,39 +322,34 @@ void *Classifier::watchman_thread(void *args)
 
         if (sw2_status == true)
         {
-            // Create classifier thread
             // printf("Creating Classifier east thread...\n");
 
             thread_error = pthread_create(&classifier_e_thread, &classifier_attrs, Classifier::classifier_thread,
                                   (void *)Directions::EAST);
-            if (thread_error) {
-                /* pthread_create() failed */
+            if (thread_error)
+            {
                 Control::get_instance()->fail_system();
             }
         }
 
         if (mmw1_status == true)
         {
-            // Create classifier thread
             printf("Creating Classifier north thread...\n");
 
-            thread_error = pthread_create(&classifier_n_thread, &classifier_attrs, Classifier::classifier_thread,
-                                  (void *)Directions::NORTH);
-            if (thread_error) {
-                /* pthread_create() failed */
+            thread_error = pthread_create(&classifier_n_thread, &classifier_attrs, Classifier::classifier_thread, (void *)Directions::NORTH);
+            if (thread_error)
+            {
                 Control::get_instance()->fail_system();
             }
         }
 
         if (mmw2_status == true)
         {
-            // Create classifier thread
             printf("Creating Classifier east thread...\n");
 
-            thread_error = pthread_create(&classifier_e_thread, &classifier_attrs, Classifier::classifier_thread,
-                                  (void *)Directions::EAST);
-            if (thread_error) {
-                /* pthread_create() failed */
+            thread_error = pthread_create(&classifier_e_thread, &classifier_attrs, Classifier::classifier_thread, (void *)Directions::EAST);
+            if (thread_error)
+            {
                 Control::get_instance()->fail_system();
             }
         }

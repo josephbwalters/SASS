@@ -36,9 +36,6 @@ public:
     uint16_t get_velocity();
     tuple<uint16_t, uint16_t> get_data();
 
-    // Thread-able method(s)
-    static void *radarTestThread(void *args);
-
 private:
     Radar(Directions direction);
     virtual ~Radar();

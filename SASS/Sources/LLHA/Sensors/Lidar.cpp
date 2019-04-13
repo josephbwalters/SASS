@@ -341,7 +341,7 @@ uint16_t Lidar::read_dist()
 */
 uint16_t Lidar::get_distance()
 {
-    uint16_t dist = 1;
+    uint16_t dist = -1;
 
     i2c = I2C_open(m_hardware_module, &i2cParams);
 

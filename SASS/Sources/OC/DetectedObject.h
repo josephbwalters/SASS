@@ -22,7 +22,7 @@ class DetectedObject
 {
 public:
     DetectedObject(Directions direction);
-    ~DetectedObject();
+    virtual ~DetectedObject();
 
     virtual void set_velocity(uint16_t velocity) = 0;
     virtual uint16_t get_velocity() = 0;

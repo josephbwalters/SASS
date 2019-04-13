@@ -50,6 +50,25 @@ using namespace sources::tlc;
 
 void *sass_init_thread(void *args)
 {
+    /* Scheduler thread information */
+    pthread_t           scheduler_handle;
+    pthread_attr_t      scheduler_attrs;
+    struct sched_param  scheduler_priParam;
+
+    /* North Classifier thread information */
+    pthread_t           classifier_n_handle;
+    pthread_attr_t      classifier_n_attrs;
+    struct sched_param  classifier_n_priParam;
+
+    /* East Classifier thread information */
+    pthread_t           classifier_e_handle;
+    pthread_attr_t      classifier_e_attrs;
+    struct sched_param  classifier_e_priParam;
+
+    /* Error tracker */
+    int                 thread_error;
+
+    /* Hardware Interrupts */
     GPIO_setCallback(Board_GPIO_BUTTON0, Classifier::emergency_hwi_callback);
     GPIO_enableInt(Board_GPIO_BUTTON0);
     GPIO_setCallback(Board_GPIO_BUTTON1, Classifier::emergency_hwi_callback);
@@ -59,27 +78,20 @@ void *sass_init_thread(void *args)
     GPIO_setCallback(Board_GPIO_MMW2, Classifier::emergency_hwi_callback);
     GPIO_enableInt(Board_GPIO_MMW2);
 
-    pthread_t           scheduler_handle;
-    pthread_attr_t      scheduler_attrs;
-    struct sched_param  scheduler_priParam;
-    int                 thread_error;
-
-    /* Initialize the attributes structure with default values */
+    /* Scheduler thread setup */
     pthread_attr_init(&scheduler_attrs);
-
-    /* Set priority, detach state, and stack size attributes */
     scheduler_priParam.sched_priority = 1;
     thread_error = pthread_attr_setschedparam(&scheduler_attrs, &scheduler_priParam);
     thread_error |= pthread_attr_setdetachstate(&scheduler_attrs, PTHREAD_CREATE_DETACHED);
     thread_error |= pthread_attr_setstacksize(&scheduler_attrs, STACK_SIZE_LARGE);
-    if (thread_error) {
-        /* failed to set attributes */
+    if (thread_error)
+    {
         Control::get_instance()->fail_system();
     }
 
     thread_error = pthread_create(&scheduler_handle, &scheduler_attrs, Scheduler::scheduler_thread, NULL);
-    if (thread_error) {
-        /* pthread_create() failed */
+    if (thread_error)
+    {
         Control::get_instance()->fail_system();
     }
 
@@ -109,51 +121,37 @@ void *sass_init_thread(void *args)
     //        while (true) {}
     //    }
 
-    pthread_t           classifier_n_handle;
-    pthread_attr_t      classifier_n_attrs;
-    struct sched_param  classifier_n_priParam;
-
-    /* Initialize the attributes structure with default values */
+    /* North Classifier Setup */
     pthread_attr_init(&classifier_n_attrs);
-
-    /* Set priority, detach state, and stack size attributes */
     classifier_n_priParam.sched_priority = 1;
     thread_error = pthread_attr_setschedparam(&classifier_n_attrs, &classifier_n_priParam);
     thread_error |= pthread_attr_setdetachstate(&classifier_n_attrs, PTHREAD_CREATE_DETACHED);
     thread_error |= pthread_attr_setstacksize(&classifier_n_attrs, STACK_SIZE_LARGE);
-    if (thread_error) {
-        /* failed to set attributes */
+    if (thread_error)
+    {
         Control::get_instance()->fail_system();
     }
 
-    thread_error = pthread_create(&classifier_n_handle, &classifier_n_attrs, Classifier::classifier_thread,
-                          (void *)Directions::NORTH);
-    if (thread_error) {
-        /* pthread_create() failed */
+    thread_error = pthread_create(&classifier_n_handle, &classifier_n_attrs, Classifier::classifier_thread, (void *)Directions::NORTH);
+    if (thread_error)
+    {
         Control::get_instance()->fail_system();
     }
 
-    pthread_t           classifier_e_handle;
-    pthread_attr_t      classifier_e_attrs;
-    struct sched_param  classifier_e_priParam;
-
-    /* Initialize the attributes structure with default values */
+    /* East Classifier Setup */
     pthread_attr_init(&classifier_e_attrs);
-
-    /* Set priority, detach state, and stack size attributes */
     classifier_e_priParam.sched_priority = 1;
     thread_error = pthread_attr_setschedparam(&classifier_e_attrs, &classifier_e_priParam);
     thread_error |= pthread_attr_setdetachstate(&classifier_e_attrs, PTHREAD_CREATE_DETACHED);
     thread_error |= pthread_attr_setstacksize(&classifier_e_attrs, STACK_SIZE_LARGE);
-    if (thread_error) {
-        /* failed to set attributes */
+    if (thread_error)
+    {
         Control::get_instance()->fail_system();
     }
 
-    thread_error = pthread_create(&classifier_e_handle, &classifier_e_attrs, Classifier::classifier_thread,
-                          (void *)Directions::EAST);
-    if (thread_error) {
-        /* pthread_create() failed */
+    thread_error = pthread_create(&classifier_e_handle, &classifier_e_attrs, Classifier::classifier_thread, (void *)Directions::EAST);
+    if (thread_error)
+    {
         Control::get_instance()->fail_system();
     }
 
@@ -166,35 +164,36 @@ void *sass_init_thread(void *args)
 */
 int main()
 {
-    Board_initGeneral();
-
-    GPIO_init();
-    Lights::init();
-
+    /* Init thread information */
     pthread_t           sass_init_handle;
     pthread_attr_t      sass_init_attrs;
     struct sched_param  sass_init_priParam;
+
+    /* Error tracker */
     int                 thread_error;
 
-    /* Initialize the attributes structure with default values */
-    pthread_attr_init(&sass_init_attrs);
+    Board_initGeneral();
+    GPIO_init();
+    Lights::init();
 
-    /* Set priority, detach state, and stack size attributes */
+    /* Init thread setup */
+    pthread_attr_init(&sass_init_attrs);
     sass_init_priParam.sched_priority = 1;
     thread_error = pthread_attr_setschedparam(&sass_init_attrs, &sass_init_priParam);
     thread_error |= pthread_attr_setdetachstate(&sass_init_attrs, PTHREAD_CREATE_DETACHED);
     thread_error |= pthread_attr_setstacksize(&sass_init_attrs, STACK_SIZE_LARGE);
-    if (thread_error) {
-        /* failed to set attributes */
+    if (thread_error)
+    {
         Control::get_instance()->fail_system();
     }
 
     thread_error = pthread_create(&sass_init_handle, &sass_init_attrs, sass_init_thread, NULL);
-    if (thread_error) {
-        /* pthread_create() failed */
+    if (thread_error)
+    {
         Control::get_instance()->fail_system();
     }
 
-    BIOS_start();    /* does not return */
+    /* Start system */
+    BIOS_start();
     return(0);
 }

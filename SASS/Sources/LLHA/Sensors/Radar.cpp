@@ -27,7 +27,7 @@
 
 using namespace sources::llha::sensors;
 
-// Initializes radar instances to null for multiton pattern
+// Initialize radar instances to null for multiton pattern
 sources::llha::sensors::Radar* sources::llha::sensors::Radar::radar_north = nullptr;
 sources::llha::sensors::Radar* sources::llha::sensors::Radar::radar_east = nullptr;
 sources::llha::sensors::Radar* sources::llha::sensors::Radar::radar_south = nullptr;
@@ -210,16 +210,16 @@ tuple<uint16_t, uint16_t> Radar::get_data()
 /**
     Test thread for mmWave reading.
 */
-void *Radar::radarTestThread(void *args)
-{
-    // Instantiating RADAR_EAST due to availability of pins on red board.
-    Radar* radar_north = Radar::get_instance(Directions::EAST);
-
-    while (true)
-    {
-        printf("Getting distance...\n");
-        uint16_t dist = radar_north->get_distance();
-        printf("Distance: %d cm\n", dist);
-        Task_yield();
-    }
-}
+//void *Radar::radarTestThread(void *args)
+//{
+//    // Instantiating RADAR_EAST due to availability of pins on red board.
+//    Radar* radar_north = Radar::get_instance(Directions::EAST);
+//
+//    while (true)
+//    {
+//        printf("Getting distance...\n");
+//        uint16_t dist = radar_north->get_distance();
+//        printf("Distance: %d cm\n", dist);
+//        Task_yield();
+//    }
+//}

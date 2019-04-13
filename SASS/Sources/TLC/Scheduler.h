@@ -36,17 +36,15 @@ public:
 
     bool is_clear(Directions direction);
     deque<Vehicle>* get_vehicle_queue();
-    pthread_mutex_t* get_queue_mutex();
 
     // Thread-able method(s)
     static void *scheduler_thread(void *refs);
 
 private:
     Scheduler();
-    virtual ~Scheduler();
+    ~Scheduler();
 
     deque<Vehicle> vehicle_queue;
-    pthread_mutex_t queue_mutex;
 
     static Scheduler* scheduler;
 };

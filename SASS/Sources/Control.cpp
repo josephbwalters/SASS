@@ -15,6 +15,8 @@
 #include <Sources/Control.h>
 #include <Sources/LLHA/Lights/Lights.h>
 
+#define HALF_SECOND 550000
+
 using namespace sources;
 using namespace sources::llha::lights;
 
@@ -36,12 +38,11 @@ void Control::init()
     Error_init(&eb);
     Swi_Params_init(&failure_interrupt_params);
 
-    failure_interrupt_handle = Swi_create((ti_sysbios_knl_Swi_FuncPtr)default_failure_callback,
-                                          &failure_interrupt_params, &eb);
+    failure_interrupt_handle = Swi_create((ti_sysbios_knl_Swi_FuncPtr)default_failure_callback, &failure_interrupt_params, &eb);
 
     if (failure_interrupt_handle == nullptr)
     {
-        // TODO: Throw exception
+        fail_system();
     }
 }
 
@@ -65,28 +66,22 @@ void Control::default_failure_callback()
     {
         Lights::set_all_red();
 
-        int us_delay = 550000;
+        int us_delay = HALF_SECOND;
         Timer32_haltTimer(TIMER32_0_BASE);
         Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1, TIMER32_32BIT, TIMER32_PERIODIC_MODE);
         Timer32_setCount(TIMER32_0_BASE, 48 * us_delay);
         Timer32_startTimer(TIMER32_0_BASE, true);
 
-        while (Timer32_getValue(TIMER32_0_BASE) > 0)
-        {
-
-        }
+        while (Timer32_getValue(TIMER32_0_BASE) > 0) {}
 
         Lights::turn_off();
 
-        us_delay = 550000;
+        us_delay = HALF_SECOND;
         Timer32_haltTimer(TIMER32_0_BASE);
         Timer32_initModule(TIMER32_0_BASE, TIMER32_PRESCALER_1, TIMER32_32BIT, TIMER32_PERIODIC_MODE);
         Timer32_setCount(TIMER32_0_BASE, 48 * us_delay);
         Timer32_startTimer(TIMER32_0_BASE, true);
 
-        while (Timer32_getValue(TIMER32_0_BASE) > 0)
-        {
-
-        }
+        while (Timer32_getValue(TIMER32_0_BASE) > 0) {}
     }
 }

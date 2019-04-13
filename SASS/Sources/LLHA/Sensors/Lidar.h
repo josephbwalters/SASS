@@ -41,14 +41,10 @@ public:
     static Lidar* get_instance(Directions direction);
 
     uint16_t get_distance();
-    uint16_t get_velocity();
-
-    // Thread-able method(s)
-    static void *lidarDemoThread(void *args);
 
 private:
     Lidar(Directions direction);
-    virtual ~Lidar();
+    ~Lidar();
 
     static uint8_t default_addr;
     uint8_t m_current_addr;
@@ -76,7 +72,6 @@ private:
     void start_reading();
     void wait_until_ready();
     uint16_t read_dist();
-
 };
 
 

@@ -37,7 +37,7 @@ public:
 
 private:
     Classifier(Directions direction);
-    virtual ~Classifier();
+    ~Classifier();
 
     void init();
     void set_reference_distance();

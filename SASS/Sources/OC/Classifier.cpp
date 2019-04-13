@@ -96,7 +96,7 @@ Classifier::Classifier(Directions direction) : m_direction(direction)
 
 Classifier::~Classifier()
 {
-
+    // TODO: Clean up (if necessary)
 }
 
 void Classifier::init()

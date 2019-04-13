@@ -116,9 +116,6 @@ Lidar* Lidar::get_instance(Directions direction)
     };
 }
 
-
-
-
 /**
     Initializes hardware on MSP432 for I2C communication.
 */
@@ -363,14 +360,4 @@ uint16_t Lidar::get_distance()
     I2C_close(i2c);
 
     return dist;
-}
-
-/**
-    Calculates velocity from previously seen distances.
-
-    @return distance to the nearest moving object that the LiDAR detected.
-*/
-uint16_t Lidar::get_velocity()
-{
-    return 0;
 }

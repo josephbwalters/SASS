@@ -27,7 +27,7 @@ public:
 
 private:
     Control();
-    virtual ~Control();
+    ~Control();
     void init();
 
     Swi_Handle failure_interrupt_handle;

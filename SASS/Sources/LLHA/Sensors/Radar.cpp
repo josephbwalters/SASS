@@ -27,7 +27,7 @@
 
 using namespace sources::llha::sensors;
 
-// Initializes radar instances to null for multiton pattern
+// Initialize radar instances to null for multiton pattern
 sources::llha::sensors::Radar* sources::llha::sensors::Radar::radar_north = nullptr;
 sources::llha::sensors::Radar* sources::llha::sensors::Radar::radar_east = nullptr;
 sources::llha::sensors::Radar* sources::llha::sensors::Radar::radar_south = nullptr;

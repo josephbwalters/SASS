@@ -70,11 +70,6 @@ deque<Vehicle>* Scheduler::get_vehicle_queue()
     return &vehicle_queue;
 }
 
-pthread_mutex_t* Scheduler::get_queue_mutex()
-{
-    return &queue_mutex;
-}
-
 void *Scheduler::scheduler_thread(void *args)
 {
     Scheduler* scheduler = get_instance();

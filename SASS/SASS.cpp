@@ -48,18 +48,6 @@ using namespace sources::llha::sensors;
 using namespace sources::llha::lights;
 using namespace sources::tlc;
 
-/**
-    Simple thread that prints to  the console
-*/
-void *test_print_thread(void *args)
-{
-    while (true)
-    {
-        printf("Print thread running.\n");
-        Task_sleep(500);
-    }
-}
-
 void *sass_init_thread(void *args)
 {
     GPIO_setCallback(Board_GPIO_BUTTON0, Classifier::emergency_hwi_callback);
@@ -86,13 +74,13 @@ void *sass_init_thread(void *args)
     thread_error |= pthread_attr_setstacksize(&scheduler_attrs, STACK_SIZE_LARGE);
     if (thread_error) {
         /* failed to set attributes */
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
     }
 
     thread_error = pthread_create(&scheduler_handle, &scheduler_attrs, Scheduler::scheduler_thread, NULL);
     if (thread_error) {
         /* pthread_create() failed */
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
     }
 
     // NOTE: May not need watchman thread
@@ -135,14 +123,14 @@ void *sass_init_thread(void *args)
     thread_error |= pthread_attr_setstacksize(&classifier_n_attrs, STACK_SIZE_LARGE);
     if (thread_error) {
         /* failed to set attributes */
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
     }
 
     thread_error = pthread_create(&classifier_n_handle, &classifier_n_attrs, Classifier::classifier_thread,
                           (void *)Directions::NORTH);
     if (thread_error) {
         /* pthread_create() failed */
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
     }
 
     pthread_t           classifier_e_handle;
@@ -159,14 +147,14 @@ void *sass_init_thread(void *args)
     thread_error |= pthread_attr_setstacksize(&classifier_e_attrs, STACK_SIZE_LARGE);
     if (thread_error) {
         /* failed to set attributes */
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
     }
 
     thread_error = pthread_create(&classifier_e_handle, &classifier_e_attrs, Classifier::classifier_thread,
                           (void *)Directions::EAST);
     if (thread_error) {
         /* pthread_create() failed */
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
     }
 
     pthread_exit(NULL);
@@ -198,13 +186,13 @@ int main()
     thread_error |= pthread_attr_setstacksize(&sass_init_attrs, STACK_SIZE_LARGE);
     if (thread_error) {
         /* failed to set attributes */
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
     }
 
     thread_error = pthread_create(&sass_init_handle, &sass_init_attrs, sass_init_thread, NULL);
     if (thread_error) {
         /* pthread_create() failed */
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
     }
 
     BIOS_start();    /* does not return */

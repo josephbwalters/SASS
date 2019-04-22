@@ -85,7 +85,7 @@ Classifier::Classifier(Directions direction) : m_direction(direction)
         m_radar = Radar::get_instance(Directions::WEST);
         break;
     default:
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
         printf("Did not initialize sensors in classifier.\n");
     };
 
@@ -139,7 +139,7 @@ Classifier* Classifier::get_instance(Directions direction)
         return classifier_west;
 
     default:
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
         return nullptr;
     };
 }
@@ -163,7 +163,7 @@ void Classifier::set_reference_distance()
     Task_sleep(200);
     ref_dist = (reading_1 + reading_2 + reading_3) / 3;
 
-    switch(m_direction)
+    switch (m_direction)
     {
     case Directions::NORTH:
         sources::oc::Classifier::ref_dist_north = ref_dist;
@@ -178,13 +178,14 @@ void Classifier::set_reference_distance()
         sources::oc::Classifier::ref_dist_west = ref_dist;
         break;
     default:
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
+        break;
     };
 }
 
-uint16_t Classifier::get_reference_distance(Directions direction)
+uint16_t Classifier::get_reference_distance()
 {
-    switch(direction)
+    switch (m_direction)
     {
     case Directions::NORTH:
         return Classifier::ref_dist_north;
@@ -195,29 +196,14 @@ uint16_t Classifier::get_reference_distance(Directions direction)
     case Directions::WEST:
         return Classifier::ref_dist_west;
     default:
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
         return 0;
     };
 }
 
 uint8_t Classifier::track()
 {
-    uint16_t dist = m_lidar->get_distance();
-
-//    if (dist < 50)
-//    {
-//        return 1;
-//    }
-
-    uint16_t ref_dist = get_reference_distance(m_direction);
-
-    if (ref_dist == 0 )
-    {
-        GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN6);
-        GPIO_setOutputHighOnPin(GPIO_PORT_P7, GPIO_PIN7);
-    }
-
-    if (dist < ref_dist - 20)
+    if (m_lidar->get_distance() < get_reference_distance() - 20)
     {
         return 1;
     }
@@ -311,7 +297,7 @@ void *Classifier::watchman_thread(void *args)
     thread_error |= pthread_attr_setstacksize(&classifier_attrs, STACK_SIZE_LARGE);
     if (thread_error) {
         /* failed to set attributes */
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
     }
 
     while (true)
@@ -330,7 +316,7 @@ void *Classifier::watchman_thread(void *args)
                                   (void *)Directions::NORTH);
             if (thread_error) {
                 /* pthread_create() failed */
-                // TODO: Throw exception
+                Control::get_instance()->fail_system();
             }
         }
 
@@ -343,7 +329,7 @@ void *Classifier::watchman_thread(void *args)
                                   (void *)Directions::EAST);
             if (thread_error) {
                 /* pthread_create() failed */
-                // TODO: Throw exception
+                Control::get_instance()->fail_system();
             }
         }
 
@@ -356,7 +342,7 @@ void *Classifier::watchman_thread(void *args)
                                   (void *)Directions::NORTH);
             if (thread_error) {
                 /* pthread_create() failed */
-                // TODO: Throw exception
+                Control::get_instance()->fail_system();
             }
         }
 
@@ -369,7 +355,7 @@ void *Classifier::watchman_thread(void *args)
                                   (void *)Directions::EAST);
             if (thread_error) {
                 /* pthread_create() failed */
-                // TODO: Throw exception
+                Control::get_instance()->fail_system();
             }
         }
 
@@ -395,7 +381,7 @@ void Classifier::classifier_hwi_callback(uint_least8_t index)
         Semaphore_post(mmw2_sem);
         break;
     default:
-        // TODO: Throw exception
+        Control::get_instance()->fail_system();
     };
 }
 
@@ -459,8 +445,4 @@ void Classifier::emergency_hwi_callback(uint_least8_t index)
             }
         }
     }
-
-//    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
-//    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN4);
-//    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN5);
 }

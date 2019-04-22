@@ -3,26 +3,29 @@
  * Created by: Joseph Walters, Trent Sellers 
  */
 
+#ifndef __MSP432P401R__
 #define __MSP432P401R__
+#endif
 
 /* Standard headers */
 #include <stdio.h>
 
 /* System headers */
 #include <ti/devices/msp432p4xx/driverlib/gpio.h>
-#include <ti/sysbios/knl/Task.h>
 #include <ti/drivers/Timer.h>
+#include <ti/sysbios/knl/Task.h>
 
 /* Board-specific headers */
 #include <Board.h>
 
 /* SASS-specific headers */
+#include <Sources/Control.h>
 #include <Sources/TLC/Scheduler.h>
-#include <Sources/OC/Classifier.h>
-#include <Sources/LLHA/Lights/Lights.h>
 #include <Sources/Directions.h>
+#include <Sources/LLHA/Lights/Lights.h>
+#include <Sources/OC/Classifier.h>
 
-// Pass requirement for verification of vehicle presence
+// Pass requirement for verification of vehicle absence
 #define PASS 2
 
 using namespace std;
@@ -54,38 +57,12 @@ Scheduler* Scheduler::get_instance()
 
 bool Scheduler::is_clear(Directions direction) // Dont need dir?
 {
-    LidarInstanceType lidar_direction;
     uint16_t ref_dist = Classifier::get_reference_distance(direction);
-
-    switch (direction)
-    {
-    case Directions::NORTH:
-        lidar_direction = LIDAR_NORTH;
-        break;
-    case Directions::EAST:
-        lidar_direction = LIDAR_EAST;
-        break;
-    case Directions::SOUTH:
-        lidar_direction = LIDAR_SOUTH;
-        break;
-    case Directions::WEST:
-        lidar_direction = LIDAR_WEST;
-        break;
-    default:
-        // TODO: Throw exception
-        break;
-    };
-
-    Lidar* lidar = Lidar::get_instance(lidar_direction);
+    Lidar* lidar = Lidar::get_instance(direction);
 
     uint16_t dist = lidar->get_distance();
 
     return !(dist < ref_dist - 20);
-}
-
-Lights* Scheduler::get_lights()
-{
-    return &lights;
 }
 
 deque<Vehicle>* Scheduler::get_vehicle_queue()
@@ -113,13 +90,7 @@ void *Scheduler::scheduler_thread(void *args)
     timer_params.timerMode  = Timer_ONESHOT_BLOCKING;
     timer_params.timerCallback = NULL;
 
-//    timer_handle = Timer_open(Board_TIMER0, &timer_params);
-//    if (timer_handle == NULL) {
-//        // Timer_open() failed
-//        // TODO: Throw exception
-//    }
-
-    while (1)
+    while (true)
     {
         // TODO: Implement Panic feature
         // TODO: Implement with directions input into the queue, not numbers!
@@ -143,62 +114,34 @@ void *Scheduler::scheduler_thread(void *args)
 
             printf("[Scheduler] 2-second timer expired.\n");
 
-            scheduler->get_lights()->schedule(direction);
+            Lights::schedule(direction);
 
             uint8_t score = 0;
 
             // Confirm vehicle is absent
             while (score < PASS)
             {
-                if(scheduler->is_clear(direction))
+                for (int i = 0; i < PASS; i++)
                 {
-                    score++;
-                }
-                else if (score > 0)
-                {
-                    score--;
-                }
-                else
-                {
-                    score = 0;
+                    if(scheduler->is_clear(direction))
+                    {
+                        score++;
+                    }
+                    else
+                    {
+                        score = 0;
+                    }
+
+                    Task_sleep(275);
                 }
 
-                Task_sleep(200);
-
-                if(scheduler->is_clear(direction))
-                {
-                    score++;
-                }
-                else if (score > 0)
-                {
-                    score--;
-                }
-                else
-                {
-                    score = 0;
-                }
-
-                Task_sleep(200);
-
+                Lights::toggle_yellow(direction);
                 GPIO_toggleOutputOnPin(GPIO_PORT_P7, GPIO_PIN3);
             }
 
             GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN3);
 
-//            timer_params.period = 1000000;
-//            timer_handle = Timer_open(Board_TIMER0, &timer_params);
-//            printf("[Scheduler] Starting 1-second timer...\n");
-//            status = Timer_start(timer_handle);
-//            Timer_close(timer_handle);
-//
-//            if (status == Timer_STATUS_ERROR) {
-//                //Timer_start() failed
-//                // TODO: Throw exception
-//            }
-
-            printf("[Scheduler] 1-second timer expired.\n");
-
-            scheduler->get_lights()->set_all_red();
+            Lights::set_all_red();
 
             timer_params.period = 2000000;
             timer_handle = Timer_open(Board_TIMER0, &timer_params);
@@ -220,7 +163,7 @@ void *Scheduler::scheduler_thread(void *args)
             Task_sleep(200);
         }
 
-        scheduler->get_lights()->set_all_red();
+        Lights::set_all_red();
         printf("[Scheduler] All lights set red.\n");
 
         Task_sleep(200);

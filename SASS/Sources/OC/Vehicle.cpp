@@ -18,9 +18,9 @@ Vehicle::~Vehicle()
     // TODO: Clean up (if necessary)
 }
 
-void Vehicle::set_speed(uint16_t speed)
+void Vehicle::set_velocity(uint16_t speed)
 {
-     m_speed = speed;
+     m_velocity = speed;
 }
 
 Directions Vehicle::get_direction()
@@ -28,9 +28,9 @@ Directions Vehicle::get_direction()
     return m_direction;
 }
 
-uint16_t Vehicle::get_speed()
+uint16_t Vehicle::get_velocity()
 {
-    return m_speed;
+    return m_velocity;
 }
 
 

@@ -1433,11 +1433,15 @@ bool valid_object(struct Object object) {
 }
 
 bool unsafe_object(struct Object object) {
-    float unsafe_velocity = (float)sqrt(2*object.range*GRAVITY*FRICTION) * -1;
+    float unsafe_velocity = (float)sqrt(2*object.range*GRAVITY*FRICTION) * -0.57;
 
     if (object.velocity < UNSAFE_VELOCITY_THRESHOLD) {
         return true;
     }
+
+//    if (object.velocity < -4.00) {
+//        return true;
+//    }
 
     if (object.velocity < unsafe_velocity + UNSAFE_OFFSET) {
         return true;
@@ -1520,20 +1524,31 @@ static void MmwDemo_mboxReadTask(UArg arg0, UArg arg1)
     float speed_of_light = 3e8;
 
     // NOTE: These are based off of configuration from mmwave demo.
+    // FIRST LINE IS OLD STUFF
 
     //profilecfg
     // id, start_freq, idleTime, adc_start_time, ramp_end_time, txOutPower, txPhaseShifter, freqSlopeConst, txStartTime, numAdcSamples, digOutSampleRate, hpfCornerFreq1, hpfCornerFreq2, rxGain
     //  0     77         429        7               57.14          0            0                70             1            256               5209           0                  0           30
+    // UPDATED VALUES:
+    //  0     76         25         7               50             0            0                20             1            224               5333           0                  0           30",
 
     // framecfg
     // chirp_start_idx, chirp_end_idx, number_of_loops, number_of_frames, frame_periodocity, trigger_select, frame_trigger_delay
     //       0               1                16              0                250                 1                 0
+    // UPDATED VALUES:
+    //       0               0                128             0                100                 1                 0
+
+
 
     //chirpcfg
     // chirp_start_idx, chirp_end_idx, profile, start_Freq, freq_slope, idle_time, adc_start_time, tx_antenna_mask
     // 0                      0           0        0            0           0           0                  1
     // 1                      1           0        0            0           0           0                  2
+    // UPDATED VALUES:
+    // 0                      0           0        0            0           0           0                  1
+    // 1                      1           0        0            0           0           0                  0
 
+    // Old Config:
 
     float dig_out_sample_rate = 5053.0;
     float freq_slope_const = 30.0;
@@ -1549,6 +1564,23 @@ static void MmwDemo_mboxReadTask(UArg arg0, UArg arg1)
     float chirp_start_idx = 0;
     float chirp_end_idx = 1;
     float num_loops = 128;
+
+
+//    float dig_out_sample_rate = 5333.0;
+//    float freq_slope_const = 20.0;
+//    float num_range_bins = 256.0; // Needs to be pwr of 2 (round up from numADCSamps)
+//    float range_bias = (float)gMmwMssMCB.cliCommonCfg.compRxChanCfg.rangeBias;
+//
+//    // speed of light times F_samp (samplng freq), S (chirp slope Hz/sec), N_FFT is 1D FFT Size
+//    float range_calculation = (speed_of_light * dig_out_sample_rate * 1e3) / (2 * (freq_slope_const * ((1e6)/(1e-6)) * num_range_bins));
+//
+//    float start_freq = 76.0;
+//    float idle_time = 25.0;
+//    float ramp_end_time = 50.0;
+//    float chirp_start_idx = 0;
+//    float chirp_end_idx = 1;
+//    float num_loops = 128;
+
     float num_chirps_per_frame = (chirp_end_idx - chirp_start_idx + 1) * num_loops;
 
     float velocity_calculation = (speed_of_light / (2 * (start_freq * 1e9) * ((idle_time + ramp_end_time) * 1e-6) * num_chirps_per_frame) );
@@ -1640,7 +1672,7 @@ static void MmwDemo_mboxReadTask(UArg arg0, UArg arg1)
                         Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINH13_PADAB, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
                         Pinmux_Set_FuncSel(SOC_XWR16XX_PINH13_PADAB, SOC_XWR16XX_PINH13_PADAB_GPIO_0);
                         GPIO_setConfig (SOC_XWR16XX_GPIO_0, GPIO_CFG_OUTPUT);
-                        GPIO_write(SOC_XWR16XX_GPIO_0, 0U);
+                        GPIO_write(SOC_XWR16XX_GPIO_0, 1U);
                     }
 
                     if (object.range != PLACEHOLDER_RANGE  && object.velocity != PLACEHOLDER_VELOCITY){
@@ -1667,7 +1699,7 @@ static void MmwDemo_mboxReadTask(UArg arg0, UArg arg1)
                             Pinmux_Set_OverrideCtrl(SOC_XWR16XX_PINH13_PADAB, PINMUX_OUTEN_RETAIN_HW_CTRL, PINMUX_INPEN_RETAIN_HW_CTRL);
                             Pinmux_Set_FuncSel(SOC_XWR16XX_PINH13_PADAB, SOC_XWR16XX_PINH13_PADAB_GPIO_0);
                             GPIO_setConfig (SOC_XWR16XX_GPIO_0, GPIO_CFG_OUTPUT);
-                            GPIO_write(SOC_XWR16XX_GPIO_0, 0U);
+                            GPIO_write(SOC_XWR16XX_GPIO_0, 1U);
                         }
 
                         // GPIO 0
@@ -1677,10 +1709,10 @@ static void MmwDemo_mboxReadTask(UArg arg0, UArg arg1)
 
                         if (unsafe_object(avg_object)) {
                             CLI_write("----Unsafe\n");
-                            GPIO_write(SOC_XWR16XX_GPIO_0, 1U);
+                            GPIO_write(SOC_XWR16XX_GPIO_0, 0U);
                         } else {
                             CLI_write("----Safe\n");
-                            GPIO_write(SOC_XWR16XX_GPIO_0, 0U);
+                            GPIO_write(SOC_XWR16XX_GPIO_0, 1U);
                         }
                     } else {
                         reset_counter += 1;

@@ -1,6 +1,10 @@
 # SASS
 Repository for all code related to UCF CECS Senior Design Project (S.A.S.S. -- Fall 2018 - Spring 2019)
 
+[SASS Github Pages](https://josephbwalters.github.io/SASS/) - Product overview and team details!  
+[UCF SASS Website](https://www.ece.ucf.edu/seniordesign/fa2018sp2019/g03/) - it is a copy of our overview site  
+[All UCF Projects](https://www.ece.ucf.edu/seniordesign/projects.php) - all UCF senior design projects  
+
 ## Installation:
 - Clone Repo
 - Open SASS, MSS, and DSS seperately in Code Composer Studio (CCS)
